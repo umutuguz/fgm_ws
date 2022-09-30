@@ -10,7 +10,7 @@ namespace local_planner
 
     LocalPlanner::LocalPlanner(std::string name, tf2_ros::Buffer* tf,
                             costmap_2d::Costmap2DROS* costmapROS)
-        : costmapROS_(NULL), tf_(NULL), initialized_(false), goalDistTolerance_(1), lookAheadDist_(1)
+        : costmapROS_(NULL), tf_(NULL), initialized_(false), goalDistTolerance_(1)
         
     {
         ROS_INFO("The structure of the local planner was constructed.");
@@ -38,14 +38,14 @@ namespace local_planner
             costmap_ = costmapROS_->getCostmap();
 
             // Subscribers
-            // odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
+            odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
             
             // scanSub_ = nh_.subscribe("/front_rp/rp_scan_filtered_front", 100, &LocalPlanner::odomCallback, this);
-            // scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this);
+            scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this);
             
-            // poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
+            poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
 
-            // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
+            nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
             globalPlanPub_ = nh_.advertise<nav_msgs::Path>("global_plan", 1);
