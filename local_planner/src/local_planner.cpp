@@ -50,7 +50,7 @@ namespace local_planner
             // Publishers
             globalPlanPub_ = nh_.advertise<nav_msgs::Path>("global_plan", 1);
             
-            distToGoalPub_ = nh_.advertise<std_msgs::Float32>("distance_to_goal", 1);
+            // distToGoalPub_ = nh_.advertise<std_msgs::Float32>("distance_to_goal", 1);
             
             wRefPub_ = nh_.advertise<std_msgs::Float32>("angular_vel_output", 1);
 
@@ -132,26 +132,29 @@ namespace local_planner
         // Print and publish the distance to global goal
         double distToGlobGoal = distanceToGlobalGoal();
         ROS_INFO_STREAM("Distance to global goal: " << distToGlobGoal);
-        publishDistToGoal(distToGoalPub_, distToGlobGoal);
+        ROS_INFO("SELAM7");
+        // publishDistToGoal(distToGoalPub_, distToGlobGoal);
+        ROS_INFO("SELAM8");
 
         double omega;
         double linearVel;
+        ROS_INFO("SELAM1");
 
         // Publish reference omega for Fuzzy planner
-        publishWRef(wRefPub_, omega);
+        // publishWRef(wRefPub_, 0.1*M_PI);
 
         // Linear velocity value calculated by the Fuzzy velocity planner
         // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
 
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = linearVel;
+        cmd_vel.linear.x = 0.5;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = omega;
-
+        cmd_vel.angular.z = 0.1*M_PI;
+        ROS_INFO("SELAM2");
         if (distanceToGlobalGoal() < goalDistTolerance_) 
         {
             cmd_vel.linear.x = 0.0;
@@ -176,14 +179,18 @@ namespace local_planner
             cmd_vel.angular.z = 0.0;
             if (!isGoalReached())
             {
-                // Use the last refence cmd_vel command
-                cmd_vel.linear.x = linearVel;
+                if (distanceToGlobalGoal() > 0.01)
+                {
+                    // Use the last refence cmd_vel command
+                cmd_vel.linear.x = 0.5;
                 cmd_vel.linear.y = 0.0;
                 cmd_vel.linear.z = 0.0;
 
                 cmd_vel.angular.x = 0.0;
                 cmd_vel.angular.y = 0.0;
-                cmd_vel.angular.z = omega;
+                cmd_vel.angular.z = 0.1 * M_PI;
+                }
+                
             }
             else
             {
@@ -196,7 +203,7 @@ namespace local_planner
                 cmd_vel.angular.z = 0.0;                
             }
         }
-
+        ROS_INFO("SELAM4");
         return true;
     }
 
@@ -282,7 +289,172 @@ namespace local_planner
         else
             phiGoal = phiGoalConstraint - odomRYaw;
 
-        return phiGoal;
+        // Calculate surrounding gaps
+        std::deque<double> obstacleAngles;
+        std::deque<unsigned int> obstacleAnglesIdx;
+
+        obstacleAngles.push_back(scanPtr_->angle_min);
+        obstacleAnglesIdx.push_back(0);
+        int obstacleCounter = 1;
+
+        // Get laser ranges
+        std::vector<double> laserRanges;
+        for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
+        {
+            // if (isinff(scanPtr_->ranges[i]))
+            //     laserRanges.push_back(scanPtr_->range_max + 99);
+            // else
+            //     laserRanges.push_back(scanPtr_->ranges[i]);
+
+            if (fabs(scanPtr_->ranges[i] - 2.75) < 0.01)
+                laserRanges.push_back(scanPtr_->range_max + 99.);
+            else
+                laserRanges.push_back(scanPtr_->ranges[i]);
+
+        }
+        
+        // ROS_INFO_STREAM_ONCE("Laser range size:" << laserRanges.size());
+
+        // Obstacle detection
+        for (unsigned int i = 0; i < laserRanges.size() - 1; i++)
+        {
+            int temp;
+            double tempAngle;
+            if (fabs(laserRanges[i] - laserRanges[i+1]) > (scanPtr_->range_max) + 0.1)
+            {
+                if (i < floor(laserRanges.size() / 2))
+                {
+                    // Right side of laser readings
+                    if (laserRanges[i] > laserRanges[i+1])
+                        temp = i + 1;
+                    else
+                        temp = i;
+                    
+                    tempAngle = -(scanPtr_->angle_max - (scanPtr_->angle_increment * temp));
+                }
+                else
+                {
+                    if (i == floor(laserRanges.size() / 2))
+                    {
+                        // Front of the robot
+                        temp = i;
+                        tempAngle = 0;
+                    }
+                    else
+                    {
+                        // Left side of laser readings
+                        if (laserRanges[i] > laserRanges[i+1])
+                            temp = i + 1;
+                        else
+                            temp = i;                       
+
+                        tempAngle = ((scanPtr_->angle_increment * temp) + scanPtr_->angle_min);
+                    }
+                }
+
+                obstacleAngles.push_back(tempAngle);
+                obstacleAnglesIdx.push_back(temp);
+                obstacleCounter++;
+            }
+        }
+
+        obstacleAngles.push_back(scanPtr_->angle_max);
+        obstacleAnglesIdx.push_back(laserRanges.size() - 1);
+
+        // for (auto item : obstacleAnglesIdx)
+        // {
+        //     ROS_INFO_STREAM("Obstacle index " << item);
+        //     ROS_INFO_STREAM("Angle " << obstacleAngles[0]);
+        //     ROS_INFO_STREAM("Angle " << obstacleAngles[1]);            
+        // }
+
+        // Check borders of the gaps
+        if (laserRanges[0] > 0 && (laserRanges[0] != 101.75))
+        {
+            obstacleAngles.pop_front();
+            obstacleAnglesIdx.pop_front();
+            obstacleCounter--;
+        }
+
+        // ROS_INFO_STREAM("first border check");
+        // for (auto item : obstacleAnglesIdx)
+        // {
+        //     ROS_INFO_STREAM("Obstacle index " << item);
+        // }
+
+        // ROS_INFO_STREAM("second border check");
+        if (laserRanges[laserRanges.size()-1] > 0 && (laserRanges[laserRanges.size()-1] != 101.75))
+        {
+            obstacleAngles.pop_back();
+            obstacleAnglesIdx.pop_back();
+            obstacleCounter--;
+        }
+       
+        // for (auto item : obstacleAnglesIdx)
+        // {
+        //     ROS_INFO_STREAM("Obstacle index " << item);
+            
+        // }
+
+        // Gap calculations
+        std::vector<double> gap;
+        double tempTheta;
+        for (unsigned int i = 1; i < obstacleAngles.size(); i = i + 2)
+        {
+            tempTheta = fabs(obstacleAngles[i] - obstacleAngles[i-1]);
+            gap.push_back(tempTheta);
+        }
+
+        int maxGapIndex = std::max_element(gap.begin(), gap.end()) - gap.begin();
+
+        double theta;
+        int angleIndex;
+        double phiGapCenter;
+        double phiFinal;
+        double alpha = 1.4;
+        auto dminIdxItr = std::min_element(gap.begin(), gap.end());
+        int dminIdx = std::distance(gap.begin(), dminIdxItr);
+        double dmin = laserRanges.at(dminIdx);
+        int beta = 2; // 1
+
+        if (!gap.empty())
+        {
+            isGapExist_ = true;
+            angleIndex = maxGapIndex * 2;
+            double d1 = laserRanges[obstacleAnglesIdx[angleIndex]];
+            double d2 = laserRanges[obstacleAnglesIdx[angleIndex+1]];
+            double phi1 = obstacleAngles[angleIndex];
+            double phi2 = obstacleAngles[angleIndex+1];
+
+            double numer = d1 + d2 * cos(phi1 - phi2);
+            double denum = sqrt(pow(d1, 2) + pow(d2, 2) + 2 * d1 * d2 * cos(phi1 - phi2));
+
+            phiGapCenter = acos(numer / denum) + phi1;
+            phiFinal = (((alpha / dmin) * phiGapCenter) + (beta * phiGoal)) / (alpha / dmin + beta);
+
+            double tempPhiFinal = fmod(phiFinal, 2 * M_PI);
+
+            if (tempPhiFinal > M_PI)
+                phiFinal = tempPhiFinal - 2 * M_PI;
+            else if (tempPhiFinal < -M_PI)
+                 phiFinal = tempPhiFinal + 2 * M_PI;
+            else
+                 phiFinal = tempPhiFinal;
+
+            ROS_INFO_STREAM("Final phi: " << phiFinal);
+            ROS_INFO_STREAM("Gap center phi: " << phiGapCenter);
+            ROS_INFO_STREAM("Goal phi: " << phiGoal);
+        }
+        else
+        {
+            ROS_WARN_STREAM("No gap exists");
+            isGapExist_ = false;
+        }
+
+        ROS_WARN_STREAM("Gap existance: " << isGapExist_);
+        // ROS_WARN_STREAM("Phi final: " << phiFinal);
+        ROS_INFO("SELAM");
+        return phiFinal;
 
     }
 
