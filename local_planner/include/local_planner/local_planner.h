@@ -101,7 +101,7 @@ private:
     ros::Publisher distToGoalPub_;
     ros::Publisher wRefPub_;
 
-    double lookAheadDist_;
+    double lookAheadDist_ =1.1;
     double goalDistTolerance_;
     int currentGoalPoseIdx_;
     bool isGapExist_;

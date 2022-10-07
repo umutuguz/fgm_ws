@@ -74,6 +74,7 @@ namespace local_planner
         globalPlan_ = orig_global_plan;
         goalReached_ = false;
         ROS_INFO("Got new plan.");
+
         return true;
     }
 
@@ -89,6 +90,13 @@ namespace local_planner
 
         // Publish global plan for visualization
         publishGlobalPlan(globalPlan_);
+        ROS_INFO("global plan size is: %lu", globalPlan_.size());
+        for (int j=0; j<globalPlan_.size();j++)
+        {
+            ROS_INFO("global plan is: %f and %f",globalPlan_[j].pose.position.x, globalPlan_[j].pose.position.y);
+            ROS_INFO("j is: %u",j);
+        }
+
 
         // Find the local goal in the global plan considering look ahead distance
         for (unsigned int i = 0; i < globalPlan_.size(); i++)
@@ -96,12 +104,19 @@ namespace local_planner
             currentPose_.position.x = posePtr_->pose.pose.position.x;
             currentPose_.position.y = posePtr_->pose.pose.position.y;
             currentPose_.position.z = posePtr_->pose.pose.position.z;
+            ROS_INFO("currentpose_x is: %f",currentPose_.position.x);
+            ROS_INFO("currentpose_y is: %f",currentPose_.position.y);
 
             double waypointX = globalPlan_[i].pose.position.x;
             double waypointY = globalPlan_[i].pose.position.y;
 
-            double diffX = waypointX - currentPose_.position.x;
+            double diffX = waypointX - currentPose_.position.x; 
             double diffY = waypointY - currentPose_.position.y;
+            ROS_INFO("global plan waypoint index: %u", i);
+            ROS_INFO("hypot is: %f", hypot(diffX,diffY));
+            ROS_INFO("distance to global goal is: %f",distanceToGlobalGoal());
+            ROS_INFO("goaldisttolerance is: %f", goalDistTolerance_);
+            ROS_INFO("lookaheaddist is: %f", lookAheadDist_);
 
             if (hypot(diffX, diffY) > lookAheadDist_ && distanceToGlobalGoal() > goalDistTolerance_)
             {
@@ -147,13 +162,13 @@ namespace local_planner
         // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
 
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = 0.5;
+        cmd_vel.linear.x = 0.1;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = 0.1*M_PI;
+        cmd_vel.angular.z = phiFinal - M_PI/4;
 
         if (distanceToGlobalGoal() < goalDistTolerance_) 
         {
@@ -272,12 +287,14 @@ namespace local_planner
         double odomRY = posePtr_->pose.pose.position.y;
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double odomRYaw = tf::getYaw(currentPose_.orientation);
+        ROS_INFO("odomRYaw is: %f", odomRYaw);
 
         double goalX = currentGoalPose_.position.x;
         double goalY = currentGoalPose_.position.y;
 
         // Calculate robot's goal angle
         double phiGoalConstraint = atan2(goalY - odomRY, goalX - odomRX);
+        ROS_INFO("phiGoalConstraint is : %f", phiGoalConstraint);
 
         // Calculate goal phi
         double phiGoal;
