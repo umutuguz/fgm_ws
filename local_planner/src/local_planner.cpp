@@ -123,6 +123,8 @@ namespace local_planner
         
         currentGoalPose_ = globalPlan_.at(currentGoalPoseIdx_).pose;
         // ROS_WARN_STREAM("Goal: " << currentGoalPose_.position.x);
+        ROS_INFO_STREAM("Current goal pose: "<< currentGoalPose_);
+
 
         double phiFinal = LLCallback(); // LL Algorithm
         // headingController_.setSampleTime(ros::Time::now().toSec() - lastCallbackTime_); /* headingController_ ? */
@@ -132,13 +134,11 @@ namespace local_planner
         // Print and publish the distance to global goal
         double distToGlobGoal = distanceToGlobalGoal();
         ROS_INFO_STREAM("Distance to global goal: " << distToGlobGoal);
-        ROS_INFO("SELAM7");
+
         // publishDistToGoal(distToGoalPub_, distToGlobGoal);
-        ROS_INFO("SELAM8");
 
         double omega;
         double linearVel;
-        ROS_INFO("SELAM1");
 
         // Publish reference omega for Fuzzy planner
         // publishWRef(wRefPub_, 0.1*M_PI);
@@ -154,7 +154,7 @@ namespace local_planner
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
         cmd_vel.angular.z = 0.1*M_PI;
-        ROS_INFO("SELAM2");
+
         if (distanceToGlobalGoal() < goalDistTolerance_) 
         {
             cmd_vel.linear.x = 0.0;
@@ -203,7 +203,6 @@ namespace local_planner
                 cmd_vel.angular.z = 0.0;                
             }
         }
-        ROS_INFO("SELAM4");
         return true;
     }
 
@@ -305,15 +304,25 @@ namespace local_planner
             //     laserRanges.push_back(scanPtr_->range_max + 99);
             // else
             //     laserRanges.push_back(scanPtr_->ranges[i]);
+            
+            //ROS_INFO_STREAM("scans: "<< scanPtr_->ranges[i] << "for index: " << i);
 
             if (fabs(scanPtr_->ranges[i] - 2.75) < 0.01)
+            {
                 laserRanges.push_back(scanPtr_->range_max + 99.);
+                // bu indexteki laserRanges[i]'yi 102.5'a eşitliyor. Nedendir bilinmez.
+            }
             else
+            {
                 laserRanges.push_back(scanPtr_->ranges[i]);
+            }
+
+            //ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
 
         }
+
         
-        // ROS_INFO_STREAM_ONCE("Laser range size:" << laserRanges.size());
+        //ROS_INFO_STREAM_ONCE("Laser range size:" << laserRanges.size());
 
         // Obstacle detection
         for (unsigned int i = 0; i < laserRanges.size() - 1; i++)
@@ -338,7 +347,7 @@ namespace local_planner
                     {
                         // Front of the robot
                         temp = i;
-                        tempAngle = 0;
+                        tempAngle = 0; //sandalyede denerken buraya dikkat etmek lazım. i = 180 önü mü gösteriyor arkayı mı?
                     }
                     else
                     {
@@ -453,7 +462,7 @@ namespace local_planner
 
         ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
-        ROS_INFO("SELAM");
+        //ROS_INFO("SELAM");
         return phiFinal;
 
     }
