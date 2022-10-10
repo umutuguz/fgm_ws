@@ -93,8 +93,8 @@ namespace local_planner
         ROS_INFO("global plan size is: %lu", globalPlan_.size());
         for (int j=0; j<globalPlan_.size();j++)
         {
-            ROS_INFO("global plan is: %f and %f",globalPlan_[j].pose.position.x, globalPlan_[j].pose.position.y);
-            ROS_INFO("j is: %u",j);
+            //ROS_INFO("global plan is: %f and %f",globalPlan_[j].pose.position.x, globalPlan_[j].pose.position.y);
+            //ROS_INFO("j is: %u",j);
         }
 
 
@@ -162,13 +162,13 @@ namespace local_planner
         // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
 
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = 0.1;
+        cmd_vel.linear.x = 0.0;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal - M_PI/4;
+        cmd_vel.angular.z = 0.0;//phiFinal - M_PI/4;
 
         if (distanceToGlobalGoal() < goalDistTolerance_) 
         {
@@ -315,8 +315,10 @@ namespace local_planner
 
         // Get laser ranges
         std::vector<double> laserRanges;
+        std::vector<double> currRange;
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
+
             // if (isinff(scanPtr_->ranges[i]))
             //     laserRanges.push_back(scanPtr_->range_max + 99);
             // else
@@ -337,6 +339,60 @@ namespace local_planner
             //ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
 
         }
+
+        currRange = laserRanges;
+        currRange.erase(currRange.begin()+91,currRange.begin()+271);
+
+        reverse(currRange.begin(), currRange.begin()+91);
+        reverse(currRange.begin()+91, currRange.end());
+
+        for (unsigned int i = 0; i < currRange.size(); i++)
+        {
+            ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
+
+        }
+
+        std::vector<double> gap_starting_points;
+        std::vector<double> gap_ending_points;
+        int gap_number;
+        int gap_validator;
+    
+    
+        for (unsigned int i=1; i<currRange.size(); i++)
+        {
+            if (currRange[i+1]>currRange[i]+0.5)
+            {
+                gap_number = gap_number+1;
+                gap_starting_points.push_back(i);
+            }
+            if (currRange[i]>currRange[i+1]+0.5)
+            {
+                gap_validator = gap_validator+1;
+                gap_ending_points.push_back(i+1);
+            }
+        }
+        for (int i = 0; i < gap_starting_points.size()-1;i++)
+        {
+            ROS_INFO_STREAM("gap starting points are: "<< gap_starting_points[i]);
+        }
+        for (int i = 0; i < gap_ending_points.size()-1;i++)
+        {
+            ROS_INFO_STREAM("gap ending points are: "<< gap_ending_points[i]);
+        }
+
+
+        
+
+        /*for (unsigned int j = 90; j >= 0 ; j--)
+        {
+            currRange.push_back(laserRanges[j]);
+            ROS_INFO_STREAM("CurrRange vector is: " << currRange[j] << " for index: " << j);
+        }
+        for (unsigned int k = 359; k>270; k--)
+        {
+            currRange.push_back(laserRanges[k]);
+            ROS_INFO_STREAM("CurrRange vector is: " << currRange[k] << "for index: " << k);
+        }*/
 
         
         //ROS_INFO_STREAM_ONCE("Laser range size:" << laserRanges.size());
