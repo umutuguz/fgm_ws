@@ -162,7 +162,7 @@ namespace local_planner
         // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
 
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = 0.0;
+        cmd_vel.linear.x = 0.1;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
@@ -348,12 +348,13 @@ namespace local_planner
 
         for (unsigned int i = 0; i < currRange.size(); i++)
         {
-            ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
+            //ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
 
         }
 
-        std::vector<double> gap_starting_points;
-        std::vector<double> gap_ending_points;
+        std::vector<int> gap_starting_points;
+        std::vector<int> gap_ending_points;
+        std::vector<int> common_angles;
         int gap_number;
         int gap_validator;
     
@@ -371,14 +372,66 @@ namespace local_planner
                 gap_ending_points.push_back(i+1);
             }
         }
-        for (int i = 0; i < gap_starting_points.size()-1;i++)
+
+        for (int i = 0; i < gap_starting_points.size();i++)
         {
             ROS_INFO_STREAM("gap starting points are: "<< gap_starting_points[i]);
         }
-        for (int i = 0; i < gap_ending_points.size()-1;i++)
+        for (int i = 0; i < gap_ending_points.size();i++)
         {
             ROS_INFO_STREAM("gap ending points are: "<< gap_ending_points[i]);
         }
+
+        //gap starting ve gap ending vektörlerinde ortak olan açı değerlerini bulma kısmı (MATLAB intersect fonksiyonunun, common kısmı)
+        std::vector<int> intersector(gap_starting_points.size()+gap_ending_points.size());
+        std::vector<int>::iterator it,end;
+        
+        end = set_intersection(gap_starting_points.begin(),gap_starting_points.end(),gap_ending_points.begin(),gap_ending_points.end(),intersector.begin());
+        
+        for(it=intersector.begin(); it!=end; it++)
+        {
+            common_angles.push_back(*it);
+        }
+
+        for (int i=0; i<common_angles.size();i++)
+        {
+            ROS_INFO_STREAM("common angles are: "<< common_angles[i]);
+        }
+        
+        // MATLAB intersect fonksiyonunun, her iki vektörde ortak olan elemanların indexlerini belirlediği kısım
+        for (auto x: common_angles)
+        {
+            int key = x;
+            vector<int>::iterator itr_start = std::find(gap_starting_points.begin(),gap_starting_points.end(),key);
+            vector<int>::iterator itr_end = std::find(gap_ending_points.begin(),gap_ending_points.end(),key);
+            
+            if(itr_start != gap_starting_points.end())
+            {
+                int index_of_common_angle = std::distance(gap_starting_points.begin(),itr_start);
+                ROS_INFO_STREAM("starting points vector indices are: "<< index_of_common_angle);
+                gap_starting_points.erase(gap_starting_points.begin()+index_of_common_angle);
+
+            }
+            
+            if(itr_end != gap_ending_points.end())
+            {
+                int index_of_common_angle = std::distance(gap_ending_points.begin(),itr_end);
+                ROS_INFO_STREAM("ending points vector indices are: "<< std::distance(gap_ending_points.begin(),itr_end));
+                gap_ending_points.erase(gap_ending_points.begin()+index_of_common_angle);
+            }
+        }
+
+        for (int i = 0; i < gap_starting_points.size();i++)
+        {
+            ROS_INFO_STREAM("gap starting points are: "<< gap_starting_points[i]);
+        }
+        for (int i = 0; i < gap_ending_points.size();i++)
+        {
+            ROS_INFO_STREAM("gap ending points are: "<< gap_ending_points[i]);
+        }
+
+        common_angles = {};
+
 
 
         
