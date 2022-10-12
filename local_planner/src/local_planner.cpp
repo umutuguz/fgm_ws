@@ -430,6 +430,32 @@ namespace local_planner
             ROS_INFO_STREAM("gap ending points are: "<< gap_ending_points[i]);
         }
 
+        int counter = 0;
+        vector<int> indices;
+
+        for (unsigned int i = 0; i < gap_starting_points.size(); i++)
+        {
+            if (i == 0)
+            {
+                double temp = gap_starting_points[i];
+                for (unsigned int j = 0; j < gap_ending_points.size(); j++)
+                {
+                    if (gap_ending_points[j] < temp)
+                    {
+                        counter++;
+                        indices.push_back(j);
+                    }
+                    if (counter > 1)
+                    {
+                        for (unsigned int k = 1; k < indices.size(); k++)
+                        {
+                            gap_ending_points.erase(gap_ending_points.begin()+k);
+                        }
+                    }
+                }
+            }
+        }
+
         common_angles = {};
 
 
