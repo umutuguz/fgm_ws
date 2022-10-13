@@ -431,6 +431,8 @@ namespace local_planner
         }
 
         int counter = 0;
+        int j = 0;
+        int k = 1;
         vector<int> indices;
 
         for (unsigned int i = 0; i < gap_starting_points.size(); i++)
@@ -438,21 +440,30 @@ namespace local_planner
             if (i == 0)
             {
                 double temp = gap_starting_points[i];
-                for (unsigned int j = 0; j < gap_ending_points.size(); j++)
+                cout << "temp is : " << temp << endl;
+                for (j; j < gap_ending_points.size(); j++)
                 {
                     if (gap_ending_points[j] < temp)
                     {
                         counter++;
+                        cout << "counter is : "<< counter << endl;
                         indices.push_back(j);
-                    }
-                    if (counter > 1)
-                    {
-                        for (unsigned int k = 1; k < indices.size(); k++)
-                        {
-                            gap_ending_points.erase(gap_ending_points.begin()+k);
-                        }
+                        cout << "indices are : " << indices[j] << endl;
                     }
                 }
+                if (counter > 1)
+                {
+                    for (k; k < indices.size(); k++)
+                    {
+                        cout << " k is " << k << endl;
+                        cout << "indices size is : "<< indices.size() << endl;
+                        gap_ending_points.erase(gap_ending_points.begin()+1);
+                    }
+                }
+            }
+            if (i > 1)
+            {
+                
             }
         }
 
