@@ -68,9 +68,9 @@ public:
 
     void publishGlobalPlan(std::vector<geometry_msgs::PoseStamped>& path);
 
-    void publishDistToGoal(const ros::Publisher& pub, double dist);
+    // void publishDistToGoal(const ros::Publisher& pub, double dist);
 
-    void publishWRef(const ros::Publisher& pub, double wRef);
+    // void publishWRef(const ros::Publisher& pub, double wRef);
 
     ~LocalPlanner();
 
@@ -101,7 +101,7 @@ private:
     ros::Publisher distToGoalPub_;
     ros::Publisher wRefPub_;
 
-    double lookAheadDist_ =1.1;
+    double lookAheadDist_ = 1.1;
     double goalDistTolerance_;
     int currentGoalPoseIdx_;
     bool isGapExist_;

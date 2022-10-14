@@ -434,45 +434,179 @@ namespace local_planner
         int j = 0;
         int k = 1;
         vector<int> indices;
+        vector<int> gap_starting_points;
+        vector<int> gap_ending_points;
+        vector<int> common_angles;
+        int temp;
 
         for (unsigned int i = 0; i < gap_starting_points.size(); i++)
+    {
+        if (i == 0)
+            double temp = gap_starting_points[i];
         {
-            if (i == 0)
+            cout << "temp is : " << temp << endl;
+            for (j; j < gap_ending_points.size(); j++)
             {
-                double temp = gap_starting_points[i];
-                cout << "temp is : " << temp << endl;
-                for (j; j < gap_ending_points.size(); j++)
+                if (gap_ending_points[j] < temp)
                 {
-                    if (gap_ending_points[j] < temp)
-                    {
-                        counter++;
-                        cout << "counter is : "<< counter << endl;
-                        indices.push_back(j);
-                        cout << "indices are : " << indices[j] << endl;
-                    }
-                }
-                if (counter > 1)
-                {
-                    for (k; k < indices.size(); k++)
-                    {
-                        cout << " k is " << k << endl;
-                        cout << "indices size is : "<< indices.size() << endl;
-                        gap_ending_points.erase(gap_ending_points.begin()+1);
-                    }
+                    counter++;
+                    cout << "counter is : "<< counter << endl;
+                    indices.push_back(j);
+                    cout << "indices are : " << indices[j] << endl;
                 }
             }
-            if (i > 1)
+            if (counter > 1)
             {
+                for (k; k < indices.size(); k++)
+                {
+                    cout << " k is " << k << endl;
+                    cout << "indices size is : "<< indices.size() << endl;
+                    gap_ending_points.erase(gap_ending_points.begin()+1);
+                }
+            }
+
+            for (int m = 0; m < gap_ending_points.size(); m++)
+            {
+                cout << "Gap ending points = " << gap_ending_points[m] << endl;
+                cout << "Gap ending size = " << gap_ending_points.size() << endl;
+            }    
+        }
+
+        if (i > 0)
+        {
+            double temp_prev = gap_starting_points[i-1];
+            double temp = gap_starting_points[i];
+            cout << "temp prev is : " << temp_prev << endl;
+            cout << "temp is : " << temp << endl;
+            for (x = 0; x < gap_ending_points.size(); x++)
+            {
+                cout << "inside x = " << x << endl;
+                if (gap_ending_points[x] < temp && gap_ending_points[x] > temp_prev)
+                {
+                    counter++;
+                    cout << "counter is : "<< counter << endl;
+                    indices.push_back(x);
+                    
+                }
+            }
+            if (counter > 1)
+            {
+                for (m; m < indices.size(); m++)
+                {
+                    cout << " m is " << m << endl;
+                    cout << "indices size is : "<< indices.size() << endl;
+                    gap_ending_points.erase(gap_ending_points.begin()+indices[1]);
+                }
+                m=1;
+            }
+            counter = 0;
+            cout << "indices are: " << endl;
+            for (unsigned int i = 0 ; i < indices.size(); i++)
+            {
+                cout << " " << indices[i] << endl;
+            }
+            indices = {};
+            cout << "gap ending points are : " << endl;
+            for (unsigned int i = 0; i < gap_ending_points.size(); i++)
+            {
+                cout << " " << gap_ending_points[i];
+            }
+            cout << endl;
                 
+            cout << "gap starting points are : " << endl;
+            for (unsigned int i = 0; i < gap_starting_points.size(); i++)
+            {
+                cout << " " << gap_starting_points[i];
             }
         }
 
-        common_angles = {};
+        if (i == gap_starting_points.size()-1)
+        {
+            temp = gap_starting_points[i];
+            cout << "temp is : " << temp << endl;
+            for (j; j < gap_ending_points.size(); j++)
+            {
+                if (gap_ending_points[j] > temp)
+                {
+                    indices.push_back(j);
+                    cout << "indices are : " << indices[counter] << endl;
+                    counter++;
+                    cout << "counter is : "<< counter << endl;
+                }
+            }
+            if (counter > 1)
+            {
+                for (k; k < indices.size(); k++)
+                {
+                    cout << " k is " << k << endl;
+                    cout << "indices size is : "<< indices.size() << endl;
+                    gap_ending_points.erase(gap_ending_points.begin() + indices[1]);
+                }
+            }
+            if (counter == 0)
+            {
+                gap_ending_points[j-1] = 180;
+            }
+        }
+    }
 
+    if (gap_ending_points[0] <= gap_starting_points[0])
+    {
+        gap_starting_points.insert(gap_starting_points.begin(), 0);
+    }
 
+    if (!common_angles.empty())
+    {
+        for (int i = 0; i < common_angles.size(); i++)
+        {
+            gap_starting_points.push_back(common_angles[i]);
+            gap_ending_points.push_back(common_angles[i]);
+        }
+    }
 
+    sort(gap_starting_points.begin(), gap_starting_points.end());
+    sort(gap_ending_points.begin(), gap_ending_points.end());
+
+    int min_size;
+
+    for (int i = 0; i < gap_starting_points.size(); i++)
+    {
+        cout << gap_starting_points[i] << endl;
+    }
+
+    min_size = min(gap_starting_points.size(), gap_ending_points.size());
+
+    int array_gap [min_size][2];
+
+    for (int i = 0; i < min_size; i ++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (j == 0)
+            {
+                array_gap [i][j] = gap_starting_points[i];
+            }
+            else
+            {
+                array_gap [i][j] = gap_ending_points[i];
+            }
+             
+        }
+    }
+    cout << "min_size is = " << min_size << endl;
+    int counter_array = 0;
+    
+    for (int i = 0; i < min_size; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            counter_array++;
+            cout << "Array gap's " << counter_array << " element is = " << array_gap [i][j] << endl;
+        }
         
+    }
 
+    common_angles.erase(common_angles.begin(), common_angles.end());
         /*for (unsigned int j = 90; j >= 0 ; j--)
         {
             currRange.push_back(laserRanges[j]);
