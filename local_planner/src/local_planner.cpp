@@ -341,10 +341,11 @@ namespace local_planner
         }
 
         currRange = laserRanges;
-        currRange.erase(currRange.begin()+91,currRange.begin()+271);
 
-        reverse(currRange.begin(), currRange.begin()+91);
-        reverse(currRange.begin()+91, currRange.end());
+        currRange.erase(currRange.begin() + (90 / scanPtr_->angle_increment) + 1,currRange.begin() + (270 / scanPtr_->angle_increment) - 1);
+
+        reverse(currRange.begin(), currRange.begin() + (90 / scanPtr_->angle_increment));
+        reverse(currRange.begin() + (90 / scanPtr_->angle_increment) + 1, currRange.end());
 
         for (unsigned int i = 0; i < currRange.size(); i++)
         {
