@@ -444,36 +444,36 @@ namespace local_planner
             if (i == 0)
             {
                 double temp = gap_starting_points[i];
-                ROS_INFO("temp is : " << temp);
+                ROS_INFO_STREAM("temp is : " << temp);
                 for (j; j < gap_ending_points.size(); j++)
                 {
                     if (gap_ending_points[j] < temp)
                     {
                         counter++;
-                        ROS_INFO("counter is : " << counter);
+                        ROS_INFO_STREAM("counter is : " << counter);
                         indices.push_back(j);
-                        ROS_INFO("indices are : " << indices[j]);
+                        ROS_INFO_STREAM("indices are : " << indices[j]);
                     }
                 }
                 if (counter > 1)
                 {
                     for (k; k < indices.size(); k++)
                     {
-                        ROS_INFO(" k is " << k);
-                        ROS_INFO("indices size is : "<< indices.size());
+                        ROS_INFO_STREAM(" k is " << k);
+                        ROS_INFO_STREAM("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin()+1);
                     }
                 }
-                ROS_INFO("gap ending points are : ");
+                ROS_INFO_STREAM("gap ending points are : ");
                 for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_ending_points[z]);
+                    ROS_INFO_STREAM(" " << gap_ending_points[z]);
                 }
                 
-                ROS_INFO("gap starting points are : ");
+                ROS_INFO_STREAM("gap starting points are : ");
                 for (unsigned int z = 0; z < gap_starting_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_starting_points[z]);
+                    ROS_INFO_STREAM(" " << gap_starting_points[z]);
                 }
             }
             indices = {};
@@ -483,15 +483,15 @@ namespace local_planner
             {
                 double temp_prev = gap_starting_points[i-1];
                 double temp = gap_starting_points[i];
-                ROS_INFO("temp prev is : " << temp_prev);
-                ROS_INFO("temp is : " << temp)
+                ROS_INFO_STREAM("temp prev is : " << temp_prev);
+                ROS_INFO_STREAM("temp is : " << temp);
                 for (l; l < gap_ending_points.size(); l++)
                 {
-                    ROS_INFO("inside l = " << l);
+                    ROS_INFO_STREAM("inside l = " << l);
                     if (gap_ending_points[l] < temp && gap_ending_points[l] > temp_prev)
                     {
                         counter++;
-                        ROS_INFO("counter is : "<< counter);
+                        ROS_INFO_STREAM("counter is : "<< counter);
                         indices.push_back(l);
                     }
                 }
@@ -500,8 +500,8 @@ namespace local_planner
                 {
                     for (m; m < indices.size(); m++)
                     {
-                        ROS_INFO(" m is " << m);
-                        ROS_INFO("indices size is : "<< indices.size());
+                        ROS_INFO_STREAM(" m is " << m);
+                        ROS_INFO_STREAM("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin()+indices[1]);
                     }
                     m=1;
@@ -512,21 +512,21 @@ namespace local_planner
                     gap_starting_points.erase(gap_starting_points.begin()+i-1);
                 }
                 counter = 0;
-                ROS_INFO("indices are: ");
+                ROS_INFO_STREAM("indices are: ");
                 for (unsigned int z = 0 ; z < indices.size(); z++)
                 {
-                    ROS_INFO(" " << indices[z]);
+                    ROS_INFO_STREAM(" " << indices[z]);
                 }
-                ROS_INFO("gap ending points are : ");
+                ROS_INFO_STREAM("gap ending points are : ");
                 for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_ending_points[z]);
+                    ROS_INFO_STREAM(" " << gap_ending_points[z]);
                 }
                 
-                ROS_INFO("gap starting points are : ");
+                ROS_INFO_STREAM("gap starting points are : ");
                 for (unsigned int z = 0; z < gap_starting_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_starting_points[z]);
+                    ROS_INFO_STREAM(" " << gap_starting_points[z]);
                 }
             }
             indices = {};
@@ -535,23 +535,23 @@ namespace local_planner
             if (i == gap_starting_points.size()-1)
             {
                 double temp = gap_starting_points[i];
-                ROS_INFO("temp is : " << temp);
+                ROS_INFO_STREAM("temp is : " << temp);
                 for (n; n < gap_ending_points.size(); n++)
                 {
                     if (gap_ending_points[n] > temp)
                     {
                         indices.push_back(n);
-                        ROS_INFO("indices are : " << indices[counter]);
+                        ROS_INFO_STREAM("indices are : " << indices[counter]);
                         counter++;
-                        ROS_INFO("counter is : "<< counter);
+                        ROS_INFO_STREAM("counter is : "<< counter);
                     }
                 }
                 if (counter > 1)
                 {
                     for (o; o < indices.size(); o++)
                     {
-                        ROS_INFO(" o is " << o);
-                        ROS_INFO("indices size is : "<< indices.size());
+                        ROS_INFO_STREAM(" o is " << o);
+                        ROS_INFO_STREAM("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin() + indices[1]);
                     }
                 }
@@ -559,16 +559,16 @@ namespace local_planner
                 {
                     gap_ending_points.push_back(180);
                 }
-                ROS_INFO("gap ending points are : ");
+                ROS_INFO_STREAM("gap ending points are : ");
                 for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_ending_points[z]);
+                    ROS_INFO_STREAM(" " << gap_ending_points[z]);
                 }
                 
-                ROS_INFO("gap starting points are : ");
+                ROS_INFO_STREAM("gap starting points are : ");
                 for (unsigned int z = 0; z < gap_starting_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_starting_points[z]);
+                    ROS_INFO_STREAM(" " << gap_starting_points[z]);
                 }
             }
         counter = 0;
@@ -584,16 +584,16 @@ namespace local_planner
         {
             gap_starting_points.insert(gap_starting_points.begin(), 0);
         }
-        ROS_INFO("gap ending points are : ");
+        ROS_INFO_STREAM("gap ending points are : ");
                 for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_ending_points[z]);
+                    ROS_INFO_STREAM(" " << gap_ending_points[z]);
                 }
             
-                ROS_INFO("gap starting points are : ");
+                ROS_INFO_STREAM("gap starting points are : ");
                 for (unsigned int z = 0; z < gap_starting_points.size(); z++)
                 {
-                    ROS_INFO(" " << gap_starting_points[z]);
+                    ROS_INFO_STREAM(" " << gap_starting_points[z]);
                 }
 
     if (!common_angles.empty())
@@ -612,7 +612,7 @@ namespace local_planner
 
     for (int i = 0; i < gap_starting_points.size(); i++)
     {
-        ROS_INFO(gap_starting_points[i]);
+        ROS_INFO_STREAM(gap_starting_points[i]);
     }
 
     min_size = min(gap_starting_points.size(), gap_ending_points.size());
@@ -634,7 +634,7 @@ namespace local_planner
              
         }
     }
-    ROS_INFO("min_size is = " << min_size);
+    ROS_INFO_STREAM("min_size is = " << min_size);
     int counter_array = 0;
     
     for (int i = 0; i < min_size; i++)
@@ -642,7 +642,7 @@ namespace local_planner
         for (int j = 0; j < 2; j++)
         {
             counter_array++;
-            ROS_INFO("Array gap's " << counter_array << " element is = " << array_gap [i][j]);
+            ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap [i][j]);
         }
         
     }
