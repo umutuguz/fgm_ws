@@ -444,57 +444,64 @@ namespace local_planner
             if (i == 0)
             {
                 double temp = gap_starting_points[i];
-                cout << "temp is : " << temp << endl;
+                ROS_INFO("temp is : " << temp);
                 for (j; j < gap_ending_points.size(); j++)
                 {
                     if (gap_ending_points[j] < temp)
                     {
                         counter++;
-                        cout << "counter is : "<< counter << endl;
+                        ROS_INFO("counter is : " << counter);
                         indices.push_back(j);
-                        cout << "indices are : " << indices[j] << endl;
+                        ROS_INFO("indices are : " << indices[j]);
                     }
                 }
                 if (counter > 1)
                 {
                     for (k; k < indices.size(); k++)
                     {
-                        cout << " k is " << k << endl;
-                        cout << "indices size is : "<< indices.size() << endl;
+                        ROS_INFO(" k is " << k);
+                        ROS_INFO("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin()+1);
                     }
                 }
-
-                for (int z = 0; z < gap_ending_points.size(); z++)
+                ROS_INFO("gap ending points are : ");
+                for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    cout << "Gap ending points = " << gap_ending_points[z] << endl;
-                    cout << "Gap ending size = " << gap_ending_points.size() << endl;
-                }    
+                    ROS_INFO(" " << gap_ending_points[z]);
+                }
+                
+                ROS_INFO("gap starting points are : ");
+                for (unsigned int z = 0; z < gap_starting_points.size(); z++)
+                {
+                    ROS_INFO(" " << gap_starting_points[z]);
+                }
             }
             indices = {};
+            counter = 0;
 
             if (i > 0)
             {
                 double temp_prev = gap_starting_points[i-1];
                 double temp = gap_starting_points[i];
-                cout << "temp prev is : " << temp_prev << endl;
-                cout << "temp is : " << temp << endl;
+                ROS_INFO("temp prev is : " << temp_prev);
+                ROS_INFO("temp is : " << temp)
                 for (l; l < gap_ending_points.size(); l++)
                 {
-                    cout << "inside l = " << l << endl;
+                    ROS_INFO("inside l = " << l);
                     if (gap_ending_points[l] < temp && gap_ending_points[l] > temp_prev)
                     {
                         counter++;
-                        cout << "counter is : "<< counter << endl;
+                        ROS_INFO("counter is : "<< counter);
                         indices.push_back(l);
                     }
                 }
+                
                 if (counter > 1)
                 {
                     for (m; m < indices.size(); m++)
                     {
-                        cout << " m is " << m << endl;
-                        cout << "indices size is : "<< indices.size() << endl;
+                        ROS_INFO(" m is " << m);
+                        ROS_INFO("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin()+indices[1]);
                     }
                     m=1;
@@ -505,60 +512,81 @@ namespace local_planner
                     gap_starting_points.erase(gap_starting_points.begin()+i-1);
                 }
                 counter = 0;
-                cout << "indices are: " << endl;
+                ROS_INFO("indices are: ");
                 for (unsigned int z = 0 ; z < indices.size(); z++)
                 {
-                    cout << " " << indices[z] << endl;
+                    ROS_INFO(" " << indices[z]);
                 }
-                cout << "gap ending points are : " << endl;
+                ROS_INFO("gap ending points are : ");
                 for (unsigned int z = 0; z < gap_ending_points.size(); z++)
                 {
-                    cout << " " << gap_ending_points[z];
+                    ROS_INFO(" " << gap_ending_points[z]);
                 }
-                cout << endl;
                 
-                cout << "gap starting points are : " << endl;
+                ROS_INFO("gap starting points are : ");
                 for (unsigned int z = 0; z < gap_starting_points.size(); z++)
                 {
-                    cout << " " << gap_starting_points[z];
+                    ROS_INFO(" " << gap_starting_points[z]);
                 }
             }
             indices = {};
+            l = 0;
 
             if (i == gap_starting_points.size()-1)
             {
-                temp = gap_starting_points[i];
-                cout << "temp is : " << temp << endl;
+                double temp = gap_starting_points[i];
+                ROS_INFO("temp is : " << temp);
                 for (n; n < gap_ending_points.size(); n++)
                 {
                     if (gap_ending_points[n] > temp)
                     {
                         indices.push_back(n);
-                        cout << "indices are : " << indices[counter] << endl;
+                        ROS_INFO("indices are : " << indices[counter]);
                         counter++;
-                        cout << "counter is : "<< counter << endl;
+                        ROS_INFO("counter is : "<< counter);
                     }
                 }
                 if (counter > 1)
                 {
                     for (o; o < indices.size(); o++)
                     {
-                        cout << " o is " << o << endl;
-                        cout << "indices size is : "<< indices.size() << endl;
+                        ROS_INFO(" o is " << o);
+                        ROS_INFO("indices size is : "<< indices.size());
                         gap_ending_points.erase(gap_ending_points.begin() + indices[1]);
                     }
                 }
                 if (counter == 0)
                 {
-                    gap_ending_points[n-1] = 180;
+                    gap_ending_points.push_back(180);
+                }
+                ROS_INFO("gap ending points are : ");
+                for (unsigned int z = 0; z < gap_ending_points.size(); z++)
+                {
+                    ROS_INFO(" " << gap_ending_points[z]);
+                }
+                
+                ROS_INFO("gap starting points are : ");
+                for (unsigned int z = 0; z < gap_starting_points.size(); z++)
+                {
+                    ROS_INFO(" " << gap_starting_points[z]);
                 }
             }
         }
-
-    if (gap_ending_points[0] <= gap_starting_points[0])
-    {
-        gap_starting_points.insert(gap_starting_points.begin(), 0);
-    }
+        if (gap_ending_points[0] < gap_starting_points[0])
+        {
+            gap_starting_points.insert(gap_starting_points.begin(), 0);
+        }
+        ROS_INFO("gap ending points are : ");
+                for (unsigned int z = 0; z < gap_ending_points.size(); z++)
+                {
+                    ROS_INFO(" " << gap_ending_points[z]);
+                }
+            
+                ROS_INFO("gap starting points are : ");
+                for (unsigned int z = 0; z < gap_starting_points.size(); z++)
+                {
+                    ROS_INFO(" " << gap_starting_points[z]);
+                }
 
     if (!common_angles.empty())
     {
@@ -576,7 +604,7 @@ namespace local_planner
 
     for (int i = 0; i < gap_starting_points.size(); i++)
     {
-        cout << gap_starting_points[i] << endl;
+        ROS_INFO(gap_starting_points[i]);
     }
 
     min_size = min(gap_starting_points.size(), gap_ending_points.size());
@@ -598,7 +626,7 @@ namespace local_planner
              
         }
     }
-    cout << "min_size is = " << min_size << endl;
+    ROS_INFO("min_size is = " << min_size);
     int counter_array = 0;
     
     for (int i = 0; i < min_size; i++)
@@ -606,7 +634,7 @@ namespace local_planner
         for (int j = 0; j < 2; j++)
         {
             counter_array++;
-            cout << "Array gap's " << counter_array << " element is = " << array_gap [i][j] << endl;
+            ROS_INFO("Array gap's " << counter_array << " element is = " << array_gap [i][j]);
         }
         
     }
