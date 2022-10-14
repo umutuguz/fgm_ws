@@ -571,6 +571,14 @@ namespace local_planner
                     ROS_INFO(" " << gap_starting_points[z]);
                 }
             }
+        counter = 0;
+        j = 0;
+        k = 1;
+        l = 0;
+        m = 1;
+        n = 0;
+        o = 1;
+        indices = {};
         }
         if (gap_ending_points[0] < gap_starting_points[0])
         {
