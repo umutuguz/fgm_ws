@@ -288,7 +288,7 @@ namespace local_planner
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double robot_pose_theta = tf::getYaw(currentPose_.orientation);
         robot_pose_theta = robot_pose_theta*180/M_PI;
-        ROS_INFO("robot_pose_theta is: %f", robot_pose_theta);
+        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
 
         double goalX = currentGoalPose_.position.x;
         double goalY = currentGoalPose_.position.y;
@@ -702,8 +702,11 @@ namespace local_planner
 
         double phiGoal;
 
-
-        robot_pose_theta = 90 - robot_pose_theta;
+        if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
+            robot_pose_theta = 450 - robot_pose_theta;
+        else
+            robot_pose_theta = 90 - robot_pose_theta;
+        
         // if (robot_pose_theta <= 180 && robot_pose_theta > 0)
         // {
         //     robot_pose_theta = 90 - robot_pose_theta;
@@ -713,7 +716,7 @@ namespace local_planner
         //     robot_pose_theta = 
         // }
     
-        if (goalX > odomRX && goalY > odomRY)
+        /* if (goalX > odomRX && goalY > odomRY)
         {
             phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
             phiGoal = phiGoal * 180 / M_PI;
@@ -736,7 +739,14 @@ namespace local_planner
         {
             phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
             phiGoal = 360 - (phiGoal * 180 / M_PI);
-        }
+        } */
+
+        phiGoal = atan2(goalY - odomRY, goalX - odomRX);
+
+        if ((odomRX > goalX) && (odomRY < goalY))
+            phiGoal = (M_PI * 2.5) - phiGoal;
+        else
+            phiGoal = (M_PI / 2) - phiGoal;
         
         if (goalX == odomRX && goalY > odomRY)
         {
@@ -769,60 +779,6 @@ namespace local_planner
         ROS_INFO_STREAM("robot_pose_theta is : " << robot_pose_theta);
 
 
-        // Gap calculations
-        // std::vector<double> gap;
-        // double tempTheta;
-        // for (unsigned int i = 1; i < obstacleAngles.size(); i = i + 2)
-        // {
-        //     tempTheta = fabs(obstacleAngles[i] - obstacleAngles[i - 1]);
-        //     gap.push_back(tempTheta);
-        // }
-
-        // int maxGapIndex = std::max_element(gap.begin(), gap.end()) - gap.begin();
-
-        // double theta;
-        // int angleIndex;
-        // double phiGapCenter;
-        // double phiFinal;
-        // double alpha = 1.4;
-        // auto dminIdxItr = std::min_element(gap.begin(), gap.end());
-        // int dminIdx = std::distance(gap.begin(), dminIdxItr);
-        // double dmin = laserRanges.at(dminIdx);
-        // int beta = 2; // 1
-
-        // if (!gap.empty())
-        // {
-        //     isGapExist_ = true;
-        //     angleIndex = maxGapIndex * 2;
-        //     double d1 = laserRanges[obstacleAnglesIdx[angleIndex]];
-        //     double d2 = laserRanges[obstacleAnglesIdx[angleIndex + 1]];
-        //     double phi1 = obstacleAngles[angleIndex];
-        //     double phi2 = obstacleAngles[angleIndex + 1];
-
-        //     double numer = d1 + d2 * cos(phi1 - phi2);
-        //     double denum = sqrt(pow(d1, 2) + pow(d2, 2) + 2 * d1 * d2 * cos(phi1 - phi2));
-
-        //     phiGapCenter = acos(numer / denum) + phi1;
-        //     phiFinal = (((alpha / dmin) * phiGapCenter) + (beta * phiGoal)) / (alpha / dmin + beta);
-
-        //     double tempPhiFinal = fmod(phiFinal, 2 * M_PI);
-
-        //     if (tempPhiFinal > M_PI)
-        //         phiFinal = tempPhiFinal - 2 * M_PI;
-        //     else if (tempPhiFinal < -M_PI)
-        //         phiFinal = tempPhiFinal + 2 * M_PI;
-        //     else
-        //         phiFinal = tempPhiFinal;
-
-        //     ROS_INFO_STREAM("Final phi: " << phiFinal);
-        //     ROS_INFO_STREAM("Gap center phi: " << phiGapCenter);
-        //     ROS_INFO_STREAM("Goal phi: " << phiGoal);
-        // }
-        // else
-        // {
-        //     ROS_WARN_STREAM("No gap exists");
-        //     isGapExist_ = false;
-        // }
 
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
@@ -833,7 +789,13 @@ namespace local_planner
         double alpha_weight = 1.4;
         double beta_weight = 2;
         //double phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (beta_weight * (phiGoal*M_PI/180))) / (alpha_weight / dmin + beta_weight);
-        double phiFinal = (90-phiGoal)*M_PI/180;
+        double phiFinal = 0; //(90-phiGoal)*M_PI/180;
+
+        if (phiGoal > 270)
+            phiFinal = (450 - phiGoal) * (M_PI / 180);
+        else
+            phiFinal = (90 - phiGoal) * (M_PI / 180);
+        
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
         ROS_INFO_STREAM("moving to " << phiFinal);
