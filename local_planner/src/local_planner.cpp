@@ -111,8 +111,8 @@ namespace local_planner
             double diffX = waypointX - currentPose_.position.x;
             double diffY = waypointY - currentPose_.position.y;
 
-            double lookAheadDist_ = 0.9;
-            goalDistTolerance_ = 1;
+            double lookAheadDist_ = 20; // index
+            goalDistTolerance_ = 0.25;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -120,21 +120,34 @@ namespace local_planner
             // ROS_INFO("goaldisttolerance is: %f", goalDistTolerance_);
             // ROS_INFO("lookaheaddist is: %f", lookAheadDist_);
 
-            if (hypot(diffX, diffY) > lookAheadDist_ && distanceToGlobalGoal() > goalDistTolerance_)
+            if (globalPlan_.size()>lookAheadDist_)
             {
-                currentGoalPoseIdx_ = i;
-                break;
+                currentGoalPoseIdx_ = lookAheadDist_;
             }
-            else if (distanceToGlobalGoal() < goalDistTolerance_)
+            else if (globalPlan_.size()<=lookAheadDist_ || distanceToGlobalGoal() < goalDistTolerance_)
             {
-                ROS_INFO("else if e girdik");
-                currentGoalPoseIdx_ = globalPlan_.size() - 1;
-                break;
+                currentGoalPoseIdx_ = globalPlan_.size()-1;
             }
             else
             {
                 continue;
             }
+
+            // if (hypot(diffX, diffY) > lookAheadDist_ && distanceToGlobalGoal() > goalDistTolerance_)
+            // {
+            //     currentGoalPoseIdx_ = i;
+            //     break;
+            // }
+            // else if (distanceToGlobalGoal() < goalDistTolerance_)
+            // {
+            //     ROS_INFO("else if e girdik");
+            //     currentGoalPoseIdx_ = globalPlan_.size() - 1;
+            //     break;
+            // }
+            // else
+            // {
+            //     continue;
+            // }
         }
         ROS_INFO_STREAM("Global plan size is:  " << globalPlan_.size());
         ROS_INFO_STREAM("Current goal index: " << currentGoalPoseIdx_);
@@ -173,7 +186,7 @@ namespace local_planner
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.20; // phiFinal - M_PI/4;
+        cmd_vel.angular.z = phiFinal * 0.3; // phiFinal - M_PI/4;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -210,7 +223,7 @@ namespace local_planner
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = 0.1 * M_PI;
+                    cmd_vel.angular.z = phiFinal * 0.3;
                     ROS_INFO("inside third if");
                 }
             }
@@ -345,7 +358,70 @@ namespace local_planner
                 gap_ending_points.push_back(i + 1);
             }
         }
+        double phiGoal;
+        double phiFinal;
+
+        if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
+            robot_pose_theta = 450 - robot_pose_theta;
+        else
+            robot_pose_theta = 90 - robot_pose_theta;
+
+        phiGoal = atan2(goalY - odomRY, goalX - odomRX);
+        phiGoal = phiGoal*180 /M_PI;
+        ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
+
+        if ((odomRX > goalX) && (odomRY < goalY))
+            phiGoal = 450 - phiGoal;
+        else
+            phiGoal = 90 - phiGoal;
+
+        if (goalX == odomRX && goalY > odomRY)
+        {
+            phiGoal = 0;
+        }
+
+        if (goalX == odomRX && goalY < odomRY)
+        {
+            phiGoal = 180;
+        }
+
+        if (goalX > odomRX && goalY == odomRY)
+        {
+            phiGoal = 90;
+        }
+
+        if (goalX < odomRX && goalY == odomRY)
+        {
+            phiGoal = 270;
+        }
+        ROS_INFO_STREAM("Goal angle 2 is: " << phiGoal);
+
+        // phiGoal = phiGoal + robot_pose_theta;
+        phiGoal = phiGoal - (robot_pose_theta-90);
+
         ROS_INFO("patlamadik5");
+        if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
+        {
+            isGapExist_ = false;
+            if (phiGoal > 270)
+                phiFinal = (450 - phiGoal) * (M_PI / 180);
+            else
+                phiFinal = (90 - phiGoal) * (M_PI / 180);
+
+            if (phiFinal > M_PI && phiFinal < 2*M_PI)
+            {
+                phiFinal = phiFinal - 2*M_PI; 
+            }
+            else if (phiFinal > 2*M_PI)
+            {
+                phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
+            }          
+            return phiFinal;
+        }
+        else
+        {
+            isGapExist_ = true;
+        }
 
         // for (int i = 0; i < gap_starting_points.size(); i++)
         // {
@@ -714,79 +790,7 @@ namespace local_planner
         ROS_INFO_STREAM("d1 is : " << d1);
         ROS_INFO_STREAM("d2 is : " << d2);
 
-        double phiGoal;
 
-        if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
-            robot_pose_theta = 450 - robot_pose_theta;
-        else
-            robot_pose_theta = 90 - robot_pose_theta;
-
-        // if (robot_pose_theta <= 180 && robot_pose_theta > 0)
-        // {
-        //     robot_pose_theta = 90 - robot_pose_theta;
-        // }
-        // if (robot_pose_theta < 0)
-        // {
-        //     robot_pose_theta =
-        // }
-
-        /* if (goalX > odomRX && goalY > odomRY)
-        {
-            phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
-            phiGoal = phiGoal * 180 / M_PI;
-        }
-
-        if (goalX > odomRX && goalY < odomRY)
-        {
-            phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
-            phiGoal = 180 - (phiGoal * 180 / M_PI);
-        }
-
-        if (goalX < odomRX && goalY < odomRY)
-        {
-            phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
-            phiGoal = 180 + (phiGoal * 180 / M_PI);
-        }
-
-
-        if (goalX < odomRX && goalY > odomRY)
-        {
-            phiGoal = atan(fabs(goalX - odomRX)/fabs(goalY - odomRY));
-            phiGoal = 360 - (phiGoal * 180 / M_PI);
-        } */
-
-        phiGoal = atan2(goalY - odomRY, goalX - odomRX);
-        phiGoal = phiGoal*180 /M_PI;
-        ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
-
-        if ((odomRX > goalX) && (odomRY < goalY))
-            phiGoal = 450 - phiGoal;
-        else
-            phiGoal = 90 - phiGoal;
-
-        if (goalX == odomRX && goalY > odomRY)
-        {
-            phiGoal = 0;
-        }
-
-        if (goalX == odomRX && goalY < odomRY)
-        {
-            phiGoal = 180;
-        }
-
-        if (goalX > odomRX && goalY == odomRY)
-        {
-            phiGoal = 90;
-        }
-
-        if (goalX < odomRX && goalY == odomRY)
-        {
-            phiGoal = 270;
-        }
-        ROS_INFO_STREAM("Goal angle 2 is: " << phiGoal);
-
-        // phiGoal = phiGoal + robot_pose_theta;
-        phiGoal = phiGoal - (robot_pose_theta-90);
 
         ROS_INFO_STREAM("odomRX is : " << odomRX);
         ROS_INFO_STREAM("odomRY is : " << odomRY);
@@ -798,14 +802,13 @@ namespace local_planner
 
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
-        isGapExist_ = true;
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         double dmin = currRange.at(dminIdx);
         double alpha_weight = 1.4;
         double beta_weight = 2;
-        double phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (beta_weight * (phiGoal*M_PI/180))) / (alpha_weight / dmin + beta_weight);
+        //double phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (beta_weight * (phiGoal*M_PI/180))) / (alpha_weight / dmin + beta_weight);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
@@ -814,9 +817,19 @@ namespace local_planner
         else
             phiFinal = (90 - phiGoal) * (M_PI / 180);
 
+        if (phiFinal > M_PI && phiFinal < 2*M_PI)
+        {
+            phiFinal = phiFinal - 2*M_PI;
+        }
+        else if (phiFinal > 2*M_PI)
+        {
+            phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
+        }      
+        
+
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
-        ROS_INFO_STREAM("moving to " << phiFinal*180/M_PI);
+        ROS_INFO_STREAM("moving to " << (phiFinal*180/M_PI));
         // ros::Rate loop_rate(10);
         // loop_rate.sleep();
         //  ROS_INFO("SELAM");
