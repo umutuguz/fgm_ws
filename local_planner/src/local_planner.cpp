@@ -333,9 +333,9 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.1;
+            currRange[i] -= 0.15;
         }
-        
+
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -798,7 +798,7 @@ namespace local_planner
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         double dmin = currRange.at(dminIdx);
-        double alpha_weight = 0.1;
+        double alpha_weight = 0.05;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / dmin + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
@@ -823,7 +823,9 @@ namespace local_planner
         ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
-        ROS_INFO_STREAM("moving to " << (phiFinal*180/M_PI));
+        double moving_to;
+        moving_to = 90 - phiFinal*180/M_PI;
+        ROS_INFO_STREAM("moving to : " << moving_to);
         // ros::Rate loop_rate(10);
         // loop_rate.sleep();
         //  ROS_INFO("SELAM");
