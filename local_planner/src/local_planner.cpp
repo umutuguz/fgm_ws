@@ -308,12 +308,10 @@ namespace local_planner
         robot_pose_theta = robot_pose_theta * 180 / M_PI;
         ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
 
-        ROS_INFO("patlamadik");
 
         double goalX = currentGoalPose_.position.x;
         double goalY = currentGoalPose_.position.y;
 
-        ROS_INFO("patlamadik2");
 
         // Get laser ranges
         std::vector<double> laserRanges;
@@ -323,7 +321,6 @@ namespace local_planner
             laserRanges.push_back(scanPtr_->ranges[i]);
             // ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
         }
-        ROS_INFO("patlamadik3");
 
         currRange = laserRanges;
 
@@ -332,8 +329,13 @@ namespace local_planner
 
         reverse(currRange.begin(), currRange.begin() + 90);
         reverse(currRange.begin() + 91, currRange.end());
-        ROS_INFO("patlamadik4");
 
+        // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
+        for (unsigned int i = 0; i < currRange.size() ; i++)
+        {
+            currRange[i] -= 0.1;
+        }
+        
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -399,7 +401,6 @@ namespace local_planner
         // phiGoal = phiGoal + robot_pose_theta;
         phiGoal = phiGoal - (robot_pose_theta-90);
 
-        ROS_INFO("patlamadik5");
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
             isGapExist_ = false;
@@ -442,7 +443,6 @@ namespace local_planner
         {
             common_angles.push_back(*it);
         }
-        ROS_INFO("patlamadik6");
 
         // for (int i = 0; i < common_angles.size(); i++)
         // {
@@ -488,19 +488,15 @@ namespace local_planner
         int n = 0;
         int o = 1;
         vector<int> indices;
-        ROS_INFO("patlamadik7");
 
         for (unsigned int i = 0; i < gap_starting_points.size(); i++)
         {
-            ROS_INFO("patlamadik8");
             if (i == 0)
             {
-                ROS_INFO("patlamadik9");
                 double temp = gap_starting_points[i];
                 // ROS_INFO_STREAM("temp is : " << temp);
                 for (j; j < gap_ending_points.size(); j++)
                 {
-                    ROS_INFO("patlamadik10");
                     if (gap_ending_points[j] < temp)
                     {
                         counter++;
@@ -640,7 +636,6 @@ namespace local_planner
         }
 
         // asagidaki donguler iki tane -99 olan eleman varsa patlıyor. i=0da ve i=1 de varsa önce i=0dakini siliyor, i=1deki sıfıra geçtiği için tekrar oraya bakmadan devam ediyor.
-        ROS_INFO("patlamadik11");
 
         for (unsigned int i = 0; i < gap_starting_points.size(); i++)
         {
@@ -650,7 +645,6 @@ namespace local_planner
                 i--;
             }
         }
-        ROS_INFO("patlamadik12");
         for (unsigned int i = 0; i < gap_ending_points.size(); i++)
         {
             if (gap_ending_points[i] == -99)
@@ -659,7 +653,6 @@ namespace local_planner
                 i--;
             }
         }
-        ROS_INFO("patlamadik13");
 
         gap_starting_points.erase(remove(gap_starting_points.begin(), gap_starting_points.end(), -99), gap_starting_points.end());
 
@@ -667,7 +660,6 @@ namespace local_planner
         {
             gap_starting_points.insert(gap_starting_points.begin(), 0);
         }
-        ROS_INFO("patlamadik14");
         // ROS_INFO_STREAM("gap ending points are : ");
         // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
         // {
@@ -731,7 +723,7 @@ namespace local_planner
             for (int j = 0; j < 2; j++)
             {
                 counter_array++;
-                // ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
             }
         }
 
@@ -806,16 +798,18 @@ namespace local_planner
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         double dmin = currRange.at(dminIdx);
-        double alpha_weight = 1.4;
-        double beta_weight = 2;
-        //double phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (beta_weight * (phiGoal*M_PI/180))) / (alpha_weight / dmin + beta_weight);
+        double alpha_weight = 0.1;
+        //double beta_weight = 2.8;
+        phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / dmin + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
-        if (phiGoal > 270)
-            phiFinal = (450 - phiGoal) * (M_PI / 180);
+        if (phiFinal > 1.5*M_PI)
+            phiFinal = (2.5*M_PI - phiFinal);
         else
-            phiFinal = (90 - phiGoal) * (M_PI / 180);
+            phiFinal = (M_PI_2 - phiFinal);
+
+
 
         if (phiFinal > M_PI && phiFinal < 2*M_PI)
         {
@@ -826,7 +820,7 @@ namespace local_planner
             phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         }      
         
-
+        ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
         ROS_INFO_STREAM("moving to " << (phiFinal*180/M_PI));
