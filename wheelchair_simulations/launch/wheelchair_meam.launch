@@ -5,6 +5,7 @@
     <arg name="roll" default="0.0" />
     <arg name="pitch" default="0.0" />
     <arg name="yaw" default="-1.57" />
+    <arg name="rviz" default="true" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_meam_closed_doors.world" />
@@ -17,6 +18,14 @@
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find wheelchair_description)/urdf/wheel_chair.urdf.xacro" />
 
+    <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch"></include>
+
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model wheel_chair -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+
+    <group if="$(arg rviz)">
+        <node pkg="rviz" type="rviz" name="rviz" required="true"
+            args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
+    </group>
+
 </launch>
   

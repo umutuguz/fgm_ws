@@ -29,7 +29,7 @@
     <material>Gazebo/FlatBlack</material>
   </gazebo>
 
-  <gazebo reference="left_small_wheel">
+<!--   <gazebo reference="left_small_wheel">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -37,10 +37,10 @@
     <minDepth>0.001</minDepth>
     <maxVel>1.0</maxVel>
     <material>Gazebo/FlatBlack</material>
-  </gazebo>
+  </gazebo> -->
 
 
-  <gazebo reference="right_smaal_wheel">
+ <!--  <gazebo reference="right_smaal_wheel">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -48,7 +48,7 @@
     <minDepth>0.001</minDepth>
     <maxVel>1.0</maxVel>
     <material>Gazebo/FlatBlack</material>
-  </gazebo>
+  </gazebo> -->
 
   <gazebo reference="imu_link">
     <sensor type="imu" name="imu">
@@ -59,7 +59,7 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="turtlebot3_burger_controller" filename="libgazebo_ros_diff_drive.so">
+    <plugin name="wheel_chair_controller" filename="libgazebo_ros_diff_drive.so">
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
@@ -72,7 +72,9 @@
       <legacyMode>false</legacyMode>
       <updateRate>30</updateRate>
       <leftJoint>left_big_wheel_joint</leftJoint>
+      <!-- <leftJoint>left_small_wheel_joint</leftJoint> -->
       <rightJoint>right_big_wheel_joint</rightJoint>
+      <!-- <rightJoint>right_small_wheel_joint</rightJoint> -->
       <wheelSeparation>0.575</wheelSeparation>
       <wheelDiameter>0.324</wheelDiameter>
       <wheelAcceleration>1</wheelAcceleration>
@@ -111,8 +113,8 @@
   </gazebo>
 
   <gazebo reference="rp_laser_front">
-    <material>Gazebo/FlatBlack</material>
-    <sensor type="ray" name="lds_lfcd_sensor">
+    <material>Gazebo/RedBright</material>
+    <sensor type="ray" name="lds_lfcd_sensor_front">
       <pose>0.00386881875434386 8.69539989361567E-05 -0.00554963797433417 0 0 0</pose>
       <visualize>$(arg laser_visual)</visualize>
       <update_rate>10</update_rate>
@@ -136,9 +138,42 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_lds_lfcd_controller_front" filename="libgazebo_ros_laser.so">
         <topicName>front_rp/rp_scan_filtered_front/</topicName>
         <frameName>rp_laser_front</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="rp_laser_back">
+    <material>Gazebo/Gold</material>
+    <sensor type="ray" name="lds_lfcd_sensor_back">
+      <pose>-0.00393393719392465 1.45541326387055E-05 -0.00550433759472346 0 0 0</pose>
+      <visualize>$(arg laser_visual)</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>0.0</min_angle>
+            <max_angle>6.28319</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>7.0</max>
+          <resolution>0.015</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lds_lfcd_controller_back" filename="libgazebo_ros_laser.so">
+        <topicName>back_rp/rp_scan_filtered_back/</topicName>
+        <frameName>rp_laser_back</frameName>
       </plugin>
     </sensor>
   </gazebo>
