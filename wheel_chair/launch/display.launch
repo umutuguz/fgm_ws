@@ -1,0 +1,14 @@
+<launch>
+
+  <arg name="model" />
+  <arg name="gui" default="False" />
+
+  <param name="robot_description" textfile="$(find wheel_chair)/urdf/wheel_chair.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true" args="-d $(find wheel_chair)/rviz/wheel_chair_urdf.rviz" />
+
+</launch>
