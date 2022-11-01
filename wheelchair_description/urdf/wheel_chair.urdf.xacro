@@ -3,6 +3,14 @@
   <!-- <xacro:include filename="$(find turtlebot3_description)/urdf/common_properties.xacro" /> -->
   <xacro:include filename="$(find wheelchair_description)/urdf/wheel_chair.gazebo.xacro" />
 
+  <link name="base_footprint" />
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0.0 0.0 0.0010" rpy="0 0 0" />
+  </joint>
+
   <link
     name="base_link">
     <inertial>
@@ -45,13 +53,13 @@
   </link>
 
   <joint name="imu_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="imu_link"/>
-    <origin xyz="-0.032 0 0.068" rpy="0 0 0"/>
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="-0.032 0 0.068" rpy="0 0 0" />
   </joint>
 
-  <link name="imu_link"/>
-  
+  <link name="imu_link" />
+
   <link
     name="left_big_wheel">
     <inertial>
@@ -85,37 +93,29 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="-1.57 0 0" />
       <geometry>
-        <mesh
-          filename="package://wheel_chair/meshes/left_big_wheel.STL" />
+        <!-- <mesh
+          filename="package://wheel_chair/meshes/left_big_wheel.STL" /> -->
+          <cylinder length="0.055" radius="0.15"/>
       </geometry>
     </collision>
   </link>
-  <joint
-    name="left_big_wheel_joint"
-    type="continuous">
-    <origin
-      xyz="0 0.315 0"
-      rpy="0 0 0" />
-    <parent
-      link="base_link" />
-    <child
-      link="left_big_wheel" />
-    <axis
-      xyz="0 -1 0" />
-    <limit
-      effort="1"
-      velocity="1" />
+
+  <joint name="left_big_wheel_joint" type="continuous">
+    <origin xyz="0 0.315 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="left_big_wheel" />
+    <axis xyz="0 -1 0" />
+    <!-- <limit effort="1" velocity="1" /> -->
   </joint>
-  <link
-    name="right_big_wheel">
+
+  <link name="right_big_wheel">
     <inertial>
       <origin
         xyz="1.60982338570648E-15 0.0275 1.11022302462516E-15"
         rpy="0 0 0" />
-      <mass
-        value="3.19005851775018" />
+      <mass value="3.19005851775018" />
       <inertia
         ixx="0.0222055020892377"
         ixy="-5.02793463534266E-19"
@@ -141,10 +141,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="-1.57 0 0" />
       <geometry>
-        <mesh
-          filename="package://wheel_chair/meshes/right_big_wheel.STL" />
+        <!-- <mesh
+          filename="package://wheel_chair/meshes/right_big_wheel.STL" /> -->
+          <cylinder length="0.055" radius="0.15"/>
       </geometry>
     </collision>
   </link>
@@ -197,10 +198,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="1.57 0 0" />
       <geometry>
-        <mesh
-          filename="package://wheel_chair/meshes/left_small_wheel.STL" />
+        <!-- <mesh
+          filename="package://wheel_chair/meshes/left_small_wheel.STL" /> -->
+          <cylinder length="0.055" radius="0.09"/>
       </geometry>
     </collision>
   </link>
@@ -255,10 +257,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="1.57 0 0" />
       <geometry>
-        <mesh
-          filename="package://wheel_chair/meshes/right_smaal_wheel.STL" />
+        <!-- <mesh
+          filename="package://wheel_chair/meshes/right_smaal_wheel.STL" /> -->
+          <cylinder length="0.055" radius="0.09"/>
       </geometry>
     </collision>
   </link>
@@ -325,7 +328,7 @@
     type="fixed">
     <origin
       xyz="-0.048279 0.305 0.26099"
-      rpy="0 0 -0.4" />
+      rpy="0 0 0" />
     <parent
       link="base_link" />
     <child
@@ -378,7 +381,7 @@
     type="fixed">
     <origin
       xyz="0.72155 0.0046595 -0.074152"
-      rpy="0 0 -0.0013615" />
+      rpy="0 0 0.0" />
     <parent
       link="base_link" />
     <child
