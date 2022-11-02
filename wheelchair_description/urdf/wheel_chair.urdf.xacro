@@ -94,11 +94,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="-1.5707963268 0 3.1415" />
+        rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://wheel_chair/meshes/left_big_wheel.STL" /> -->
-          <cylinder length="0.06" radius="0.16"/>
+        <mesh
+          filename="package://wheel_chair/meshes/left_big_wheel.STL" />
+          <!-- <cylinder length="0.06" radius="0.16"/> -->
           <!-- <cylinder length="0.25" radius="0.25"/> -->
       </geometry>
     </collision>
@@ -143,11 +143,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="-1.5707963268 0 3.1415" />
+        rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://wheel_chair/meshes/right_big_wheel.STL" /> -->
-          <cylinder length="0.06" radius="0.16"/>
+        <mesh
+          filename="package://wheel_chair/meshes/right_big_wheel.STL" />
+          <!-- <cylinder length="0.06" radius="0.16"/> -->
           <!-- <cylinder length="0.25" radius="0.25"/> -->
       </geometry>
     </collision>
@@ -201,11 +201,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="1.57 0 0" />
+        rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://wheel_chair/meshes/left_small_wheel.STL" /> -->
-          <cylinder length="0.055" radius="0.095"/>
+        <mesh
+          filename="package://wheel_chair/meshes/left_small_wheel.STL" />
+          <!-- <cylinder length="0.055" radius="0.095"/> -->
           <!-- <cylinder length="0.25" radius="0.25"/> -->
       </geometry>
     </collision>
@@ -224,9 +224,9 @@
       xyz="-0.0019131 1 0" />
     <limit
       lower="0.1"
-      upper="1.0"
-      effort="1"
-      velocity="1" />
+      upper="10.0"
+      effort="10"
+      velocity="100" />
   </joint>
   <link
     name="right_smaal_wheel">
@@ -261,11 +261,11 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="1.57 0 0" />
+        rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://wheel_chair/meshes/right_smaal_wheel.STL" /> -->
-          <cylinder length="0.055" radius="0.095"/>
+        <mesh
+          filename="package://wheel_chair/meshes/right_smaal_wheel.STL" />
+          <!-- <cylinder length="0.055" radius="0.095"/> -->
           <!-- <cylinder length="0.25" radius="0.25"/> -->
       </geometry>
     </collision>
@@ -283,10 +283,10 @@
     <axis
       xyz="0.0043627 0.99999 0" />
     <limit
-      lower="0.1"
+      lower="0.0"
       upper="1.0"
-      effort="1"
-      velocity="1" />
+      effort="0.1"
+      velocity="0.05" />
   </joint>
   <link
     name="rp_laser_back">
