@@ -40,15 +40,15 @@
         <color
           rgba="0.2 0.2 0.2 1" />
       </material>
-    </visual>
+    </visual> 
     <collision>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://wheel_chair/meshes/base_link.STL" /> -->
-          <box size="0.8 0.6 0.0" />
+        <mesh
+          filename="package://wheel_chair/meshes/base_link.STL" />
+          <!-- <box size="0.8 0.6 0.0" /> -->
       </geometry>
     </collision>
   </link>
@@ -108,7 +108,7 @@
     <origin xyz="0 0.315 0" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="left_big_wheel" />
-    <axis xyz="0 -1 0" />
+    <axis xyz="0 1 0" />
     <!-- <limit effort="1" velocity="1" /> -->
   </joint>
 
@@ -163,7 +163,7 @@
     <child
       link="right_big_wheel" />
     <axis
-      xyz="0 -1 0" />
+      xyz="0 1 0" />
     <limit
       effort="1"
       velocity="1" />
