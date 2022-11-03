@@ -105,6 +105,7 @@ private:
     double goalDistTolerance_;
     int currentGoalPoseIdx_;
     bool isGapExist_;
+    double dmin;
 
     double lastCallbackTime_;
 

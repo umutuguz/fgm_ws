@@ -179,14 +179,16 @@ namespace local_planner
         // Linear velocity value calculated by the Fuzzy velocity planner
         // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
 
+        double dmin_sanal = dmin;
+        
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = 0.1;
+        cmd_vel.linear.x = log(dmin_sanal+1)/2;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.3; // phiFinal - M_PI/4;
+        cmd_vel.angular.z = phiFinal * 0.3 / dmin_sanal; // phiFinal - M_PI/4;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -217,13 +219,13 @@ namespace local_planner
                 if (distanceToGlobalGoal() > 0.01)
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = 0.1;
+                    cmd_vel.linear.x = log(dmin_sanal+1)/2;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.3;
+                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_sanal;
                     ROS_INFO("inside third if");
                 }
             }
@@ -411,12 +413,12 @@ namespace local_planner
 
             if (phiFinal > M_PI && phiFinal < 2*M_PI)
             {
-                phiFinal = phiFinal - 2*M_PI; 
+                phiFinal = phiFinal - 2*M_PI;
             }
             else if (phiFinal > 2*M_PI)
             {
                 phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
-            }          
+            }
             return phiFinal;
         }
         else
@@ -797,7 +799,7 @@ namespace local_planner
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
-        double dmin = currRange.at(dminIdx);
+        dmin = currRange.at(dminIdx);
         double alpha_weight = 0.05;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / dmin + 1);
@@ -818,8 +820,8 @@ namespace local_planner
         else if (phiFinal > 2*M_PI)
         {
             phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
-        }      
-        
+        }
+
         ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
