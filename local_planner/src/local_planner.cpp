@@ -168,27 +168,37 @@ namespace local_planner
         double distToGlobGoal = distanceToGlobalGoal();
         ROS_INFO_STREAM("Distance to global goal: " << distToGlobGoal);
 
-        // publishDistToGoal(distToGoalPub_, distToGlobGoal);
-
-        double omega;
+        double angularVel;
         double linearVel;
+        double dmin_temp;
+        double phiFinal_temp;
 
-        // Publish reference omega for Fuzzy planner
-        // publishWRef(wRefPub_, 0.1*M_PI);
+        if (dmin > 6)
+            dmin_temp = 6;
+        else if (dmin < 0)
+            dmin_temp = 0;
+        else
+            dmin_temp = dmin;
 
-        // Linear velocity value calculated by the Fuzzy velocity planner
-        // double linearVel = scaledLinVelPtr_->data;  //scaledLinVelPtr_ ?
+        phiFinal_temp = abs(phiFinal);
 
-        double dmin_sanal = dmin;
-        
+        linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
+        // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 20) - exp(-4 * dmin_temp) + 1);
+
+        ROS_INFO_STREAM("Lineer velocity: " << linearVel);
+        ROS_INFO_STREAM("Angular velocity: " << angularVel);
+        ROS_INFO_STREAM("dmin: " << dmin_temp);
+        ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
+        ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
+        ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = log(dmin_sanal+1)/2;
+        cmd_vel.linear.x = linearVel;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.3 / dmin_sanal; // phiFinal - M_PI/4;
+        cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -201,7 +211,7 @@ namespace local_planner
             cmd_vel.angular.z = 0.0;
 
             goalReached_ = true;
-            ROS_INFO("inside first if");
+            // ROS_INFO("inside first if");
         }
 
         if (!isGapExist_)
@@ -213,19 +223,19 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             cmd_vel.angular.z = 0.0;
-            ROS_INFO("inside second if");
+            // ROS_INFO("inside second if");
             if (!isGoalReached())
             {
                 if (distanceToGlobalGoal() > 0.01)
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = log(dmin_sanal+1)/2;
+                    cmd_vel.linear.x = linearVel;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_sanal;
+                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
                     ROS_INFO("inside third if");
                 }
             }
