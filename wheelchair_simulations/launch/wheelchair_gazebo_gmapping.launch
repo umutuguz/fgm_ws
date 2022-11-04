@@ -20,6 +20,6 @@
     <rosparam command="load" file="$(find wheelchair_simulations)/params/gmapping_params.yaml" />
   </node>
 
-  <!-- <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" /> -->
+  <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
 
 </launch>
