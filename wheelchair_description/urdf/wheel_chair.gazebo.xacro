@@ -9,8 +9,8 @@
   </gazebo>
 
   <gazebo reference="left_big_wheel">
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
+    <mu1>0.4</mu1>
+    <mu2>0.4</mu2>
     <kp>1000000.0</kp>
     <kd>1.0</kd>
     <minDepth>0.0</minDepth>
@@ -20,8 +20,8 @@
   </gazebo>
 
   <gazebo reference="right_big_wheel">
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
+    <mu1>0.4</mu1>
+    <mu2>0.4</mu2>
     <kp>1000000.0</kp>
     <kd>1.0</kd>
     <minDepth>0.0</minDepth>
@@ -32,7 +32,7 @@
 
   <gazebo reference="left_small_wheel">
     <mu1>0.0</mu1>
-    <mu2>0.0</mu2>
+    <mu2>0.08</mu2>
     <kp>1000000.0</kp>
     <kd>1.0</kd>
     <minDepth>0.0</minDepth>
@@ -44,7 +44,7 @@
 
   <gazebo reference="right_smaal_wheel">
     <mu1>0.0</mu1>
-    <mu2>0.0</mu2>
+    <mu2>0.08</mu2>
     <kp>1000000.0</kp>
     <kd>1.0</kd>
     <minDepth>0.0</minDepth>
