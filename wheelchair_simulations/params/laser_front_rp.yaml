@@ -1,0 +1,36 @@
+scan_filter_chain:
+
+# - name: box
+#   type: laser_filters/LaserScanBoxFilter
+#   params:
+#     box_frame: rp_laser_front
+#     min_x: -0.10
+#     max_x: 35.0
+#     min_y: -35.0
+#     max_y: 35.0
+#     min_z: -2.0
+#     max_z: 2.0 
+
+- name: angle
+  type: laser_filters/LaserScanAngularBoundsFilter
+  params:
+    lower_angle: -1.57
+    upper_angle: 1.57
+
+- name: speckle_filter
+  type: laser_filters/LaserScanSpeckleFilter
+  params:
+    filter_type: 0
+    max_range: 1.0
+    max_range_difference: 0.1
+    filter_window: 2
+
+
+- name: range
+  type: laser_filters/LaserScanRangeFilter
+  params:
+    use_message_range_limits: false
+    lower_threshold: 0.1
+    upper_threshold: 2.0
+    lower_replacement_value: -.inf
+    upper_replacement_value: .inf

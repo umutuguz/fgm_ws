@@ -1,0 +1,21 @@
+obstacle_range: 3.5
+raytrace_range: 4.0
+max_obstacle_height: 0.3
+
+footprint: [[-0.30, -0.35], [-0.30, 0.35], [0.95, 0.35], [0.95, -0.35]]
+
+# layer definitions
+static:
+  map_topic: /map
+  subscribe_to_updates: true
+
+obstacles_laser:
+  map_type: costmap
+  observation_sources: rp_lidar_front rs_camera
+  # rp_lidar_front: {sensor_frame: /rp_laser_front, data_type: LaserScan, topic: /rp_scan_filtered_front, marking: true, clearing: true}
+  rs_camera : {sensor_frame: /camera_link, data_type: LaserScan, topic: /pseudo_scan, marking: true, clearing: true}
+  rp_lidar_back: {sensor_frame: /rp_laser_back, data_type: LaserScan, topic: /back_rp/rp_scan_filtered_back, marking: false, clearing: false}
+
+inflation:
+  inflation_radius: 0.50
+  cost_scaling_factor: 10
