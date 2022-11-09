@@ -40,7 +40,7 @@ namespace local_planner
             odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
 
             // scanSub_ = nh_.subscribe("/front_rp/rp_scan_filtered_front", 100, &LocalPlanner::odomCallback, this);
-            scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this);
+            scanSub_ = nh_.subscribe("/scan_multi", 100, &LocalPlanner::scanCallback, this);
 
             poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
 
@@ -192,13 +192,15 @@ namespace local_planner
         ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
         ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = linearVel;
+        cmd_vel.linear.x = 0.0;
+        // cmd_vel.linear.x = linearVel;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+        // cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+        cmd_vel.angular.z = 0.0;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -235,7 +237,8 @@ namespace local_planner
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+                    // cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+                    cmd_vel.angular.z = 0.0;
                     ROS_INFO("inside third if");
                 }
             }
@@ -285,7 +288,7 @@ namespace local_planner
     void LocalPlanner::scanCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg)
     {
         scanPtr_ = msg;
-    } // end function laserScanCallback
+        } // end function laserScanCallback
 
     void LocalPlanner::poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg)
     {
@@ -323,15 +326,17 @@ namespace local_planner
 
         double goalX = currentGoalPose_.position.x;
         double goalY = currentGoalPose_.position.y;
+        ROS_INFO("asd");
 
 
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
+        ROS_INFO_STREAM("size is: " << scanPtr_->ranges.size());
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
             laserRanges.push_back(scanPtr_->ranges[i]);
-            // ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
+            ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
         }
 
         currRange = laserRanges;

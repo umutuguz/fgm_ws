@@ -11,10 +11,11 @@ static:
 
 obstacles_laser:
   map_type: costmap
-  observation_sources: rp_lidar_front rs_camera
-  # rp_lidar_front: {sensor_frame: /rp_laser_front, data_type: LaserScan, topic: /rp_scan_filtered_front, marking: true, clearing: true}
+  observation_sources: two_lidars
+  rp_lidar_front: {sensor_frame: /rp_laser_front, data_type: LaserScan, topic: /rp_scan_filtered_front, marking: true, clearing: true}
   rs_camera : {sensor_frame: /camera_link, data_type: LaserScan, topic: /pseudo_scan, marking: true, clearing: true}
   rp_lidar_back: {sensor_frame: /rp_laser_back, data_type: LaserScan, topic: /back_rp/rp_scan_filtered_back, marking: false, clearing: false}
+  two_lidars: {sensor_frame: /scan_multi, data_type: LaserScan, topic: /scan_multi, marking: true, clearing: true}
 
 inflation:
   inflation_radius: 0.50

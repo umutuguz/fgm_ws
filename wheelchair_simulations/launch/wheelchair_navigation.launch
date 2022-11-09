@@ -1,7 +1,6 @@
 <launch>
 
-  <!-- RP merge -->
-  <include file="$(find wheelchair)/launch/laserscan_multi_merger.launch" />
+
   <!-- Arguments -->
   <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml"/>
   <arg name="open_rviz" default="true"/>
