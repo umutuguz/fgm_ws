@@ -23,6 +23,9 @@
     <!-- RP merge -->
     <include file="$(find wheelchair_simulations)/launch/laserscan_multi_merger.launch" />
 
+    <!-- Scan Multi Filter -->
+    <include file="$(find wheelchair_simulations)/launch/scan_multi_filter.launch" />
+
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find wheelchair_description)/urdf/wheel_chair.urdf.xacro" />
 
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model wheel_chair -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
