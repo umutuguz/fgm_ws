@@ -66,7 +66,7 @@
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
-      <odometrySource>world</odometrySource>
+      <odometrySource>encoder</odometrySource>
       <publishOdomTF>true</publishOdomTF>
       <robotBaseFrame>base_footprint</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
@@ -165,7 +165,7 @@
         </scan>
         <range>
           <min>0.12</min>
-          <max>7.0</max>
+          <max>8.0</max>
           <resolution>1</resolution>
         </range>
         <noise>
