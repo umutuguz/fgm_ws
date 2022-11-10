@@ -9,6 +9,10 @@ global_costmap:
   # inflation_radius: 0.2
   static_map: true
  
-  # plugins:
-  #   - {name: static, type: "costmap_2d::StaticLayer"}
-  #   - {name: inflation, type: "costmap_2d::InflationLayer"}
+  plugins:
+    - {name: static, type: "costmap_2d::StaticLayer"}
+    - {name: inflation, type: "costmap_2d::InflationLayer"}
+  
+  inflation:
+    inflation_radius: 0.55
+    cost_scaling_factor: 10

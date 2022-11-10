@@ -1,0 +1,15 @@
+scan_filter_chain:
+  
+- name: angle
+  type: laser_filters/LaserScanAngularBoundsFilter
+  params:
+    lower_angle: -1.57
+    upper_angle: 3.14
+
+- name: speckle_filter
+  type: laser_filters/LaserScanSpeckleFilter
+  params:
+    filter_type: 0
+    max_range: 1.0
+    max_range_difference: 0.1
+    filter_window: 2
