@@ -18,12 +18,12 @@
 
     <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 100" /> -->
 
+    <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch" />
+    
     <!-- RP merge -->
-    <include file="$(find wheelchair)/launch/laserscan_multi_merger.launch" />
+    <include file="$(find wheelchair_simulations)/launch/laserscan_multi_merger.launch" />
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find wheelchair_description)/urdf/wheel_chair.urdf.xacro" />
-
-    <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch" />
 
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model wheel_chair -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
 

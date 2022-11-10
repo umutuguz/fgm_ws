@@ -144,7 +144,7 @@
         </noise>
       </ray>
       <plugin name="gazebo_ros_lds_lfcd_controller_front" filename="libgazebo_ros_laser.so">
-        <topicName>front_rp/rp_scan_filtered_front/</topicName>
+        <topicName>front_rp/scan/</topicName>
         <frameName>rp_laser_front</frameName>
       </plugin>
     </sensor>
@@ -179,7 +179,7 @@
         </noise>
       </ray>
       <plugin name="gazebo_ros_lds_lfcd_controller_back" filename="libgazebo_ros_laser.so">
-        <topicName>back_rp/rp_scan_filtered_back/</topicName>
+        <topicName>back_rp/scan/</topicName>
         <frameName>rp_laser_back</frameName>
       </plugin>
     </sensor>
