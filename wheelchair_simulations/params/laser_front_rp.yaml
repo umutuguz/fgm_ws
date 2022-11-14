@@ -15,18 +15,18 @@ scan_filter_chain:
       lower_replacement_value: -.inf
       upper_replacement_value: .inf
   
-  - name: speckle_filter
-    type: laser_filters/LaserScanSpeckleFilter
-    params:
-      filter_type: 0
-      max_range: 8.0
-      max_range_difference: 0.05
-      filter_window: 2
+  # - name: speckle_filter
+  #   type: laser_filters/LaserScanSpeckleFilter
+  #   params:
+  #     filter_type: 0
+  #     max_range: 8.0
+  #     max_range_difference: 0.05
+  #     filter_window: 2
 
-  - name: shadows
-    type: laser_filters/ScanShadowsFilter
-    params:
-      min_angle: 10
-      max_angle: 170
-      neighbors: 20
-      window: 1
+  # - name: shadows
+  #   type: laser_filters/ScanShadowsFilter
+  #   params:
+  #     min_angle: 10
+  #     max_angle: 170
+  #     neighbors: 20
+  #     window: 1
