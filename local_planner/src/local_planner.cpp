@@ -40,7 +40,7 @@ namespace local_planner
             odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
 
             // scanSub_ = nh_.subscribe("/front_rp/rp_scan_filtered_front", 100, &LocalPlanner::odomCallback, this);
-            scanSub_ = nh_.subscribe("/scan_multi", 100, &LocalPlanner::scanCallback, this);
+            scanSub_ = nh_.subscribe("/scan_multi_rp/scan_filtered", 100, &LocalPlanner::scanCallback, this);
 
             poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
 
@@ -341,11 +341,18 @@ namespace local_planner
 
         currRange = laserRanges;
 
-        currRange.erase(currRange.begin() + 91, currRange.begin() + 270); // ilk 90 veri soldan karşıya olan tarama, ikinci 90 veri
+        
+        currRange.erase(currRange.begin(), currRange.begin() + 270); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
+        // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
+        ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
+        currRange.erase(currRange.begin() + 542, currRange.end());
+        ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
+
+        // ilk 90 veri soldan karşıya olan tarama, ikinci 90 veri
         // karşıdan sağa olan tarama olacak şekilde ayarlandı. Turtlebot3 lidarı dönüş yönünden ötürü böyle. Sandalyeye geçildiğinde tarama yönünün teyit edilmesi gerekli.
 
-        reverse(currRange.begin(), currRange.begin() + 90);
-        reverse(currRange.begin() + 91, currRange.end());
+        reverse(currRange.begin(), currRange.end()); // kırpma işleminden sonra sağdan sola taranmış şekilde öndeki 180 derecelik veriler kalmıştı
+        // ters çevrilerek ilk indeksli olan nokta sol 90derecede kalan yer olmaktadır buradan sağa doğru taranmış hale gelir.
 
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
@@ -366,12 +373,12 @@ namespace local_planner
 
         for (unsigned int i = 0; i < currRange.size() - 1; i++)
         {
-            if (currRange[i + 1] > currRange[i] + 0.5)
+            if (currRange[i + 1] > currRange[i] + 1)
             {
                 gap_number = gap_number + 1;
                 gap_starting_points.push_back(i);
             }
-            if (currRange[i] > currRange[i + 1] + 0.5)
+            if (currRange[i] > currRange[i + 1] + 1)
             {
                 gap_validator = gap_validator + 1;
                 gap_ending_points.push_back(i + 1);
