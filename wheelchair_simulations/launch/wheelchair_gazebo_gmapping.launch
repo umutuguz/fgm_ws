@@ -1,25 +1,21 @@
 <launch>
 
-  <!-- Wheelchair Bring up -->
-  <!-- <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch" /> -->
-
-  <!-- RP merge -->
-  <include file="$(find wheelchair)/launch/laserscan_multi_merger.launch" />
-  <!-- Arguments -->
-  <!-- <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/> -->
-  <arg name="set_base_frame" default="base_footprint"/>
-  <arg name="set_odom_frame" default="odom"/>
-  <arg name="set_map_frame"  default="map"/>
+  <arg name="set_base_frame" default="base_link" />
+  <arg name="set_odom_frame" default="odom" />
+  <arg name="set_map_frame" default="map" />
+  <arg name="open_rviz" default="false" />
 
   <!-- Gmapping -->
-  <node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" args="scan:=scan_multi" output="screen">
-    <param name="base_frame" value="$(arg set_base_frame)"/>
-    <param name="odom_frame" value="$(arg set_odom_frame)"/>
-    <param name="map_frame"  value="$(arg set_map_frame)"/>
+  <node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" args="scan:=scan_multi_filtered" output="screen">
+    <param name="base_frame" value="$(arg set_base_frame)" />
+    <param name="odom_frame" value="$(arg set_odom_frame)" />
+    <param name="map_frame" value="$(arg set_map_frame)" />
     <rosparam command="load" file="$(find wheelchair_simulations)/params/gmapping_params.yaml" />
   </node>
 
-  <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
+  <!-- rviz -->
+  <group if="$(arg open_rviz)">
+    <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair_gmapping.rviz" />
+  </group>
 
 </launch>

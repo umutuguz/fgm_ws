@@ -1,22 +1,28 @@
 <launch>
-    <arg name="model" default="wheel_chair"/>
-    <arg name="multi_robot_name" default=""/>
-    <arg name="use_tf_static" default="false"/>
-  
-    <include file="$(find wheelchair_simulations)/launch/includes/description.launch.xml">
-      <arg name="model" value="$(arg model)" />
-    </include>
-  
-    <include file="$(find wheelchair_simulations)/launch/rp_filter.launch" />
 
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
-      <param name="publish_frequency" type="double" value="50.0" />
-      <param name="tf_prefix" value="$(arg multi_robot_name)"/>
-      <param name="use_tf_static" value="$(arg use_tf_static)"/>
-    </node>
+  <arg name="model" default="wheel_chair" />
+  <arg name="multi_robot_name" default="" />
+  <arg name="use_tf_static" default="false" />
+  <arg name="open_rviz" default="false" />
 
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
-      
-    </node>
-  </launch>
+  <include file="$(find wheelchair_simulations)/launch/includes/description.launch.xml">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <include file="$(find wheelchair_simulations)/launch/rp_filter.launch" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+    <param name="tf_prefix" value="$(arg multi_robot_name)" />
+    <param name="use_tf_static" value="$(arg use_tf_static)" />
+  </node>
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)">
+    <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
+  </group>
+
+</launch>
   
