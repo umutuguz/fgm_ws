@@ -6,7 +6,7 @@
       <!-- <remap from = "scan_filtered" to ="rp_laser_front_filtered" /> -->
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter_front">
         <rosparam command="load" file="$(find wheelchair_simulations)/params/laser_front_rp.yaml" />
-        <remap from="scan_front" to="/front_rp/rp_scan_front" />
+        <!-- <remap from="scan" to="rp_scan_front" /> -->
         <remap from="scan_filtered"	to="rp_scan_filtered_front"/>
       </node>
     </group>
@@ -15,7 +15,7 @@
       <!-- <remap from = "scan_filtered" to ="rp_laser_back_filtered" /> -->
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter_back">
         <rosparam command="load" file="$(find wheelchair_simulations)/params/laser_back_rp.yaml" />
-        <remap from="scan_back" to="/back_rp/rp_scan_back" />
+        <!-- <remap from="scan" to="rp_scan_back" /> -->
         <remap from="scan_filtered"	to="rp_scan_filtered_back"/>
       </node>
     </group>
