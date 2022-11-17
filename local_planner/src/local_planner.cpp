@@ -344,7 +344,7 @@ namespace local_planner
         currRange = laserRanges;
 
         
-        currRange.erase(currRange.begin(), currRange.begin() + 1); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
+        currRange.erase(currRange.begin(), currRange.begin() + 190); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
         // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
         ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
         currRange.erase(currRange.begin() + 380, currRange.end());
@@ -743,14 +743,14 @@ namespace local_planner
         // ROS_INFO_STREAM("min_size is = " << min_size);
         int counter_array = 0;
 
-        for (int i = 0; i < min_size; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                counter_array++;
-                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-            }
-        }
+        // for (int i = 0; i < min_size; i++)
+        // {
+        //     for (int j = 0; j < 2; j++)
+        //     {
+        //         counter_array++;
+        //         ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+        //     }
+        // }
 
         common_angles.erase(common_angles.begin(), common_angles.end());
 
@@ -770,7 +770,16 @@ namespace local_planner
         {
             for (int j = 0 ; j < cols ; j++)
             {
-                array_gap[i][j] = array_gap[i][j] * (180 / 380);
+                array_gap[i][j] = array_gap[i][j] * (180.0/ 380.0);
+            }
+        }
+
+        for (int i = 0; i < min_size; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                counter_array++;
+                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
             }
         }
 
@@ -793,16 +802,16 @@ namespace local_planner
         ROS_INFO_STREAM("beta is: " << beta);
 
         if (alpha != 0)
-            d1 = currRange.at(int(alpha*(380/180)));
+            d1 = currRange.at(int(alpha*(380.0/180.0)));
 
         if (beta != 0)
-            d2 = currRange.at(int(beta*(380/180)));
+            d2 = currRange.at(int(beta*(380.0/180.0)));
 
         if (alpha == 0)
-            d1 = currRange.at(int(beta*(380/180)));
+            d1 = currRange.at(int(beta*(380.0/180.0)));
 
         if (beta == 180)
-            d2 = currRange.at(int(alpha*(380/180)));
+            d2 = currRange.at(int(alpha*(380.0/180.0)));
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
