@@ -40,7 +40,7 @@ namespace local_planner
             odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
 
             // scanSub_ = nh_.subscribe("/front_rp/rp_scan_filtered_front", 100, &LocalPlanner::odomCallback, this);
-            scanSub_ = nh_.subscribe("/scan_multi_rp/scan_filtered", 100, &LocalPlanner::scanCallback, this);
+            scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this); //scan move base içinde remap edildi buradaki scan scan_multi_filtered a yönlendiriliyor.
 
             poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
 
@@ -192,15 +192,16 @@ namespace local_planner
         ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
         ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = 0.0;
+        // cmd_vel.linear.x = 0.0;
         // cmd_vel.linear.x = linearVel;
+        cmd_vel.linear.x = 0.6;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        // cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
-        cmd_vel.angular.z = 0.0;
+        cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+        // cmd_vel.angular.z = 0.0;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -231,14 +232,15 @@ namespace local_planner
                 if (distanceToGlobalGoal() > 0.01)
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVel;
+                    // cmd_vel.linear.x = linearVel;
+                    cmd_vel.linear.x = 0.6;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    // cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
-                    cmd_vel.angular.z = 0.0;
+                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+                    // cmd_vel.angular.z = 0.0;
                     ROS_INFO("inside third if");
                 }
             }
@@ -325,27 +327,27 @@ namespace local_planner
 
 
         double goalX = currentGoalPose_.position.x;
-        double goalY = currentGoalPose_.position.y;
-        ROS_INFO("asd");
+        double goalY = currentGoalPose_.position.y;;
 
 
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
         ROS_INFO_STREAM("size is: " << scanPtr_->ranges.size());
+
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
             laserRanges.push_back(scanPtr_->ranges[i]);
-            ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
+            // ROS_INFO_STREAM("this is laserRanges vector, at index: "<< i << " range is: " << laserRanges[i]);
         }
 
         currRange = laserRanges;
 
         
-        currRange.erase(currRange.begin(), currRange.begin() + 270); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
+        currRange.erase(currRange.begin(), currRange.begin() + 1); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
         // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
         ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
-        currRange.erase(currRange.begin() + 542, currRange.end());
+        currRange.erase(currRange.begin() + 380, currRange.end());
         ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
 
         // ilk 90 veri soldan karşıya olan tarama, ikinci 90 veri
@@ -393,7 +395,7 @@ namespace local_planner
             robot_pose_theta = 90 - robot_pose_theta;
 
         phiGoal = atan2(goalY - odomRY, goalX - odomRX);
-        phiGoal = phiGoal*180 /M_PI;
+        phiGoal = phiGoal * 180 / M_PI;
         ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
 
         if ((odomRX > goalX) && (odomRY < goalY))
@@ -595,8 +597,7 @@ namespace local_planner
                 //     ROS_INFO_STREAM(" " << indices[z]);
                 // }
                 // ROS_INFO_STREAM("gap ending points are : ");
-                // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
-                // {
+                // for (unsigned int z = 0; z < gap_ending_points.size(); z
                 //     ROS_INFO_STREAM(" " << gap_ending_points[z]);
                 // }
 
@@ -635,7 +636,7 @@ namespace local_planner
                 }
                 if (counter == 0)
                 {
-                    gap_ending_points.push_back(180);
+                    gap_ending_points.push_back(380);
                 }
                 // ROS_INFO_STREAM("gap ending points are : ");
                 // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -723,7 +724,7 @@ namespace local_planner
 
         min_size = min(gap_starting_points.size(), gap_ending_points.size());
 
-        int array_gap[min_size][2];
+        double array_gap[min_size][2];
 
         for (int i = 0; i < min_size; i++)
         {
@@ -765,7 +766,15 @@ namespace local_planner
         rows = sizeof(array_gap) / sizeof(array_gap[0]);
         cols = sizeof(array_gap[0]) / sizeof(array_gap[0][0]);
 
-        vector<int> gap_sizes;
+        for (int i = 0; i < rows; i ++)
+        {
+            for (int j = 0 ; j < cols ; j++)
+            {
+                array_gap[i][j] = array_gap[i][j] * (180 / 380);
+            }
+        }
+
+        vector<double> gap_sizes;
 
         for (int i = 0; i < rows; i++)
         {
@@ -784,16 +793,16 @@ namespace local_planner
         ROS_INFO_STREAM("beta is: " << beta);
 
         if (alpha != 0)
-            d1 = currRange.at(int(alpha / 1));
+            d1 = currRange.at(int(alpha*(380/180)));
 
         if (beta != 0)
-            d2 = currRange.at(int(beta / 1));
+            d2 = currRange.at(int(beta*(380/180)));
 
         if (alpha == 0)
-            d1 = currRange.at(int(beta / 1));
+            d1 = currRange.at(int(beta*(380/180)));
 
         if (beta == 180)
-            d2 = currRange.at(int(alpha / 1));
+            d2 = currRange.at(int(alpha*(380/180)));
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
@@ -805,8 +814,6 @@ namespace local_planner
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("d1 is : " << d1);
         ROS_INFO_STREAM("d2 is : " << d2);
-
-
 
         ROS_INFO_STREAM("odomRX is : " << odomRX);
         ROS_INFO_STREAM("odomRY is : " << odomRY);

@@ -1,6 +1,6 @@
 <launch>
   <!-- Arguments -->
-  <arg name="scan_topic"     default="/scan_multi_filtered"/>
+  <arg name="scan_topic"     default="scan_multi_filtered"/>
   <arg name="odom_frame"     default="odom"/>
   <arg name="base_frame"     default="base_footprint"/>
   <arg name="initial_pose_x" default="0.0"/>

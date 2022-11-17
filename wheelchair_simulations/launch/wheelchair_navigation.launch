@@ -4,10 +4,12 @@
   <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml" />
   <arg name="open_rviz" default="true" />
   <arg name="move_forward_only" default="false" />
-  <!-- <arg name="scan_topic" default="scan_multi_filtered" /> -->
+  <arg name="scan_topic" default="scan_multi_filtered" />
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
+
+  <remap from="scan" to="$(arg scan_topic)" />
 
   <!-- AMCL -->
   <include file="$(find wheelchair_simulations)/launch/amcl.launch" />
@@ -19,7 +21,7 @@
 
   <!-- rviz -->
   <group if="$(arg open_rviz)">
-    <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
+    <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find wheelchair_simulations)/rviz/wheelchair_navigation.rviz" />
   </group>
-  
+
 </launch>
