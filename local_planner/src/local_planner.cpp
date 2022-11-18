@@ -186,23 +186,23 @@ namespace local_planner
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 20) - exp(-4 * dmin_temp) + 1);
 
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
-        ROS_INFO_STREAM("Angular velocity: " << angularVel);
+        // ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
         ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
-        ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
-        ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
+        // ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
+        // ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         // Send velocity commands to robot's base
         // cmd_vel.linear.x = 0.0;
-        // cmd_vel.linear.x = linearVel;
-        cmd_vel.linear.x = 0.6;
+        cmd_vel.linear.x = linearVel;
+        // cmd_vel.linear.x = 0.4;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+        cmd_vel.angular.z = phiFinal * 0.7 / dmin_temp;
         // cmd_vel.angular.z = 0.0;
-
+        ROS_INFO_STREAM("Angular velocity: " << phiFinal * 0.3 / dmin_temp);
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
             cmd_vel.linear.x = 0.0;
@@ -232,14 +232,14 @@ namespace local_planner
                 if (distanceToGlobalGoal() > 0.01)
                 {
                     // Use the last refence cmd_vel command
-                    // cmd_vel.linear.x = linearVel;
-                    cmd_vel.linear.x = 0.6;
+                    cmd_vel.linear.x = linearVel;
+                    // cmd_vel.linear.x = 0.4;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.3 / dmin_temp;
+                    cmd_vel.angular.z = phiFinal * 0.7 / dmin_temp;
                     // cmd_vel.angular.z = 0.0;
                     ROS_INFO("inside third if");
                 }
@@ -342,13 +342,12 @@ namespace local_planner
         }
 
         currRange = laserRanges;
-
         
-        currRange.erase(currRange.begin(), currRange.begin() + 190); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
+        // currRange.erase(currRange.begin(), currRange.begin() + 190); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
         // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
-        ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
-        currRange.erase(currRange.begin() + 380, currRange.end());
-        ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
+        // ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
+        // currRange.erase(currRange.begin() + 380, currRange.end());
+        // ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
 
         // ilk 90 veri soldan karşıya olan tarama, ikinci 90 veri
         // karşıdan sağa olan tarama olacak şekilde ayarlandı. Turtlebot3 lidarı dönüş yönünden ötürü böyle. Sandalyeye geçildiğinde tarama yönünün teyit edilmesi gerekli.
@@ -636,7 +635,7 @@ namespace local_planner
                 }
                 if (counter == 0)
                 {
-                    gap_ending_points.push_back(380);
+                    gap_ending_points.push_back(344);
                 }
                 // ROS_INFO_STREAM("gap ending points are : ");
                 // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -779,7 +778,7 @@ namespace local_planner
         {
             for (int j = 0 ; j < cols ; j++)
             {
-                array_gap[i][j] = array_gap[i][j] * (180.0/ 380.0);
+                array_gap[i][j] = array_gap[i][j] * (163.0/ 344.0);
             }
         }
         counter_array = 0;
@@ -812,21 +811,21 @@ namespace local_planner
 
         if (alpha != 0.0)
         {
-            d1 = currRange.at(int(alpha*(380.0/180.0)));
+            d1 = currRange.at(int(alpha*(344.0/163.0)));
         }
         ROS_INFO_STREAM("d1 1: " << d1);
 
         if (beta != 180.0)
         {   
             ROS_INFO_STREAM("d2 11: " << d2);
-            d2 = currRange.at(int(beta*(380.0/180.0)));
+            d2 = currRange.at(int(beta*(344.0/163.0)));
         }
 
         ROS_INFO_STREAM("d2 1: " << d2);
 
         if (alpha == 0.0)
         {
-            d1 = currRange.at(int(beta*(380.0/180.0)));
+            d1 = currRange.at(int(beta*(344.0/163.0)));
         }
 
         ROS_INFO_STREAM("d1 2: " << d1);
@@ -834,7 +833,7 @@ namespace local_planner
         if (beta == 180.0)
         {   
             ROS_INFO_STREAM("d2 2: " << d2);
-            d2 = currRange.at(int(alpha*(380.0/180.0)));
+            d2 = currRange.at(int(alpha*(344.0/163.0)));
         }
         ROS_INFO_STREAM("d2 2: " << d2);
 
