@@ -362,10 +362,10 @@ namespace local_planner
             currRange[i] -= 0.15;
         }
 
-        // for (unsigned int i = 0; i < currRange.size(); i++)
-        // {
-        //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
-        // }
+        for (unsigned int i = 0; i < currRange.size(); i++)
+        {
+            ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
+        }
 
         std::vector<int> gap_starting_points;
         std::vector<int> gap_ending_points;
@@ -752,16 +752,25 @@ namespace local_planner
         //     }
         // }
 
+        for (int i = 0; i < min_size; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                counter_array++;
+                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+            }
+        }
+
         common_angles.erase(common_angles.begin(), common_angles.end());
 
         int rows, cols;
         int idx = 0;
         int max_gap = 0;
-        double alpha = 0;
-        double beta = 0;
+        double alpha = 0.0;
+        double beta = 0.0;
 
-        double d1 = 0, d2 = 0;
-        double phi_gap = 0;
+        double d1 = 0.0, d2 = 0.0;
+        double phi_gap = 0.0;
 
         rows = sizeof(array_gap) / sizeof(array_gap[0]);
         cols = sizeof(array_gap[0]) / sizeof(array_gap[0][0]);
@@ -773,13 +782,13 @@ namespace local_planner
                 array_gap[i][j] = array_gap[i][j] * (180.0/ 380.0);
             }
         }
-
+        counter_array = 0;
         for (int i = 0; i < min_size; i++)
         {
             for (int j = 0; j < 2; j++)
-            {
+            {  
                 counter_array++;
-                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+                ROS_INFO_STREAM("Array gap 2's " << counter_array << " element is = " << array_gap[i][j]);
             }
         }
 
@@ -801,17 +810,33 @@ namespace local_planner
         ROS_INFO_STREAM("alpha is: " << alpha);
         ROS_INFO_STREAM("beta is: " << beta);
 
-        if (alpha != 0)
+        if (alpha != 0.0)
+        {
             d1 = currRange.at(int(alpha*(380.0/180.0)));
+        }
+        ROS_INFO_STREAM("d1 1: " << d1);
 
-        if (beta != 0)
+        if (beta != 180.0)
+        {   
+            ROS_INFO_STREAM("d2 11: " << d2);
             d2 = currRange.at(int(beta*(380.0/180.0)));
+        }
 
-        if (alpha == 0)
+        ROS_INFO_STREAM("d2 1: " << d2);
+
+        if (alpha == 0.0)
+        {
             d1 = currRange.at(int(beta*(380.0/180.0)));
+        }
 
-        if (beta == 180)
+        ROS_INFO_STREAM("d1 2: " << d1);
+
+        if (beta == 180.0)
+        {   
+            ROS_INFO_STREAM("d2 2: " << d2);
             d2 = currRange.at(int(alpha*(380.0/180.0)));
+        }
+        ROS_INFO_STREAM("d2 2: " << d2);
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
