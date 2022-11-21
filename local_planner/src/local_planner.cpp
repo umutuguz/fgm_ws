@@ -152,10 +152,10 @@ namespace local_planner
         ROS_INFO_STREAM("Global plan size is:  " << globalPlan_.size());
         ROS_INFO_STREAM("Current goal index: " << currentGoalPoseIdx_);
 
-        ROS_INFO("patlamadi1");
+        // ROS_INFO("patlamadi1");
 
         currentGoalPose_ = globalPlan_.at(currentGoalPoseIdx_).pose;
-        ROS_INFO("patlamadi2");
+        // ROS_INFO("patlamadi2");
         // ROS_WARN_STREAM("Goal: " << currentGoalPose_.position.x);
         ROS_INFO_STREAM("Current goal pose: " << currentGoalPose_);
 
@@ -172,6 +172,9 @@ namespace local_planner
         double linearVel;
         double dmin_temp;
         double phiFinal_temp;
+        double coefVel;
+
+        coefVel = 0.7;
 
         if (dmin > 6)
             dmin_temp = 6;
@@ -182,8 +185,10 @@ namespace local_planner
 
         phiFinal_temp = abs(phiFinal);
 
-        linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
-        // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 20) - exp(-4 * dmin_temp) + 1);
+        // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
+        linearVel = coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
+        // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
+        angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
 
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         // ROS_INFO_STREAM("Angular velocity: " << angularVel);
