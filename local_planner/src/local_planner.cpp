@@ -804,23 +804,35 @@ namespace local_planner
 
         for (int i = 0; i < rows; i++) // her gap icin midpoint makaledeki denklemle hesaplanır
         {
+            ROS_INFO_STREAM("i is: " << i);
             alpha_temp = array_gap[i][0];
+            ROS_INFO_STREAM("deneme1");
             beta_temp = array_gap[i][1];
-            d1_temp = currRange.at(int(alpha_temp*(344.0/163.0))-1);
-            d2_temp = currRange.at(int(beta_temp*(344.0/163.0))+1);
+            ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
+            ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
+            d1_temp = currRange.at(round(alpha_temp*(344.0/163.0)));
+            ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
+            ROS_INFO_STREAM("beta_temp at: " << beta_temp);
+            if (beta_temp >= 163)
+                beta_temp = 162.53;
+            d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
+            ROS_INFO_STREAM("deneme4");
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp)) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp))) + (M_PI / 180) * alpha_temp)/M_PI;
             gap_midpoints.push_back(midpoint);
             diff_to_goal.push_back(fabs(midpoint - phiGoal));
             ROS_INFO_STREAM("d1 temp is : " << d1_temp);
             ROS_INFO_STREAM("d2 temp is : " << d2_temp);
+            ROS_INFO_STREAM("deneme");
         }
-
         
+        ROS_INFO_STREAM("burda mi?");
 
-        
-        for (int i = 0; i<gap_midpoints.size();i++)
+        if (gap_midpoints.size() != 0)
         {
-            ROS_INFO_STREAM("gap midpoints are: " << gap_midpoints[i]);
+            for (int i = 0; i<gap_midpoints.size();i++)
+            {
+                ROS_INFO_STREAM("gap midpoints are: " << gap_midpoints[i]);
+            }
         }
 
         vector<double> gap_sizes;
@@ -845,36 +857,38 @@ namespace local_planner
 
         alpha = array_gap[max_gap_idx][0];
         beta = array_gap[max_gap_idx][1];
+        if (beta >= 163)
+                beta = 162.53;
         ROS_INFO_STREAM("alpha is: " << alpha);
         ROS_INFO_STREAM("beta is: " << beta);
 
         if (alpha != 0.0)
         {
-            d1 = currRange.at(int(alpha*(344.0/163.0)));
+            d1 = currRange.at(round(alpha*(344.0/163.0)));
         }
-        // ROS_INFO_STREAM("d1 1: " << d1);
+        ROS_INFO_STREAM("d1 1: " << d1);
 
         if (beta != 180.0)
         {   
             // ROS_INFO_STREAM("d2 11: " << d2);
-            d2 = currRange.at(int(beta*(344.0/163.0)));
+            d2 = currRange.at(round(beta*(344.0/163.0)));
         }
 
-        // ROS_INFO_STREAM("d2 1: " << d2);
+        ROS_INFO_STREAM("d2 1: " << d2);
 
         if (alpha == 0.0)
         {
-            d1 = currRange.at(int(beta*(344.0/163.0)));
+            d1 = currRange.at(round(beta*(344.0/163.0)));
         }
 
-        // ROS_INFO_STREAM("d1 2: " << d1);
+        ROS_INFO_STREAM("d1 2: " << d1);
 
         if (beta == 180.0)
         {   
             // ROS_INFO_STREAM("d2 2: " << d2);
-            d2 = currRange.at(int(alpha*(344.0/163.0)));
+            d2 = currRange.at(round(alpha*(344.0/163.0)));
         }
-        // ROS_INFO_STREAM("d2 2: " << d2);
+        ROS_INFO_STREAM("d2 2: " << d2);
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
