@@ -174,7 +174,7 @@ namespace local_planner
         double phiFinal_temp;
         double coefVel;
 
-        coefVel = 0.7;
+        coefVel = 0.4;
 
         if (dmin > 6)
             dmin_temp = 6;
@@ -186,14 +186,15 @@ namespace local_planner
         phiFinal_temp = abs(phiFinal);
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
-        linearVel = coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
+        linearVel = coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.01));
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
 
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
-        // ROS_INFO_STREAM("Angular velocity: " << angularVel);
+        ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
-        ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
+        ROS_INFO_STREAM("ahmet");
+        // ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
         // ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
         // ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         // Send velocity commands to robot's base
@@ -205,9 +206,9 @@ namespace local_planner
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.7 / dmin_temp;
-        // cmd_vel.angular.z = 0.0;
-        ROS_INFO_STREAM("Angular velocity: " << phiFinal * 0.3 / dmin_temp);
+        cmd_vel.angular.z = phiFinal * 0.3;
+        // cmd_vel.angular.z = angularVel;
+
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
             cmd_vel.linear.x = 0.0;
@@ -219,47 +220,49 @@ namespace local_planner
             cmd_vel.angular.z = 0.0;
 
             goalReached_ = true;
-            // ROS_INFO("inside first if");
         }
 
         if (!isGapExist_)
         {
-            cmd_vel.linear.x = 0.0;
-            cmd_vel.linear.y = 0.0;
-            cmd_vel.linear.z = 0.0;
+            // cmd_vel.linear.x = 0.0;
+            // cmd_vel.linear.y = 0.0;
+            // cmd_vel.linear.z = 0.0;
 
-            cmd_vel.angular.x = 0.0;
-            cmd_vel.angular.y = 0.0;
-            cmd_vel.angular.z = 0.0;
-            // ROS_INFO("inside second if");
+            // cmd_vel.angular.x = 0.0;
+            // cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            ROS_INFO("Gap yok!");
+
             if (!isGoalReached())
             {
-                if (distanceToGlobalGoal() > 0.01)
+                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.70))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVel;
+                    cmd_vel.linear.x = linearVel/4;
                     // cmd_vel.linear.x = 0.4;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.7 / dmin_temp;
+                    cmd_vel.angular.z = phiFinal * 0.3;
+                     // cmd_vel.angular.z = angularVel;
                     // cmd_vel.angular.z = 0.0;
-                    ROS_INFO("inside third if");
+                    ROS_INFO("Gap yok, globale gidiyor.");
                 }
-            }
-            else
-            {
-                ROS_INFO("inside else");
+                else
+                {
+                ROS_INFO("Gap yok, globale ulasilamadi.");
                 cmd_vel.linear.x = 0.0;
                 cmd_vel.linear.y = 0.0;
                 cmd_vel.linear.z = 0.0;
 
                 cmd_vel.angular.x = 0.0;
                 cmd_vel.angular.y = 0.0;
-                cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = 0.3; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
+                }
             }
+            
         }
         return true;
     }
@@ -347,7 +350,6 @@ namespace local_planner
         }
 
         currRange = laserRanges;
-        
         // currRange.erase(currRange.begin(), currRange.begin() + 190); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
         // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
         // ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
@@ -363,9 +365,14 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.20;
+            currRange[i] -= 0.05;
         }
 
+        auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
+        int dminIdx = std::distance(currRange.begin(), dminIdxItr);
+
+        dmin = currRange.at(dminIdx);
+        ROS_INFO_STREAM("AHMET = " << dmin);
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -806,26 +813,24 @@ namespace local_planner
         {
             ROS_INFO_STREAM("i is: " << i);
             alpha_temp = array_gap[i][0];
-            ROS_INFO_STREAM("deneme1");
+            // ROS_INFO_STREAM("deneme1");
             beta_temp = array_gap[i][1];
-            ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
-            ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
+            // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
+            // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
             d1_temp = currRange.at(round(alpha_temp*(344.0/163.0)));
-            ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
-            ROS_INFO_STREAM("beta_temp at: " << beta_temp);
+            // ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
+            // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
             if (beta_temp >= 163)
                 beta_temp = 162.53;
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
-            ROS_INFO_STREAM("deneme4");
+            // ROS_INFO_STREAM("deneme4");
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp)) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp))) + (M_PI / 180) * alpha_temp)/M_PI;
             gap_midpoints.push_back(midpoint);
             diff_to_goal.push_back(fabs(midpoint - phiGoal));
-            ROS_INFO_STREAM("d1 temp is : " << d1_temp);
-            ROS_INFO_STREAM("d2 temp is : " << d2_temp);
-            ROS_INFO_STREAM("deneme");
+            // ROS_INFO_STREAM("d1 temp is : " << d1_temp);
+            // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
+            // ROS_INFO_STREAM("deneme");
         }
-        
-        ROS_INFO_STREAM("burda mi?");
 
         if (gap_midpoints.size() != 0)
         {
@@ -836,7 +841,7 @@ namespace local_planner
         }
 
         vector<double> gap_sizes;
-        double gap_weight = 2.0;
+        double gap_weight = 0.1;
 
         for (int i = 0; i < rows; i++) //midpointlerin 
         {
@@ -859,14 +864,14 @@ namespace local_planner
         beta = array_gap[max_gap_idx][1];
         if (beta >= 163)
                 beta = 162.53;
-        ROS_INFO_STREAM("alpha is: " << alpha);
-        ROS_INFO_STREAM("beta is: " << beta);
+        // ROS_INFO_STREAM("alpha is: " << alpha);
+        // ROS_INFO_STREAM("beta is: " << beta);
 
         if (alpha != 0.0)
         {
             d1 = currRange.at(round(alpha*(344.0/163.0)));
         }
-        ROS_INFO_STREAM("d1 1: " << d1);
+        // ROS_INFO_STREAM("d1 1: " << d1);
 
         if (beta != 180.0)
         {   
@@ -874,21 +879,21 @@ namespace local_planner
             d2 = currRange.at(round(beta*(344.0/163.0)));
         }
 
-        ROS_INFO_STREAM("d2 1: " << d2);
+        // ROS_INFO_STREAM("d2 1: " << d2);
 
         if (alpha == 0.0)
         {
             d1 = currRange.at(round(beta*(344.0/163.0)));
         }
 
-        ROS_INFO_STREAM("d1 2: " << d1);
+        // ROS_INFO_STREAM("d1 2: " << d1);
 
         if (beta == 180.0)
         {   
             // ROS_INFO_STREAM("d2 2: " << d2);
             d2 = currRange.at(round(alpha*(344.0/163.0)));
         }
-        ROS_INFO_STREAM("d2 2: " << d2);
+        // ROS_INFO_STREAM("d2 2: " << d2);
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
@@ -911,11 +916,8 @@ namespace local_planner
 
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
-        auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
-        dmin = currRange.at(dminIdx);
-        double alpha_weight = 0.05;
+        double alpha_weight = 20.0;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / dmin + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
@@ -925,8 +927,6 @@ namespace local_planner
             phiFinal = (2.5*M_PI - phiFinal);
         else
             phiFinal = (M_PI_2 - phiFinal);
-
-
 
         if (phiFinal > M_PI && phiFinal < 2*M_PI)
         {
