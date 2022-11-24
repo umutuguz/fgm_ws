@@ -193,14 +193,13 @@ namespace local_planner
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
-        ROS_INFO_STREAM("ahmet");
         // ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
         // ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
         // ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
+        
         // Send velocity commands to robot's base
-        // cmd_vel.linear.x = 0.0;
         cmd_vel.linear.x = linearVel;
-        // cmd_vel.linear.x = 0.4;
+        
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
@@ -235,10 +234,10 @@ namespace local_planner
 
             if (!isGoalReached())
             {
-                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.70))
+                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.50))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVel/4;
+                    cmd_vel.linear.x = linearVel / 2;
                     // cmd_vel.linear.x = 0.4;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
@@ -365,7 +364,7 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.05;
+            currRange[i] -= 0.01;
         }
 
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
@@ -917,9 +916,9 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 20.0;
+        double alpha_weight = 5.0;
         //double beta_weight = 2.8;
-        phiFinal = (((alpha_weight / dmin) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / dmin + 1);
+        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
