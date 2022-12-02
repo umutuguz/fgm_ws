@@ -371,7 +371,7 @@ namespace local_planner
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         dmin = currRange.at(dminIdx);
-        ROS_INFO_STREAM("currangesize is " << currRange.size());
+        ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -790,12 +790,11 @@ namespace local_planner
             {  
                 counter_array++;
                 ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-                ROS_INFO_STREAM("Array gap's rounded" << counter_array << " element is = " << round(array_gap[i][j]));
+                ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
             }
         }
 
         vector<double> memory_array;
-
         // Gap odullendirme baslangici
 
         

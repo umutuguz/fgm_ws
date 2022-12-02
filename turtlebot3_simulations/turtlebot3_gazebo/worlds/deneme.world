@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.25 0.25 0.25 1</background>
+      <shadows>false</shadows>
+    </scene>
+    <light type="directional" name="some_light">
+      <diffuse>0.7 0.7 0.7 0</diffuse>
+      <specular>1 1 1 0</specular>
+      <direction>-1 -1 -1</direction>
+    </light>
+    
+    <actor name="actor">
+      <skin>
+         <filename>/home/meam/fgm_ws/src/walking_actor/meshes/walk.dae</filename>
+         <scale>1.0</scale>
+      </skin>
+      <pose>0 0 0 0 0 0</pose>
+      <animation name="walk">
+         <filename>/home/meam/fgm_ws/src/walking_actor/meshes/walk.dae</filename>
+         <scale>1.000000</scale>
+         <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+         <loop>true</loop>
+         <delay_start>0.000000</delay_start>
+         <auto_start>true</auto_start>
+         <trajectory id="0" type="walk">
+             <waypoint>
+                <time>0</time>
+                <pose>0 0 1.0 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>2</time>
+                <pose>2.0 0 1.0 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>2.5</time>
+                <pose>2 0 1.0 0 0 1.57</pose>
+             </waypoint>
+             <waypoint>
+                <time>4</time>
+                <pose>2 2 1.0 0 0 1.57</pose>
+             </waypoint>
+             <waypoint>
+                <time>4.5</time>
+                <pose>2 2 1.0 0 0 3.142</pose>
+             </waypoint>
+             <waypoint>
+                <time>6</time>
+                <pose>0 2 1 0 0 3.142</pose>
+             </waypoint>
+             <waypoint>
+                <time>6.5</time>
+                <pose>0 2 1 0 0 -1.57</pose>
+             </waypoint>
+             <waypoint>
+                <time>8</time>
+                <pose>0 0 1.0 0 0 -1.57</pose>
+             </waypoint>
+             <waypoint>
+                <time>8.5</time>
+                <pose>0 0 1.0 0 0 0</pose>
+             </waypoint>
+          </trajectory>
+      </script>
+   </actor>
+  </world>
+</sdf>
