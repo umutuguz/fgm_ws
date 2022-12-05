@@ -9,7 +9,7 @@ project(haro_description)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  spawn_robot_tools_pkg
+#   spawn_robot_tools_pkg
 )
 
 ## System dependencies are found with CMake's conventions
