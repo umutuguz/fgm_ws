@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>  
+  <include file="$(find haro_description)/launch/main_only_haro.launch"/>
+  <include file="$(find haro_description)/launch/haro_init_standing_person.launch"/>
+  <include file="$(find haro_description)/launch/haro_tf_to_object_listener.launch"/>
+</launch>

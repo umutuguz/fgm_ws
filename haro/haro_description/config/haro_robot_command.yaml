@@ -1,0 +1,9 @@
+robot_command_buttons:
+  - name: "Execute Program"
+    icon: "package://haro_description/img/Haro.jpg"
+    type: euscommand
+    command: "move_in_circles"
+  - name: "Send EmptySrv message"
+    icon: "package://haro_description/img/haro.gif"
+    type: emptysrv
+    srv: "/move_up_and_down"

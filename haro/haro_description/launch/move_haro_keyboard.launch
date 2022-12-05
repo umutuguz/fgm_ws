@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch> 
+    <arg name="robot_name" default="haro" />
+    <node name="$(arg robot_name)_twist_keyboard" pkg="spawn_robot_tools_pkg" type="model_twist_keyboard.py" args="$(arg robot_name)" output="screen"/>
+</launch> 

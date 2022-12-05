@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="haro_description"
+        type="move_standing_person_circles.py"
+        respawn="true"
+        name="move_standing_person_circles_node" />
+</launch>

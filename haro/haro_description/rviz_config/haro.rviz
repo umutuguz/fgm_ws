@@ -1,0 +1,287 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 61
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /TwistStamped1
+      Splitter Ratio: 0.5
+    Tree Height: 479
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: ""
+  - Class: jsk_rviz_plugin/YesNoButton
+    Name: YesNoButton
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        body_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        haro_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: /haro/robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 0.5
+      Class: jsk_rviz_plugin/Footstep
+      Enabled: false
+      Name: Footstep
+      Show Name: true
+      Topic: /dummy_footstep_array
+      Unreliable: false
+      Use Group Coloring: false
+      Value: false
+      Width: 0.15
+      depth: 0.3
+      height: 0.01
+    - Class: jsk_rviz_plugin/BoundingBoxArray
+      Enabled: false
+      Name: BoundingBoxArray
+      Topic: /dummy_bounding_box_array
+      Unreliable: false
+      Value: false
+      alpha: 0.8
+      color: 25; 255; 0
+      coloring: Auto
+      line width: 0.005
+      only edge: false
+      show coords: false
+    - Background Alpha: 0.8
+      Background Color: 0; 0; 0
+      Class: jsk_rviz_plugin/OverlayText
+      Enabled: false
+      Foreground Alpha: 0.8
+      Foreground Color: 25; 255; 240
+      Name: OverlayText
+      Overtake Color Properties: false
+      Overtake Position Properties: false
+      Topic: /rosconsole_overlay_text/output
+      Value: false
+      font: DejaVu Sans Mono
+      height: 128
+      left: 0
+      line width: 2
+      text size: 12
+      top: 0
+      width: 128
+    - Alpha: 1
+      Class: jsk_rviz_plugin/PolygonArray
+      Color: 25; 255; 0
+      Enabled: false
+      Name: PolygonArray
+      Topic: /polygon_array_dynamic_square/output
+      Unreliable: false
+      Value: false
+      coloring: Label
+      normal length: 0.1
+      only border: false
+      show normal: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        body_link:
+          Value: true
+        haro_base_link:
+          Value: true
+        map:
+          Value: true
+        person_standing:
+          Value: true
+        world:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          person_standing:
+            {}
+          world:
+            haro_base_link:
+              body_link:
+                {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Auto Color: true
+      Class: jsk_rviz_plugin/SimpleOccupancyGridArray
+      Enabled: false
+      Name: SimpleOccupancyGridArray
+      Topic: /occupancy_grid
+      Unreliable: false
+      Value: false
+    - Class: jsk_rviz_plugin/TFTrajectory
+      Enabled: false
+      Name: TFTrajectory
+      Value: false
+      color: 255; 0; 0
+      duration: 10
+      frame: haro_base_link
+      line_width: 0.01
+    - Class: jsk_rviz_plugin/TwistStamped
+      Enabled: false
+      Name: TwistStamped
+      Topic: /haro/twist_stamped_publisher
+      Unreliable: false
+      Value: false
+      angular color: 255; 0; 0
+      angular scale: 1
+      linear color: 0; 255; 0
+      linear scale: 1
+    - Class: jsk_rviz_plugin/VideoCapture
+      Enabled: false
+      Name: VideoCapture
+      Value: false
+      filename: /home/user/catkin_ws/src/testrecord.avi
+      fps: 30
+      start capture: false
+    - Class: jsk_rviz_plugin/BoundingBox
+      Enabled: false
+      Name: BoundingBox
+      Topic: /dummy_bounding_box
+      Unreliable: false
+      Value: false
+      alpha: 0.8
+      color: 25; 255; 0
+      coloring: Flat color
+      line width: 0.005
+      only edge: false
+      show coords: false
+    - Class: jsk_rviz_plugin/Pictogram
+      Enabled: false
+      Name: Pictogram
+      Topic: /pictogram
+      Unreliable: false
+      Value: false
+    - Class: jsk_rviz_plugin/PictogramArray
+      Enabled: false
+      Name: PictogramArray
+      Topic: /pictogram_array
+      Unreliable: false
+      Value: false
+    - Class: rviz/Marker
+      Enabled: false
+      Marker Topic: /marker_basic
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 3.29679
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: -0.153877
+        Y: 0.106027
+        Z: 0.743788
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.470398
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 5.74859
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 749
+  Hide Left Dock: false
+  Hide Right Dock: true
+  QMainWindow State: 000000ff00000000fd00000004000000000000014200000259fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005300fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003600000259000000b700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000016005900650073004e006f0042007500740074006f006e000000024e000000410000004100ffffff000000010000010f00000259fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000036000002590000009b00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004000000003efc0100000002fb0000000800540069006d00650100000000000004000000024500fffffffb0000000800540069006d00650100000000000004500000000000000000000002b80000025900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: true
+  Width: 1024
+  X: 0
+  Y: 0
+  YesNoButton:
+    collapsed: false

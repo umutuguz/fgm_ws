@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <group ns="haro">
+        
+        <arg name="x" default="0.0" />
+        <arg name="y" default="0.0" />
+        <arg name="z" default="1.0" />
+            
+            
+        <arg name="robot_name" default="haro" />
+        <arg name="robot_description_name" default="/$(arg robot_name)/robot_description" />
+        <arg name="urdf_robot_file" value="$(find haro_description)/urdf/haro_geometric_simple_withCamera.urdf" />
+        
+        <param name="$(arg robot_description_name)" command="cat $(arg urdf_robot_file)" />
+        
+        
+        <node name="urdf_spawner_mira" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+            args="-urdf -x $(arg x) -y $(arg y) -z $(arg z)  -model $(arg robot_name) -param $(arg robot_description_name)"/>
+        
+        <node name="robot_state_publisher_$(arg robot_name)" pkg="robot_state_publisher" type="robot_state_publisher"
+            respawn="false" output="screen">
+                <param name="publish_frequency" type="double" value="5.0" />
+        </node>
+    </group>
+    
+</launch>

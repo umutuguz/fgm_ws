@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+        <node name="publisher_of_tf_world_node" pkg="haro_description" type="haro_tf_world_broadcaster.py" respawn="false" output="screen"/>
+</launch>

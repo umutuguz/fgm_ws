@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="rviz" type="rviz" name="$(anon rviz)"
+        args="-d $(find haro_description)/rviz_config/haro_panels.rviz">
+    <rosparam command="load" file="$(find haro_description)/config/haro_robot_command.yaml" />
+  </node>
+  
+  <node pkg="haro_description" type="robot_command_server.py" name="robot_command_server"  output="screen">
+  </node>
+</launch>

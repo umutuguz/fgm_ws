@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="rviz" type="rviz" name="rviz"
+        output="screen"
+        args="-d $(find haro_description)/rviz_config/haro_overlay.rviz"/>
+</launch>

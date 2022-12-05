@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+    <arg name="x" default="0.0" />
+    <arg name="y" default="0.0" />
+    <arg name="z" default="1.0" />
+    <arg name="roll" default="0.0"/>
+    <arg name="pitch" default="0.0"/>
+    <arg name="yaw" default="0.0"/>
+
+  <include file="$(find haro_description)/launch/spawn_haro.launch">
+        <arg name="x" value="$(arg x)" />
+        <arg name="y" value="$(arg y)" />
+        <arg name="z" value="$(arg z)" />
+        <arg name="roll" value="$(arg roll)"/>
+        <arg name="pitch" value="$(arg pitch)"/>
+        <arg name="yaw" value="$(arg yaw)" />
+  </include>
+
+  <include file="$(find haro_description)/launch/make_haro_movable.launch"/>
+
+  <include file="$(find haro_description)/launch/haro_publish_world_tf.launch"/>
+  <include file="$(find haro_description)/launch/haro_world_tf_listener.launch"/>
+  <include file="$(find haro_description)/launch/haro_twiststamped.launch"/>
+
+
+</launch>

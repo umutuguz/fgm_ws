@@ -1,0 +1,18 @@
+<launch>
+  <node pkg="haro_description"
+        type="overlay_sample.py"
+        respawn="true"
+        name="overlay_sample" />
+    <!--  
+  <node pkg="haro_description"
+        type="image_publisher.py"
+        name="image_publisher">
+    <rosparam subst_value="true">
+      file_name: $(find haro_description)/img/Haro.jpg
+    </rosparam>
+  </node>
+  -->
+  <node pkg="rviz" type="rviz" name="rviz"
+        output="screen"
+        args="-d $(find haro_description)/rviz_config/haro_overlay.rviz"/>
+</launch>

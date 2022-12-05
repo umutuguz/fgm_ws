@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="haro_description"
+        type="haro_overlay_complete_demo.py"
+        respawn="true"
+        name="distance_overlay_demo_node" />
+</launch>
