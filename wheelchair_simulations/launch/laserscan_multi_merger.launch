@@ -3,8 +3,11 @@
 		<param name="destination_frame" value="base_link" />
 		<param name="cloud_destination_topic" value="/merged_cloud" />
 		<param name="scan_destination_topic" value="/scan_multi" />
-		<param name="laserscan_topics" value="/back_rp/rp_scan_filtered_back /front_rp/rp_scan_filtered_front " /> <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
+		<param name="laserscan_topics" value="/back_rp/rp_scan_filtered_back /front_rp/rp_scan_filtered_front " />
+		<!-- <param name="laserscan_topics" value="/front_rp/rp_scan_filtered_front " />  -->
 		<param name="angle_min" value="-3.1415" />
+		<!-- <param name="angle_min" value="-1.4224433404" /> -->
+		<!-- <param name="angle_max" value="1.4224433404" /> -->
 		<param name="angle_max" value="3.1415" />
 		<param name="angle_increment" value="0.008278241381049156" />
 		<!-- <param name="scan_time" value="0.08737853914499283" /> -->

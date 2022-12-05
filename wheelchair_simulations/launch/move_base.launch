@@ -4,6 +4,7 @@
   <arg name="odom_topic" default="/odom" />
   <arg name="move_forward_only" default="false" />
   <arg name="scan_topic" default="front_rp/rp_scan_filtered_front" />
+  <!-- <arg name="scan_topic" default="scan_multi_filtered" />  -->
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
