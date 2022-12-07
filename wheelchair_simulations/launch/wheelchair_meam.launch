@@ -9,7 +9,7 @@
     <arg name="open_rviz" default="false" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_meam_closed_doors_1.world" />
+        <arg name="world_name" value="$(find wheelchair_simulations)/worlds/turtlebot3_meam_closed_doors_1.world" />
         <arg name="paused" value="false" />
         <arg name="use_sim_time" value="true" />
         <arg name="gui" value="true" />
@@ -20,10 +20,10 @@
     <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch" />
 
     <!-- RP merge -->
-    <include file="$(find wheelchair_simulations)/launch/laserscan_multi_merger.launch" />
+    <!-- <include file="$(find wheelchair_simulations)/launch/laserscan_multi_merger.launch" /> -->
 
     <!-- Scan Multi Filter -->
-    <include file="$(find wheelchair_simulations)/launch/scan_multi_filter.launch" />
+    <!-- <include file="$(find wheelchair_simulations)/launch/scan_multi_filter.launch" /> -->
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find wheelchair_description)/urdf/wheel_chair.urdf.xacro" />
 
