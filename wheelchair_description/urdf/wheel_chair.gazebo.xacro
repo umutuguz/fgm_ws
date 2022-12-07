@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="wheelchair_sim" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:arg name="laser_visual" default="false"/>
+  <xacro:arg name="laser_visual" default="true"/>
   <xacro:arg name="imu_visual"   default="false"/>
   <xacro:arg name="camera_name"   default="camera"/>
 
@@ -117,7 +117,7 @@
 
   <gazebo reference="rp_laser_front">
     <material>Gazebo/RedBright</material>
-    <sensor type="ray" name="lds_lfcd_sensor_front">
+    <sensor type="gpu_ray" name="lds_lfcd_sensor_front">
       <pose>0.00386881875434386 8.69539989361567E-05 -0.00554963797433417 0 0 0</pose>
       <visualize>$(arg laser_visual)</visualize>
       <update_rate>10</update_rate>
@@ -134,16 +134,16 @@
         </scan>
         <range>
           <min>0.20</min>
-          <max>20.0</max>
-          <resolution>0</resolution>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
         </range>
-        <!-- <noise>
+        <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
           <stddev>0.01</stddev>
-        </noise> -->
+        </noise>
       </ray>
-      <plugin name="gazebo_ros_lds_lfcd_controller_front" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_lds_lfcd_controller_front" filename="libgazebo_ros_gpu_laser.so">
         <topicName>front_rp/scan</topicName>
         <frameName>rp_laser_front</frameName>
       </plugin>
@@ -152,7 +152,7 @@
 
   <gazebo reference="rp_laser_back">
     <material>Gazebo/Gold</material>
-    <sensor type="ray" name="lds_lfcd_sensor_back">
+    <sensor type="gpu_ray" name="lds_lfcd_sensor_back">
       <pose>-0.00393393719392465 1.45541326387055E-05 -0.00550433759472346 0 0 0</pose>
       <visualize>$(arg laser_visual)</visualize>
       <update_rate>10</update_rate>
@@ -169,16 +169,16 @@
         </scan>
         <range>
           <min>0.20</min>
-          <max>20.0</max>
-          <resolution>0</resolution>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
         </range>
-        <!-- <noise>
+        <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
           <stddev>0.01</stddev>
-        </noise> -->
+        </noise>
       </ray>
-      <plugin name="gazebo_ros_lds_lfcd_controller_back" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_lds_lfcd_controller_back" filename="libgazebo_ros_gpu_laser.so">
         <topicName>back_rp/scan</topicName>
         <frameName>rp_laser_back</frameName>
       </plugin>
@@ -219,7 +219,7 @@
         <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
         <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
         <frameName>camera_gazebo</frameName>
-        <pointCloudCutoff>0.2</pointCloudCutoff>
+        <pointCloudCutoff>0.2 </pointCloudCutoff>
         <pointCloudCutoffMax>5.0</pointCloudCutoffMax>
         <distortionK1>0.00000001</distortionK1>
         <distortionK2>0.00000001</distortionK2>
