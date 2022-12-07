@@ -8,7 +8,7 @@
     <arg name="detection_id_increment" default="1" />
     <arg name="cov_scale" default="0.01" />
 
-    <arg name="fixed_frame" default="odom"/>
+    <arg name="fixed_frame" default="base_footprint"/>
     <arg name="scan_frequency" default="15"/>
     <arg name="scan_topic" default="/front_rp/rp_scan_filtered_front"/>
     <arg name="config_file" default="trained_leg_detector_res=0.33.yaml"/>

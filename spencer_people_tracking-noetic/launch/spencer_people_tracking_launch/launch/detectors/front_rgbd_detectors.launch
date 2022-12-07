@@ -4,7 +4,7 @@
     <arg name="hog" default="false"/>
 
     <arg name="ground_plane" value="/spencer/sensors/rgbd_front_top/ground_plane"/>
-    <arg name="base_footprint_frame_id" default="base_link"/>
+    <arg name="base_footprint_frame_id" default="base_footprint"/>
     <arg name="detection_id_increment" default="20"/>
 
     <group ns="/spencer/perception_internal/people_detection">
@@ -22,7 +22,7 @@
             <arg name="detected_persons" value="/spencer/perception_internal/detected_persons/rgbd_front_top/upper_body"/>
             <arg name="camera_namespace" value="/camera"/>
             <arg name="depth_image" default="/depth/image_rect_raw" />
-            <arg name="rgb_image" default="/color/image_raw/image_topics" />
+            <arg name="rgb_image" default="/color/image_raw" />
             <arg name="camera_info_depth" default="/depth/camera_info" />
             <arg name="upper_body_detections" value="upper_body_detector/detections" />
             <arg name="upper_body_bb_centres" value="/spencer/perception_internal/people_detectionupper_body_detector/bounding_box_centres" />

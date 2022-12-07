@@ -6,7 +6,7 @@
     <arg name="roll" default="0.0" />
     <arg name="pitch" default="0.0" />
     <arg name="yaw" default="-1.5707963268" />
-    <arg name="open_rviz" default="true" />
+    <arg name="open_rviz" default="false" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find wheelchair_simulations)/worlds/turtlebot3_meam_closed_doors_stationary.world" />

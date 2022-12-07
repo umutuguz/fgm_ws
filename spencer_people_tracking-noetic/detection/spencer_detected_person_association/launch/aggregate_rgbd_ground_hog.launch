@@ -1,6 +1,6 @@
 <!-- Fuses front and rear RGB(-D) groundHOG detections by simple aggregation. -->
 <launch>
-    <arg name="common_frame_id" default="base_link"/>
+    <arg name="common_frame_id" default="base_footprint"/>
     
     <group ns="/spencer/perception_internal/detected_person_association">
         <!-- Convert DetectedPersons topics into CompositeDetectedPersons, and transform poses into common coordinate frame -->
