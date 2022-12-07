@@ -423,7 +423,7 @@
     type="fixed">
     <origin
       xyz="-0.066986 -0.0039691 1.5345"
-      rpy="0 0 0" />
+      rpy="-1.57 -1.57 -1.57" />
     <parent
       link="base_link" />
     <child
@@ -445,7 +445,8 @@
   <link name="camera_depth_frame"/>
 
   <joint name="camera_depth_optical_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+    <!-- <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" /> -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="camera_depth_frame" />
     <child link="camera_depth_optical_frame" />
   </joint>
@@ -460,7 +461,8 @@
   <link name="camera_infra1_frame"/>
 
   <joint name="camera_infra1_optical_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+    <!-- <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" /> -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="camera_infra1_frame" />
     <child link="camera_infra1_optical_frame" />
   </joint>
@@ -475,8 +477,8 @@
   <link name="camera_infra2_frame"/>
 
   <joint name="camera_infra2_optical_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
-    <parent link="camera_infra2_frame" />
+    <!-- <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" /> -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <child link="camera_infra2_optical_frame" />
   </joint>
   <link name="camera_infra2_optical_frame"/>
@@ -490,7 +492,8 @@
   <link name="camera_color_frame"/>
 
   <joint name="camera_color_optical_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+    <!-- <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" /> -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="camera_color_frame" />
     <child link="camera_color_optical_frame" />
   </joint>
