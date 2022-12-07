@@ -371,7 +371,7 @@ namespace local_planner
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         dmin = currRange.at(dminIdx);
-        ROS_INFO_STREAM("currangesize is " << currRange.size());
+        ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -790,12 +790,11 @@ namespace local_planner
             {  
                 counter_array++;
                 ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-                ROS_INFO_STREAM("Array gap's rounded" << counter_array << " element is = " << round(array_gap[i][j]));
+                ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
             }
         }
 
         vector<double> memory_array;
-
         // Gap odullendirme baslangici
 
         
@@ -911,9 +910,9 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 0.05;
+        double alpha_weight = 5.0;
         //double beta_weight = 2.8;
-        phiFinal = (((alpha_weight /(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight /(dmin) + 1);
+        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
