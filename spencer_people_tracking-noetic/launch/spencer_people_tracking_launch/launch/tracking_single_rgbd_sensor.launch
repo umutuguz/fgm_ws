@@ -9,7 +9,7 @@
     <arg name="use_upper_body_detector" default="true"/> <!-- use depth-template-based upper-body detector? -->
     <arg name="use_pcl_detector" default="false"/> <!-- use ROI-HOG detector from PCL? Cannot be combined with upper-body detector! -->
     <arg name="use_hog_detector" default="false"/> <!-- use RGB groundHOG detector? Requires cudaHOG library-->
-    <!-- <arg name="map_file" default="$(find wheelchair)/maps/8_tur_multi.yaml"/> -->
+    <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml"/>
 
     <!-- TF frame IDs used by some detectors, and tracking components -->
     <arg name="base_footprint_frame_id" default="base_link"/>  <!-- name of the robot's base frame after projection onto the ground plane -->
