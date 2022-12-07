@@ -23,7 +23,7 @@
          <filename>/home/umut/fgm_ws/src/walking_actor/meshes/walk.dae</filename>
          <scale>1.0</scale>
       </skin>
-      <pose>0 0 1.7 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
       <animation name="walk">
          <filename>/home/umut/fgm_ws/src/walking_actor/meshes/walk.dae</filename>
          <scale>1.000000</scale>
@@ -33,14 +33,26 @@
          <loop>true</loop>
          <delay_start>0.0000000</delay_start>
          <auto_start>true</auto_start>
-         <trajectory id="0" type="walking">
+         <trajectory id="0" type="walk">
              <waypoint>
                 <time>0</time>
-                <pose>0 -2.0 0 0 0 -1.57</pose>
+                <pose>0 -2.5 0 0 0 -1.5707963268</pose>
              </waypoint>
              <waypoint>
-                <time>2</time>
-                <pose>0 -3.0 0 0 0 -1.57</pose>
+                <time>1.5</time>
+                <pose>0 -4.0 0 0 0 -1.5707963268</pose>
+             </waypoint>
+             <waypoint>
+                <time>2.5</time>
+                <pose>0 -4.0 0 0 0 1.5707963268</pose>
+             </waypoint>
+             <waypoint>
+                <time>4</time>
+                <pose>0 -2.5 0 0 0 1.5707963268</pose>
+             </waypoint>
+             <waypoint>
+                <time>5.5</time>
+                <pose>0 -2.5 0 0 0 -1.5707963268</pose>
              </waypoint>
           </trajectory>
       </script>
