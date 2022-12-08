@@ -16,7 +16,8 @@
             <param name="num_frames_to_observe" value="12"/>
             <param name="max_timespan_to_observe" value="10.0"/>
             <param name="min_required_avg_velocity" value="0.35"/>
-            <param name="delete_unseen_tracks_after_num_frames" value="15"/>
+            <!-- <param name="delete_unseen_tracks_after_num_frames" value="15"/> -->
+            <param name="delete_unseen_tracks_after_num_frames" value="30"/>
             <remap from="input_tracks" to="/spencer/perception/tracked_persons_orientation_fixed"/>
             <remap from="output_tracks" to="/spencer/perception/tracked_persons_moving"/>
         </node>
@@ -34,7 +35,7 @@
         <!-- Filter tracks which have been confirmed by RGB-D (upper-body detector) -->
         <node name="filter_tracks_confirmed_by_upper_body" pkg="spencer_tracking_utils" type="filter_visually_confirmed_tracks">
             <rosparam param="min_matches_per_modality">
-                rgbd: 5
+                rgbd: 3
             </rosparam>
             <remap from="input_tracks" to="/spencer/perception/tracked_persons_orientation_fixed"/>
             <remap from="output_tracks" to="/spencer/perception/tracked_persons_confirmed_by_upper_body"/>

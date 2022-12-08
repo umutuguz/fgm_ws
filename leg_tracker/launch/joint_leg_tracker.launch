@@ -1,10 +1,11 @@
 <launch>
 
-  <arg name="open_rviz" default="true" />
+  <arg name="open_rviz" default="false" />
 
   <!-- params -->
   <param name="forest_file" value="$(find leg_tracker)/config/trained_leg_detector_res=0.33.yaml" />
-  <param name="scan_topic" value="front_rp/rp_scan_filtered_front" />
+  <param name="scan_topic" value="/front_rp/rp_scan_filtered_front" />
+  <!-- <param name="scan_topic" value="scan" /> -->
   <param name="fixed_frame" value="base_footprint" />
   <param name="scan_frequency" value="10" />
   <param name="max_detected_clusters" value="4" />

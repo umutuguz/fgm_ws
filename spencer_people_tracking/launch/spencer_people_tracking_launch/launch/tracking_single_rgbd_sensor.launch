@@ -1,17 +1,22 @@
 <launch>
     <!-- Launch file arguments -->
     <arg name="height_above_ground" default="1.7"/>  <!-- in meters, assumes a horizontally oriented RGB-D sensor; important for accurate detection -->
-    <arg name="load_driver" default="true"/>  <!-- set to false if you are already running OpenNi from elsewhere -->
+    <arg name="load_driver" default="false"/>  <!-- set to false if you are already running OpenNi from elsewhere -->
     <arg name="visualization" default="true"/> <!-- start Rviz with predefined configuration? -->
-    <arg name="dummy_transforms" default="true"/> <!-- publish TF transform for sensor to groundplane -->
+    <arg name="dummy_transforms" default="false"/> <!-- publish TF transform for sensor to groundplane -->
     <arg name="use_openni1" default="false"/> <!-- compatibility for Kinect v1 -->
     <arg name="use_upper_body_detector" default="true"/> <!-- use depth-template-based upper-body detector? -->
     <arg name="use_pcl_detector" default="false"/> <!-- use ROI-HOG detector from PCL? Cannot be combined with upper-body detector! -->
     <arg name="use_hog_detector" default="false"/> <!-- use RGB groundHOG detector? Requires cudaHOG library-->
+    <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml"/>
 
     <!-- TF frame IDs used by some detectors, and tracking components -->
     <arg name="base_footprint_frame_id" default="base_footprint"/>  <!-- name of the robot's base frame after projection onto the ground plane -->
     <arg name="world_frame_id" default="odom"/>  <!-- this is the fixed tracking frame -->
+
+    <!-- Run the Map Server -->
+    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)"/> 
+    <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.16 0 0 0 /map /odom 10" />
 
     <!-- Run OpenNi driver if desired -->
     <group ns="spencer/sensors" if="$(arg load_driver)">
@@ -40,8 +45,8 @@
     <group>
         <!-- Remap input topics of detectors from "depth" to "depth_registered" in case we are using the OpenNi 1 driver (for MS Kinect).
              Necessary because OpenNi 1 does not publish both the registered and unregistered depth images (as OpenNi 2 does), and we want to keep depth registration enabled. -->
-        <remap from="/spencer/sensors/rgbd_front_top/depth/image_rect" to="/spencer/sensors/rgbd_front_top/depth_registered/hw_registered/image_rect"  if="$(arg use_openni1)"/>
-        <remap from="/spencer/sensors/rgbd_front_top/depth/camera_info" to="/spencer/sensors/rgbd_front_top/depth_registered/camera_info" if="$(arg use_openni1)"/>
+        <!-- <remap from="/spencer/sensors/rgbd_front_top/depth/image_rect" to="/spencer/sensors/rgbd_front_top/depth_registered/hw_registered/image_rect"  if="$(arg use_openni1)"/> -->
+        <!-- <remap from="/spencer/sensors/rgbd_front_top/depth/camera_info" to="/spencer/sensors/rgbd_front_top/depth_registered/camera_info" if="$(arg use_openni1)"/> -->
 
         <include file="$(find spencer_people_tracking_launch)/launch/detectors/front_rgbd_detectors.launch">
             <arg name="upper_body" default="$(arg use_upper_body_detector)"/>
@@ -51,6 +56,8 @@
         </include>
     </group>
     
+    <!-- Laser detectors -->
+    <include file="$(find spencer_people_tracking_launch)/launch/detectors/leg_detectors.launch"/>
 
     <!-- People tracking -->
     <include file="$(find spencer_people_tracking_launch)/launch/tracking/freiburg_people_tracking.launch">
@@ -70,6 +77,6 @@
     <!-- <include file="$(find spencer_people_tracking_launch)/launch/tracking/group_tracking.launch"/>  -->
 
     <!-- RViz visualization -->
-    <node name="tracking_visualization_rviz" pkg="rviz" type="rviz" args="-d $(find spencer_people_tracking_launch)/rviz/tracking-single-rgbd-sensor.rviz" if="$(arg visualization)"/>
+    <node name="tracking_visualization_rviz" pkg="rviz" type="rviz" args="-d $(find spencer_people_tracking_launch)/rviz/tracking-single-rgbd-sensor_1.rviz" if="$(arg visualization)"/>
 
 </launch>
