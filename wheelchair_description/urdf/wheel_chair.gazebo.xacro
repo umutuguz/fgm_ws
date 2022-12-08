@@ -209,13 +209,20 @@
       <plugin name="rgbd_camera_controller" filename="libgazebo_ros_openni_kinect.so">
         <baseline>0.2</baseline>
         <alwaysOn>true</alwaysOn>
-        <updateRate>30.0</updateRate>
-        <cameraName>camera</cameraName>
-        <imageTopicName>/camera/color/image_raw</imageTopicName>
-        <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
-        <depthImageTopicName>/camera/depth/image_rect_raw</depthImageTopicName>
-        <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
-        <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+        <updateRate>30</updateRate>
+        <!-- <cameraName>camera</cameraName> -->
+        <cameraName>/spencer/sensors/rgbd_front_top</cameraName>
+        <!-- <imageTopicName>/camera/color/image_raw</imageTopicName> -->
+        <imageTopicName>/spencer/sensors/rgbd_front_top/rgb/image_rect_color</imageTopicName>
+        <!-- <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName> -->
+        <cameraInfoTopicName>/spencer/sensors/rgbd_front_top/depth/camera_info</cameraInfoTopicName>
+        <!-- <depthImageTopicName>/camera/depth/image_rect_raw</depthImageTopicName> -->
+        <depthImageTopicName>/spencer/sensors/rgbd_front_top/depth/image_rect</depthImageTopicName>
+        <!-- <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName> -->
+        <!-- <depthImageCameraInfoTopicName>/spencer/sensors/rgbd_front_top/depth/camera_info</depthImageCameraInfoTopicName> -->
+        <depthImageCameraInfoTopicName>/spencer/sensors/rgbd_front_top/rgb/camera_info</depthImageCameraInfoTopicName>
+        <!-- <pointCloudTopicName>/camera/depth/points</pointCloudTopicName> -->
+        <pointCloudTopicName>/spencer/sensors/rgbd_front_top/depth/points</pointCloudTopicName>
         <frameName>camera_gazebo</frameName>
         <pointCloudCutoff>0.2 </pointCloudCutoff>
         <pointCloudCutoffMax>4.0</pointCloudCutoffMax>
