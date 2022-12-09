@@ -48,12 +48,12 @@
         <!-- <remap from="/spencer/sensors/rgbd_front_top/depth/image_rect" to="/spencer/sensors/rgbd_front_top/depth_registered/hw_registered/image_rect"  if="$(arg use_openni1)"/> -->
         <!-- <remap from="/spencer/sensors/rgbd_front_top/depth/camera_info" to="/spencer/sensors/rgbd_front_top/depth_registered/camera_info" if="$(arg use_openni1)"/> -->
 
-        <include file="$(find spencer_people_tracking_launch)/launch/detectors/front_rgbd_detectors.launch">
+        <!-- <include file="$(find spencer_people_tracking_launch)/launch/detectors/front_rgbd_detectors.launch">
             <arg name="upper_body" default="$(arg use_upper_body_detector)"/>
             <arg name="pcl_detector" value="$(arg use_pcl_detector)"/>
             <arg name="hog" default="$(arg use_hog_detector)"/>
             <arg name="base_footprint_frame_id" value="$(arg base_footprint_frame_id)"/>
-        </include>
+        </include> -->
     </group>
     
     <!-- Laser detectors -->

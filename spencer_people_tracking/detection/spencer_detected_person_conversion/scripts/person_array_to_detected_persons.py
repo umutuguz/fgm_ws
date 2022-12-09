@@ -92,7 +92,7 @@ useObjectId = rospy.get_param("~use_object_id", True)
 
 
 # Create publisher and subscriber
-inputTopic = rospy.resolve_name("/spencer/perception_internal/people_detection/laser_detector_front/people_tracked")
+inputTopic = rospy.resolve_name("/spencer/perception_internal/people_detection/laser_front/people_tracked")
 outputTopic = rospy.resolve_name("/spencer/perception/detected_persons")
 sub = rospy.Subscriber(inputTopic, PersonArray, newMessageReceived, queue_size=5)
 pub = rospy.Publisher(outputTopic, DetectedPersons, queue_size=5)

@@ -475,17 +475,17 @@ Visualization Manager:
       Marker Topic: /spencer/perception_internal/people_detection/laser_detector_front/visualization_marker
       Name: Marker
       Namespaces:
-        LEGS: true
-        People_tracked: true
-        objects_tracked: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /spencer/perception_internal/people_detection/laser_detector_rear/visualization_marker
+      Marker Topic: /spencer/perception_internal/people_detection/laser_front/visualization_marker
       Name: Marker
       Namespaces:
-        {}
+        LEGS: true
+        People_tracked: true
+        objects_tracked: true
       Queue Size: 100
       Value: true
   Enabled: true
