@@ -34,13 +34,13 @@ inputs:
       inputs:
         - type: topic
           topic: /spencer/perception_internal/detected_persons/laser_front
-        - type: topic
-          topic: /spencer/perception_internal/detected_persons/laser_rear
+        # - type: topic
+        #   topic: /spencer/perception_internal/detected_persons/laser_rear
     #
     # Aggregate front+rear upper-body
     - type: aggregate
       inputs:
         - type: topic
           topic: /spencer/perception_internal/detected_persons/rgbd_front_top/upper_body
-        - type: topic
-          topic: /spencer/perception_internal/detected_persons/rgbd_rear_top/upper_body
+        # - type: topic
+        #   topic: /spencer/perception_internal/detected_persons/rgbd_rear_top/upper_body

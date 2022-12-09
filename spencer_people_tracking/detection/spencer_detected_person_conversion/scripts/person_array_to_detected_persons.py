@@ -65,7 +65,8 @@ def newMessageReceived(PersonArray):
         # for i in range(3, 6):
             # detectedPerson.pose.covariance[i*6 + i] = 0.1
             
-        detectedPerson.pose.covariance = [0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1]
+        # detectedPerson.pose.covariance = [0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.1]
+        detectedPerson.pose.covariance = [0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 999999999.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 999999999.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 999999999.0]
 
        # Detection ID
         if useObjectId:
