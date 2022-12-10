@@ -2,7 +2,7 @@
     <!-- Launch file arguments -->
     <arg name="height_above_ground" default="1.7"/>  <!-- in meters, assumes a horizontally oriented RGB-D sensor; important for accurate detection -->
     <arg name="load_driver" default="false"/>  <!-- set to false if you are already running OpenNi from elsewhere -->
-    <arg name="visualization" default="true"/> <!-- start Rviz with predefined configuration? -->
+    <arg name="visualization" default="false"/> <!-- start Rviz with predefined configuration? -->
     <arg name="dummy_transforms" default="false"/> <!-- publish TF transform for sensor to groundplane -->
     <arg name="use_openni1" default="false"/> <!-- compatibility for Kinect v1 -->
     <arg name="use_upper_body_detector" default="true"/> <!-- use depth-template-based upper-body detector? -->
