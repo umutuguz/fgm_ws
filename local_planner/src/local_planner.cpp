@@ -49,7 +49,7 @@ namespace local_planner
             // Publishers
             globalPlanPub_ = nh_.advertise<nav_msgs::Path>("global_plan", 1);
 
-            // distToGoalPub_ = nh_.advertise<std_msgs::Float32>("distance_to_goal", 1);
+            distToGoalPub_ = nh_.advertise<std_msgs::Float32>("distance_to_goal", 1);
 
             wRefPub_ = nh_.advertise<std_msgs::Float32>("angular_vel_output", 1);
 
