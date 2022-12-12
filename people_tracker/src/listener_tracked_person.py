@@ -8,13 +8,13 @@ from std_msgs.msg import Float32
 
 
 
-def newMessageReceived(TrackedPersons):
+def newMessageReceived(msg):
     
     global poseStamped
     poseStamped = PoseStamped()
     rate = rospy.Rate(1)
     
-    for TrackedPerson in TrackedPersons.tracks:
+    for TrackedPerson in msg.tracks:
 
         poseStamped.header.frame_id = "map"
         poseStamped.pose.position = TrackedPerson.pose.pose.position
