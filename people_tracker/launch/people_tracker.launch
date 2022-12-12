@@ -1,4 +1,18 @@
 <launch>
 
     <node pkg="people_tracker" type="people_tracker.py" name="people_tracker" output="screen" />
+
+    <node name="controller" pkg="pid" type="controller" output="screen" >
+        <param name="Kp" value="2.0" />
+        <param name="Ki" value="0.1" />
+        <param name="Kd" value="0.1" />
+        <param name="upper_limit" value="2" />
+        <param name="lower_limit" value="-2" />
+        <param name="windup_limit" value="2" />
+        <param name="max_loop_frequency" value="100.0" />
+        <param name="min_loop_frequency" value="5.0" />
+        <remap from="setpoint" to="/setpoint" />
+        <remap from="state" to="/dist_to_goal" />
+        <remap from="control_effort" to="/cmd_vel_controller" />
+    </node>
 </launch>

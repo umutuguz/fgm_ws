@@ -8,15 +8,15 @@
     <arg name="use_upper_body_detector" default="true"/> <!-- use depth-template-based upper-body detector? -->
     <arg name="use_pcl_detector" default="false"/> <!-- use ROI-HOG detector from PCL? Cannot be combined with upper-body detector! -->
     <arg name="use_hog_detector" default="false"/> <!-- use RGB groundHOG detector? Requires cudaHOG library-->
-    <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml"/>
+    <!-- <arg name="map_file" default="$(find wheelchair_simulations)/maps/meam_simulation_map.yaml"/> -->
 
     <!-- TF frame IDs used by some detectors, and tracking components -->
     <arg name="base_footprint_frame_id" default="base_footprint"/>  <!-- name of the robot's base frame after projection onto the ground plane -->
-    <arg name="world_frame_id" default="odom"/>  <!-- this is the fixed tracking frame -->
+    <arg name="world_frame_id" default="map"/>  <!-- this is the fixed tracking frame -->
 
     <!-- Run the Map Server -->
-    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)"/> 
-    <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.16 0 0 0 /map /odom 10" />
+    <!-- <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)"/>  -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0.16 0 0 0 /map /odom 10" /> -->
 
     <!-- Run OpenNi driver if desired -->
     <group ns="spencer/sensors" if="$(arg load_driver)">
