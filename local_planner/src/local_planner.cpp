@@ -910,7 +910,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 5.0;
+        double alpha_weight = 0.1;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
@@ -949,13 +949,13 @@ namespace local_planner
         base_local_planner::publishPlan(path, globalPlanPub_);
     } // end function publishGlobalPlan
 
-    void publishDistToGoal(const ros::Publisher &pub, double dist)
-    {
-        std_msgs::Float32 msg;
-        msg.data = dist;
+    // void publishDistToGoal(const ros::Publisher &pub, double dist)
+    // {
+    //     std_msgs::Float32 msg;
+    //     msg.data = dist;
 
-        pub.publish(msg);
-    } // end function publishDistToGoal
+    //     pub.publish(msg);
+    // } // end function publishDistToGoal
 
     void publishWRef(const ros::Publisher &pub, double wRef)
     {

@@ -7,20 +7,20 @@ import math
 import tf
 from spencer_tracking_msgs.msg import TrackedPersons, TrackedPerson
 from geometry_msgs.msg import PoseStamped,PoseWithCovarianceStamped, PoseWithCovariance, Pose
-from std_msgs.msg import Float32
+from std_msgs.msg import Float64
 
 class people_tracker():
     
     def __init__(self):
         rospy.init_node("people_tracker")
-        self.dist_publisher = rospy.Publisher('/dist_to_goal', Float32, queue_size = 10)
-        self.goal_publisher = rospy.Publisher('/move_base/goal', PoseStamped, queue_size = 10)
+        self.dist_publisher = rospy.Publisher('/dist_to_goal', Float64, queue_size = 10)
+        self.goal_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size = 10)
         self.pose_subscriber = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.pose_callback)
         self.tracker_subscriber = rospy.Subscriber('/spencer/perception/tracked_persons', TrackedPersons, self.tracker_callback)
         self.poseStamped = PoseStamped()
         self.trackedPersons = TrackedPersons()
         self.poseWithCovarienceStamped = PoseWithCovarianceStamped()
-        self.distToGoal = Float32()
+        self.distToGoal = 0.0
         self.diffX = 0.0
         self.diffY = 0.0
         self.trans = Pose()
@@ -30,20 +30,23 @@ class people_tracker():
         self.rate_10 = rospy.Rate(10)
         rospy.on_shutdown(self.shutdownhook)
         
-    def publish_dist(self):
+    def publish_dist_goal(self):
         
         while not self.ctrl_c:
             self.dist_publisher.publish(self.distToGoal)
             self.goal_publisher.publish(self.poseStamped)
             rospy.loginfo("Dist to goal and goal published!" )
+            rospy.loginfo(self.poseWithCovarienceStamped.pose.pose.position.x)
+            rospy.loginfo(self.poseStamped.pose.position.x)
+            rospy.loginfo(self.diffX)
             self.rate_1.sleep()
             
-    def publish_goal(self):
+    # def publish_goal(self):
         
-        while not self.ctrl_c:
-            self.goal_publisher.publish(self.poseStamped)
-            rospy.loginfo("Goal published!")
-            self.rate_1.sleep()
+    #     while not self.ctrl_c:
+    #         self.goal_publisher.publish(self.poseStamped)
+    #         rospy.loginfo("Goal published!")
+    #         self.rate_1.sleep()
     
     def shutdownhook(self):
         self.ctrl_c = True
@@ -65,11 +68,17 @@ class people_tracker():
     def compute_dist(self):
         # self.diffX = abs(self.trackedPersons.tracks.pose.pose.position.x - self.poseWithCovarienceStamped.pose.pose.position.x)
         # self.diffY = abs(self.trackedPersons.tracks.pose.pose.position.y - self.poseWithCovarienceStamped.pose.pose.position.y)
-        self.diffX = abs(self.poseStamped.pose.position.x - self.poseWithCovarienceStamped.pose.pose.position.x)
-        self.diffY = abs(self.poseStamped.pose.position.y - self.poseWithCovarienceStamped.pose.pose.position.y)
-        self.distToGoal = math.hypot(self.diffX, self.diffY)
+        a = self.poseStamped.pose.position.x
+        b = self.poseWithCovarienceStamped.pose.pose.position.x
+        rospy.loginfo(a)
+        rospy.loginfo(b)
+        diffXX = (a-b)
+        diffYY = (self.poseStamped.pose.position.y - self.poseWithCovarienceStamped.pose.pose.position.y)
+        # self.distToGoal = math.hypot(-1.7971077858124727, 0.0)
+        # self.distToGoal = math.hypot(self.diffX, self.diffY)
+        self.distToGoal = math.hypot(diffXX, diffYY)
         
-        self.publish_dist()
+        self.publish_dist_goal()
     
         
         
