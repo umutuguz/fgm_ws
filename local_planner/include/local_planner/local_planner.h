@@ -18,6 +18,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <tf/tfMessage.h>
 
 #include <boost/shared_ptr.hpp>
@@ -57,6 +58,8 @@ public:
     void scanCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg);
         
     void poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg);
+    
+    void cmdCallback(const std_msgs::Float64::ConstPtr& msg);
 
     double distanceToGlobalGoal();
 
@@ -92,9 +95,11 @@ private:
     ros::Subscriber odomSub_;
     ros::Subscriber scanSub_;
     ros::Subscriber poseSub_;
+    ros::Subscriber cmdSub_;
     boost::shared_ptr<nav_msgs::Odometry const> odomPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanPtr_;
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> posePtr_;
+    double cmdPtr_;
 
     // Publishers
     ros::Publisher globalPlanPub_;

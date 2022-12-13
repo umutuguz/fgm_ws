@@ -43,6 +43,8 @@ namespace local_planner
             scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this); //scan move base içinde remap edildi buradaki scan scan_multi_filtered a yönlendiriliyor.
 
             poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
+            
+            cmdSub_ = nh_.subscribe("/cmd_vel_controller", 100, &LocalPlanner::cmdCallback, this);
 
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
@@ -173,6 +175,7 @@ namespace local_planner
         double dmin_temp;
         double phiFinal_temp;
         double coefVel;
+        double linearVelocity;
 
         coefVel = 0.4;
 
@@ -190,6 +193,8 @@ namespace local_planner
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
 
+        linearVelocity = min(linearVel, cmdPtr_);
+        
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
@@ -198,7 +203,7 @@ namespace local_planner
         // ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
         
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = linearVel;
+        cmd_vel.linear.x = linearVelocity;
         
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
@@ -237,7 +242,7 @@ namespace local_planner
                 if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.50))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVel / 2;
+                    cmd_vel.linear.x = linearVelocity / 2;
                     // cmd_vel.linear.x = 0.4;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
@@ -303,6 +308,11 @@ namespace local_planner
     {
         posePtr_ = msg;
     } // end function poseCallback
+    
+    void LocalPlanner::cmdCallback(const std_msgs::Float64::ConstPtr& msg)
+    {
+        cmdPtr_ = msg->data;
+    } // end function cmdCallback
 
     double LocalPlanner::distanceToGlobalGoal()
     {
