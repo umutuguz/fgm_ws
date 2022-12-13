@@ -2,6 +2,11 @@
 
     <node pkg="people_tracker" type="people_tracker.py" name="people_tracker" output="screen" />
 
+    <!-- <node pkg="people_tracker" type="laser_tracker_filter.py" name="laser_tracker_filter" output="screen">
+        <remap from="scan" to="/front_rp/rp_scan_filtered_front" />
+        <remap from="scan_track_filtered" to="/front_rp/track_filtered" />
+    </node> -->
+
     <node name="controller" pkg="pid" type="controller" output="screen" >
         <param name="Kp" value="2.0" />
         <param name="Ki" value="0.1" />
