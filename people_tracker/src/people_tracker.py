@@ -26,6 +26,7 @@ class people_tracker():
         self.diffY = 0.0
         self.set_point = -1.0
         self.theta = 0.0
+        self.theta_laser = 0.0
         self.pose_theta = 0.0
         self.quaternion = (0.0, 0.0, 0.0, 0.0)
         self.trans = Pose()
@@ -55,9 +56,9 @@ class people_tracker():
     
     def publish_theta(self):
         
-            self.theta_publisher.publish(self.theta)
+            self.theta_publisher.publish(self.theta_laser)
             # rospy.loginfo("Setpoint published!")
-            self.rate_10.sleep()
+            # self.rate_10.sleep()
     
     def shutdownhook(self):
         self.ctrl_c = True
@@ -74,8 +75,10 @@ class people_tracker():
     
     def compute_dist(self):
         
-        self.diffX = ( self.poseWithCovarienceStamped.pose.pose.position.x - self.poseStamped.pose.position.x)
-        self.diffY = (self.poseWithCovarienceStamped.pose.pose.position.y - self.poseStamped.pose.position.y)
+        # self.diffX = self.poseWithCovarienceStamped.pose.pose.position.x - self.poseStamped.pose.position.x
+        self.diffX = self.poseStamped.pose.position.x - self.poseWithCovarienceStamped.pose.pose.position.x 
+        # self.diffY = self.poseWithCovarienceStamped.pose.pose.position.y - self.poseStamped.pose.position.y
+        self.diffY = self.poseStamped.pose.position.y - self.poseWithCovarienceStamped.pose.pose.position.y 
         
         self.distToGoal = -(math.hypot(self.diffX, self.diffY))
     
@@ -90,11 +93,23 @@ class people_tracker():
             self.poseWithCovarienceStamped.pose.pose.orientation.y,
             self.poseWithCovarienceStamped.pose.pose.orientation.z,
             self.poseWithCovarienceStamped.pose.pose.orientation.w)
-        self.theta = math.atan2(self.diffX, self.diffY) * (180.0 / math.pi)
+        self.theta = math.atan2(self.diffY, self.diffX) * (180.0 / math.pi)
         self.pose_theta = tf.transformations.euler_from_quaternion(self.quaternion)
-        self.pose_theta = self.pose_theta[2]
-        self.pose_theta = self.pose_theta * (180.0 / math.pi)
-        # self.theta = self.theta + self.pose_theta[2]
+        self.pose_theta = self.pose_theta[2] * (180.0 / math.pi)
+        
+        if ((90 < self.pose_theta) and (self.pose_theta < 180)):
+            self.pose_theta = 450 - self.pose_theta
+        else:
+            self.pose_theta = 90 - self.pose_theta
+            
+        if ((self.diffX > 0) and (self.diffY > 0)):
+            self.theta = 450 - self.theta
+        else:
+            self.theta = 90 - self.theta
+            
+        self.theta_laser = self.theta - self.pose_theta + 90.0
+        
+        # self.theta = self.theta + self.pose_theta
         
         
     # def get_map(self):
@@ -134,6 +149,7 @@ if __name__ == '__main__':
         # rospy.loginfo("Theta published!")
         rospy.loginfo("theta is: %f" %people_tracker_obj.theta)
         rospy.loginfo("pose_theta is: %f" %people_tracker_obj.pose_theta)
+        rospy.loginfo("theta_laser is: %f" %people_tracker_obj.theta_laser)
         people_tracker_obj.rate_1.sleep()
         
     
