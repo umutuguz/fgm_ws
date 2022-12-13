@@ -6,13 +6,14 @@ import tf
 from spencer_tracking_msgs.msg import TrackedPersons, TrackedPerson
 from geometry_msgs.msg import PoseStamped,PoseWithCovarianceStamped, PoseWithCovariance, Pose
 from std_msgs.msg import Float64
-
+from tf.transformations import euler_from_quaternion
 class people_tracker():
     
     def __init__(self):
         rospy.init_node("people_tracker")
         self.dist_publisher = rospy.Publisher('/dist_to_goal', Float64, queue_size = 10)
         self.ref_publisher = rospy.Publisher('/setpoint', Float64, queue_size = 10)
+        self.theta_publisher = rospy.Publisher('/track_theta', Float64, queue_size = 10)
         self.goal_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size = 10)
         self.pose_subscriber = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.pose_callback)
         self.tracker_subscriber = rospy.Subscriber('/spencer/perception/tracked_persons', TrackedPersons, self.tracker_callback)
@@ -24,6 +25,9 @@ class people_tracker():
         self.diffX = 0.0
         self.diffY = 0.0
         self.set_point = -1.0
+        self.theta = 0.0
+        self.pose_theta = 0.0
+        self.quaternion = (0.0, 0.0, 0.0, 0.0)
         self.trans = Pose()
         self.ctrl_c = False
         self.rate_1 = rospy.Rate(1)
@@ -34,7 +38,7 @@ class people_tracker():
         
             self.dist_publisher.publish(self.distToGoal)
             # rospy.loginfo("Dist to goal published!" )
-            rospy.loginfo(self.distToGoal)
+            # rospy.loginfo(self.distToGoal)
             # self.rate_10.sleep()
             
     def publish_goal(self):
@@ -46,6 +50,12 @@ class people_tracker():
     def publish_ref(self):
         
             self.ref_publisher.publish(self.set_point)
+            # rospy.loginfo("Setpoint published!")
+            # self.rate_10.sleep()
+    
+    def publish_theta(self):
+        
+            self.theta_publisher.publish(self.theta)
             # rospy.loginfo("Setpoint published!")
             self.rate_10.sleep()
     
@@ -64,14 +74,28 @@ class people_tracker():
     
     def compute_dist(self):
         
-        self.diffX = abs(self.poseStamped.pose.position.x - self.poseWithCovarienceStamped.pose.pose.position.x)
-        self.diffY = abs(self.poseStamped.pose.position.y - self.poseWithCovarienceStamped.pose.pose.position.y)
+        self.diffX = ( self.poseWithCovarienceStamped.pose.pose.position.x - self.poseStamped.pose.position.x)
+        self.diffY = (self.poseWithCovarienceStamped.pose.pose.position.y - self.poseStamped.pose.position.y)
         
         self.distToGoal = -(math.hypot(self.diffX, self.diffY))
     
     def compute_goal(self):
         a = 0
         # self.publish_goal()
+        
+    def compute_theta(self):
+        
+        self.quaternion = (
+            self.poseWithCovarienceStamped.pose.pose.orientation.x,
+            self.poseWithCovarienceStamped.pose.pose.orientation.y,
+            self.poseWithCovarienceStamped.pose.pose.orientation.z,
+            self.poseWithCovarienceStamped.pose.pose.orientation.w)
+        self.theta = math.atan2(self.diffX, self.diffY) * (180.0 / math.pi)
+        self.pose_theta = tf.transformations.euler_from_quaternion(self.quaternion)
+        self.pose_theta = self.pose_theta[2]
+        self.pose_theta = self.pose_theta * (180.0 / math.pi)
+        # self.theta = self.theta + self.pose_theta[2]
+        
         
     # def get_map(self):
 
@@ -99,11 +123,18 @@ if __name__ == '__main__':
         people_tracker_obj.compute_dist()
         # people_tracker_obj.compute_goal()
         people_tracker_obj.publish_dist()
-        rospy.loginfo("Dist to goal published!" )
+        # rospy.loginfo("Dist to goal published!" )
         # people_tracker_obj.publish_goal()
-        rospy.loginfo("Goal published!")
+        # rospy.loginfo("Goal published!")
         people_tracker_obj.publish_ref()
-        rospy.loginfo("Setpoint published!")
+        # rospy.loginfo("Setpoint published!")
+        people_tracker_obj.compute_theta()
+        # rospy.loginfo("Computing theta!")
+        people_tracker_obj.publish_theta()
+        # rospy.loginfo("Theta published!")
+        rospy.loginfo("theta is: %f" %people_tracker_obj.theta)
+        rospy.loginfo("pose_theta is: %f" %people_tracker_obj.pose_theta)
+        people_tracker_obj.rate_1.sleep()
         
     
 rospy.spin()

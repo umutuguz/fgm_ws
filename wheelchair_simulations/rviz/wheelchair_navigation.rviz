@@ -382,6 +382,51 @@ Visualization Manager:
       Topic: /move_base_simple/goal
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Class: spencer_tracking_rviz_plugin/TrackedPersons
+      Color: 130; 130; 130
+      Color map offset: 0
+      Color transform: Rainbow
+      Delete after no. cycles: 100
+      Enabled: true
+      Excluded person IDs: ""
+      Font color: 255; 255; 255
+      Font color style: Same color
+      Font scale: 2
+      History as line:
+        Line width: 0.05000000074505806
+        Value: true
+      History size: 100
+      Included person IDs: ""
+      Min. history point distance: 0.4000000059604645
+      Missed alpha: 0.5
+      Name: TrackedPersons
+      Occlusion alpha: 0.30000001192092896
+      Queue Size: 10
+      Render covariances:
+        Line width: 0.10000000149011612
+        Value: true
+      Render detection IDs: true
+      Render history: true
+      Render person visual: true
+      Render track IDs: true
+      Render track state: true
+      Render velocities: true
+      Show DELETED tracks: false
+      Show MATCHED tracks: true
+      Show MISSED tracks: true
+      Show OCCLUDED tracks: true
+      Style:
+        Line width: 0.05000000074505806
+        Scaling factor: 1
+        Value: Cylinders
+      Topic: /spencer/perception/tracked_persons
+      Tracking frame: odom
+      Unreliable: false
+      Value: true
+      Z offset:
+        Use Z position from message: false
+        Value: 0
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

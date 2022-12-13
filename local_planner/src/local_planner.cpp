@@ -177,14 +177,14 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.4;
+        coefVel = 0.8;
 
         if (dmin > 6)
             dmin_temp = 6;
         else if (dmin < 0)
             dmin_temp = 0;
         else
-            dmin_temp = dmin;
+            dmin_temp = dmin - 0.3;
 
         phiFinal_temp = abs(phiFinal);
 
@@ -193,7 +193,8 @@ namespace local_planner
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
 
-        linearVelocity = min(linearVel, cmdPtr_);
+        // linearVelocity = min(linearVel, cmdPtr_);
+        linearVelocity = min(linearVel, 111.0);
         
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
@@ -210,8 +211,8 @@ namespace local_planner
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = phiFinal * 0.3;
-        // cmd_vel.angular.z = angularVel;
+        // cmd_vel.angular.z = phiFinal * 0.3;
+        cmd_vel.angular.z = angularVel;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -249,8 +250,8 @@ namespace local_planner
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = phiFinal * 0.3;
-                     // cmd_vel.angular.z = angularVel;
+                    // cmd_vel.angular.z = phiFinal * 0.3;
+                     cmd_vel.angular.z = angularVel;
                     // cmd_vel.angular.z = 0.0;
                     ROS_INFO("Gap yok, globale gidiyor.");
                 }
@@ -900,22 +901,22 @@ namespace local_planner
 
         ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
-        phi_gap = acos((d1 + d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha)) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha))) + (M_PI / 180) * alpha;
+        phi_gap = acos((d1 + d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5))) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5)))) + (M_PI / 180) * (alpha + 8.5);
         phi_gap = phi_gap * 180 / M_PI;
 
         // phi_gap = ((180.0/M_PI) * acos((d1 + d2 * cos(M_PI/180.0*(beta-alpha))) / sqrt(pow(d1, 2) + pow(d2, 2) + 2*d1*d2*cos(M_PI/180.0*(beta-alpha))))) + alpha;
 
-        ROS_INFO_STREAM("phi gap is : " << phi_gap);
-        ROS_INFO_STREAM("d1 is : " << d1);
-        ROS_INFO_STREAM("d2 is : " << d2);
+        // ROS_INFO_STREAM("phi gap is : " << phi_gap);
+        // ROS_INFO_STREAM("d1 is : " << d1);
+        // ROS_INFO_STREAM("d2 is : " << d2);
 
         // ROS_INFO_STREAM("odomRX is : " << odomRX);
         // ROS_INFO_STREAM("odomRY is : " << odomRY);
         // ROS_INFO_STREAM("goalX is : " << goalX);
         // ROS_INFO_STREAM("goalY is : " << goalY);
 
-        ROS_INFO_STREAM("Goal angle is: " << phiGoal);
-        ROS_INFO_STREAM("robot_pose_theta is : " << robot_pose_theta);
+        // ROS_INFO_STREAM("Goal angle is: " << phiGoal);
+        // ROS_INFO_STREAM("robot_pose_theta is : " << robot_pose_theta);
 
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
@@ -923,6 +924,7 @@ namespace local_planner
         double alpha_weight = 0.1;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
+        // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
