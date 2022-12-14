@@ -13,8 +13,7 @@ class laser_tracker_filter():
     def __init__(self):
         rospy.init_node("laser_tracker_filter")
         self.laser_publisher = rospy.Publisher('/scan_track_filtered', LaserScan, queue_size = 10)
-        # self.laser_subscriber = rospy.Subscriber('/scan', LaserScan, self.laserCallback)
-        self.laser_subscriber = rospy.Subscriber('/front_rp/rp_scan_filtered_front', LaserScan, self.laserCallback)
+        self.laser_subscriber = rospy.Subscriber('/scan', LaserScan, self.laserCallback)
         self.theta_subscriber = rospy.Subscriber('/track_theta', Float64, self.thetaCallback)
         self.dist_subscriber = rospy.Subscriber('/dist_to_goal', Float64, self.distCallback)
         self.tracking_status_subscriber = rospy.Subscriber('/tracking_status', Bool, self.trackingCallback)
@@ -55,40 +54,37 @@ class laser_tracker_filter():
     def compute_range_index(self):
 
         # rospy.loginfo("Track theta is: %f" %self.trackTheta.data)
-        rospy.loginfo("Dist is: %f" %(-self.dist_to_goal.data-0.4))
+        # rospy.loginfo("Dist is: %f" %(-self.dist_to_goal.data-0.4))
         self.track_index = 343 - round((self.trackTheta.data - 8.5) * (343.0 / 163.0))
-        # self.track_index = 172
-            # if self.track_index < 0:
-            #     self.track_index = 0
-            # self.track_index = round((self.trackThetafloat - 8.5) * (344.0 / 163.0))
         # rospy.loginfo("Track index is: %d" %self.track_index)
 
         if self.track_index >= 344:
             self.track_index = 343
 
     def filter_laser_ranges(self):
-        
-        # self.filter_indexs = round((-2.5 * (-self.dist_to_goal.data)) + 17)
-        self.filter_indexs = round((-5.0 * (-self.dist_to_goal.data-0.3)) + 40)
-        # self.filter_indexs = 20
-        # rospy.loginfo("Filter indexs is: %f" %self.filter_indexs)
-        # rospy.loginfo("Track index is: %f" %self.track_index)
+        if self.tracking_status == True:
+            self.filter_indexs = round((-5.0 * (-self.dist_to_goal.data-0.3)) + 40)
+            # rospy.loginfo("Filter indexs is: %f" %self.filter_indexs)
+            # rospy.loginfo("Track index is: %f" %self.track_index)
             
-        for counter in range(1, (self.filter_indexs + 1)):
-        # for counter in range(0, 100):
-            if self.track_index <= 25 :
-                self.track_index = 25
-            elif  self.track_index >= 318:
-                self.track_index = 318
-            self.index_pos = int(self.track_index + counter)   
-            self.index_neg = int(self.track_index - counter)
-            # rospy.loginfo("index_pos index is: %d" %self.index_pos)
-            # rospy.loginfo("index_neg index is: %d" %self.index_neg)
-            self.laserScan.ranges[self.track_index] = math.inf
-            self.laserScan.ranges[self.index_pos] = math.inf
-            self.laserScan.ranges[self.index_neg] = math.inf
+            if self.track_index - self.filter_indexs < 0:
+                self.track_index = self.filter_indexs
+            elif  self.track_index + self.filter_indexs > 343:
+                self.track_index = 343 - self.filter_indexs
+                
+            for counter in range(1, (self.filter_indexs + 1)):
+                
+                self.index_pos = int(self.track_index + counter)   
+                self.index_neg = int(self.track_index - counter)
+                # rospy.loginfo("index_pos index is: %d" %self.index_pos)
+                # rospy.loginfo("index_neg index is: %d" %self.index_neg)
+                self.laserScan.ranges[self.track_index] = math.inf
+                self.laserScan.ranges[self.index_pos] = math.inf
+                self.laserScan.ranges[self.index_neg] = math.inf
+        else:
+            rospy.loginfo("No need to laser filter. There is no person!")
        
-        self.laser_publisher.publish(self.laserScan)
+        # self.laser_publisher.publish(self.laserScan)
         
         
 if __name__ == '__main__':
@@ -98,7 +94,7 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             laser_tracker_filter_obj.compute_range_index()
             laser_tracker_filter_obj.filter_laser_ranges()
-            # laser_tracker_filter_obj.publish_laser()
+            laser_tracker_filter_obj.publish_laser()
             laser_tracker_filter_obj.rate_10.sleep()
     except rospy.ROSInterruptException: pass
         

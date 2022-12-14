@@ -39,7 +39,6 @@ namespace local_planner
             // Subscribers
             odomSub_ = nh_.subscribe("/odom", 100, &LocalPlanner::odomCallback, this);
 
-            // scanSub_ = nh_.subscribe("/front_rp/rp_scan_filtered_front", 100, &LocalPlanner::odomCallback, this);
             scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this); //scan move base içinde remap edildi buradaki scan scan_multi_filtered a yönlendiriliyor.
 
             poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
@@ -162,9 +161,6 @@ namespace local_planner
         ROS_INFO_STREAM("Current goal pose: " << currentGoalPose_);
 
         double phiFinal = LLCallback(); // LL Algorithm
-        // headingController_.setSampleTime(ros::Time::now().toSec() - lastCallbackTime_); /* headingController_ ? */
-        // ROS_WARN_STREAM("Sample time: " << headingController_.getSampleTime());
-        // double omega = headingController_.derivativeFilteredControlSignal(phiFinal);  /* headingController_ ? */
 
         // Print and publish the distance to global goal
         double distToGlobGoal = distanceToGlobalGoal();
@@ -199,10 +195,7 @@ namespace local_planner
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
-        // ROS_INFO_STREAM("phiFinal: " << phiFinal_temp);
-        // ROS_INFO_STREAM("1. kisim: " << (0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)));
-        // ROS_INFO_STREAM("2. kisim: " << (exp(1.57 - phiFinal_temp) / 8.01));
-        
+
         // Send velocity commands to robot's base
         cmd_vel.linear.x = linearVelocity;
         
@@ -211,7 +204,6 @@ namespace local_planner
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        // cmd_vel.angular.z = phiFinal * 0.3;
         cmd_vel.angular.z = angularVel;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
@@ -229,13 +221,6 @@ namespace local_planner
 
         if (!isGapExist_)
         {
-            // cmd_vel.linear.x = 0.0;
-            // cmd_vel.linear.y = 0.0;
-            // cmd_vel.linear.z = 0.0;
-
-            // cmd_vel.angular.x = 0.0;
-            // cmd_vel.angular.y = 0.0;
-            // cmd_vel.angular.z = 0.0;
             ROS_INFO("Gap yok!");
 
             if (!isGoalReached())
@@ -243,16 +228,13 @@ namespace local_planner
                 if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.50))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVelocity / 2;
-                    // cmd_vel.linear.x = 0.4;
+                    cmd_vel.linear.x = linearVelocity / 1.25;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    // cmd_vel.angular.z = phiFinal * 0.3;
                      cmd_vel.angular.z = angularVel;
-                    // cmd_vel.angular.z = 0.0;
                     ROS_INFO("Gap yok, globale gidiyor.");
                 }
                 else
@@ -817,7 +799,6 @@ namespace local_planner
         {
             ROS_INFO_STREAM("i is: " << i);
             alpha_temp = array_gap[i][0];
-            // ROS_INFO_STREAM("deneme1");
             beta_temp = array_gap[i][1];
             // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
             // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
@@ -827,13 +808,11 @@ namespace local_planner
             if (beta_temp >= 163)
                 beta_temp = 162.53;
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
-            // ROS_INFO_STREAM("deneme4");
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp)) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp))) + (M_PI / 180) * alpha_temp)/M_PI;
             gap_midpoints.push_back(midpoint);
             diff_to_goal.push_back(fabs(midpoint - phiGoal));
             // ROS_INFO_STREAM("d1 temp is : " << d1_temp);
             // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
-            // ROS_INFO_STREAM("deneme");
         }
 
         if (gap_midpoints.size() != 0)
@@ -948,13 +927,9 @@ namespace local_planner
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);
-        // ros::Rate loop_rate(10);
-        // loop_rate.sleep();
-        //  ROS_INFO("SELAM");
+
         return phiFinal;
     }
-
-    // end for
 
     void LocalPlanner::publishGlobalPlan(std::vector<geometry_msgs::PoseStamped> &path)
     {
