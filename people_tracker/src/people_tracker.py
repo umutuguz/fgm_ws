@@ -123,9 +123,6 @@ class people_tracker():
             
         self.theta_laser = self.theta - self.pose_theta + 90.0
         
-        # self.theta = self.theta + self.pose_theta
-        
-        
     # def get_map(self):
 
     #     # Get the current transform between the odom and base frames
@@ -146,30 +143,31 @@ class people_tracker():
     #     return self.trans
         
 if __name__ == '__main__':
-
-    people_tracker_obj = people_tracker()
-    while not rospy.is_shutdown():
-        people_tracker_obj.compute_dist()
-        # people_tracker_obj.compute_goal()
-        people_tracker_obj.publish_dist()
-        # rospy.loginfo("Dist to goal published!" )
-        if people_tracker_obj.tracking_status == True:
-            # people_tracker_obj.publish_goal()
-            rospy.loginfo("Goal published!")
-        else:
-            rospy.loginfo("There is no person to track!")
-        people_tracker_obj.publish_ref()
-        # rospy.loginfo("Setpoint published!")
-        people_tracker_obj.compute_theta()
-        # rospy.loginfo("Computing theta!")
-        people_tracker_obj.publish_theta()
-        # rospy.loginfo("Theta published!")
-        people_tracker_obj.publish_tracking_status()
-        # rospy.loginfo("theta is: %f" %people_tracker_obj.theta)
-        # rospy.loginfo("pose_theta is: %f" %people_tracker_obj.pose_theta)
-        # rospy.loginfo("theta_laser is: %f" %people_tracker_obj.theta_laser)
-        rospy.loginfo(people_tracker_obj.tracking_status)
-        people_tracker_obj.rate_1.sleep()
+    try:
+        people_tracker_obj = people_tracker()
+        while not rospy.is_shutdown():
+            people_tracker_obj.compute_dist()
+            # people_tracker_obj.compute_goal()
+            people_tracker_obj.publish_dist()
+            # rospy.loginfo("Dist to goal published!" )
+            # if people_tracker_obj.tracking_status == True:
+            #     # people_tracker_obj.publish_goal()
+            #     # rospy.loginfo("Goal published!")
+            # else:
+            #     rospy.loginfo("There is no person to track!")
+            people_tracker_obj.publish_ref()
+            # rospy.loginfo("Setpoint published!")
+            people_tracker_obj.compute_theta()
+            # rospy.loginfo("Computing theta!")
+            people_tracker_obj.publish_theta()
+            # rospy.loginfo("Theta published!")
+            people_tracker_obj.publish_tracking_status()
+            # rospy.loginfo("theta is: %f" %people_tracker_obj.theta)
+            # rospy.loginfo("pose_theta is: %f" %people_tracker_obj.pose_theta)
+            # rospy.loginfo("theta_laser is: %f" %people_tracker_obj.theta_laser)
+            # rospy.loginfo(people_tracker_obj.tracking_status)
+            # people_tracker_obj.rate_1.sleep()
+    except rospy.ROSInterruptException: pass
         
     
 rospy.spin()

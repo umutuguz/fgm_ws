@@ -6,11 +6,13 @@ Panels:
       Expanded:
         - /TF1/Frames1
         - /TF1/Tree1
+        - /LaserScan1
         - /Global Map1/Costmap1
         - /Global Map1/Planner1
         - /Local Map1/Polygon1
         - /Local Map1/Costmap1
         - /Local Map1/Planner1
+        - /LaserScan2
       Splitter Ratio: 0.5
     Tree Height: 727
   - Class: rviz/Selection
@@ -213,7 +215,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.07000000029802322
       Style: Flat Squares
-      Topic: /front_rp/rp_scan_filtered_front
+      Topic: /scan_track_filtered
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -427,6 +429,34 @@ Visualization Manager:
       Z offset:
         Use Z position from message: false
         Value: 0
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 0; 255; 0
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.07000000029802322
+      Style: Flat Squares
+      Topic: /front_rp/rp_scan_filtered_front
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -460,7 +490,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 88.92790985107422
+      Scale: 114.86329650878906
       Target Frame: <Fixed Frame>
       X: 0.2711282968521118
       Y: -2.338571310043335

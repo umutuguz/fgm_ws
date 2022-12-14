@@ -16,29 +16,33 @@ class laser_tracker_filter():
         # self.laser_subscriber = rospy.Subscriber('/scan', LaserScan, self.laserCallback)
         self.laser_subscriber = rospy.Subscriber('/front_rp/rp_scan_filtered_front', LaserScan, self.laserCallback)
         self.theta_subscriber = rospy.Subscriber('/track_theta', Float64, self.thetaCallback)
-        self.theta_subscriber = rospy.Subscriber('/dist_to_goal', Float64, self.distCallback)
+        self.dist_subscriber = rospy.Subscriber('/dist_to_goal', Float64, self.distCallback)
         self.tracking_status_subscriber = rospy.Subscriber('/tracking_status', Bool, self.trackingCallback)
         self.laserScan = LaserScan()
-        self.trackTheta = 0.0
-        self.track_index = 0
-        self.dist_to_goal = 0.0
+        for i in range(0, 344):
+            self.laserScan.ranges.append(1.0)  
+        self.trackTheta = Float64()
+        self.trackTheta.data = 90
+        self.dist_to_goal = Float64()
+        self.tracking_status = Bool()
+        self.track_index = 172
         self.filter_indexs = 0
-        self.counter = 0
         self.index_pos = 0
         self.index_neg = 0
-        self.tracking_status = False
+        self.rate_1 = rospy.Rate(1)
+        self.rate_10 = rospy.Rate(10)
     
     def publish_laser(self):
-        
         self.laser_publisher.publish(self.laserScan)
         
     def thetaCallback(self, msg):
         
         self.trackTheta = msg
-
+        
     def laserCallback(self, msg):
         
         self.laserScan = msg
+        self.laserScan.ranges = list(msg.ranges)
         
     def distCallback(self, msg):
         
@@ -49,40 +53,53 @@ class laser_tracker_filter():
         self.tracking_status = msg
         
     def compute_range_index(self):
-        
-        self.track_index = round((self.trackTheta - 8.5) * (344.0 / 163.0))
 
-        
-        if self.track_index <= 344:
+        # rospy.loginfo("Track theta is: %f" %self.trackTheta.data)
+        rospy.loginfo("Dist is: %f" %(-self.dist_to_goal.data-0.4))
+        self.track_index = 343 - round((self.trackTheta.data - 8.5) * (343.0 / 163.0))
+        # self.track_index = 172
+            # if self.track_index < 0:
+            #     self.track_index = 0
+            # self.track_index = round((self.trackThetafloat - 8.5) * (344.0 / 163.0))
+        # rospy.loginfo("Track index is: %d" %self.track_index)
+
+        if self.track_index >= 344:
             self.track_index = 343
 
     def filter_laser_ranges(self):
         
-        if self.tracking_status == True:
+        # self.filter_indexs = round((-2.5 * (-self.dist_to_goal.data)) + 17)
+        self.filter_indexs = round((-5.0 * (-self.dist_to_goal.data-0.3)) + 40)
+        # self.filter_indexs = 20
+        # rospy.loginfo("Filter indexs is: %f" %self.filter_indexs)
+        # rospy.loginfo("Track index is: %f" %self.track_index)
             
-            self.filter_indexs = round((-2.5 * self.dist_to_goal) + 17)
-            
-            for self.counter in range(1, (self.filter_indexs + 1)):
-                self.index_pos = self.track_index + self.counter
-                self.index_neg = self.track_index - self.counter
-                # self.laserScan.ranges[self.index_pos] = math.inf
-                self.laserScan.ranges[self.index_pos] = 99
-                # self.laserScan.ranges[self.index_neg] = math.inf
-                self.laserScan.ranges[self.index_neg] = 99
-                # self.laserScan.ranges[self.track_index] = math.inf
-                self.laserScan.ranges[self.track_index] = 99
-                rospy.loginfo(self.laserScan.ranges[self.track_index])
-            
+        for counter in range(1, (self.filter_indexs + 1)):
+        # for counter in range(0, 100):
+            if self.track_index <= 25 :
+                self.track_index = 25
+            elif  self.track_index >= 318:
+                self.track_index = 318
+            self.index_pos = int(self.track_index + counter)   
+            self.index_neg = int(self.track_index - counter)
+            # rospy.loginfo("index_pos index is: %d" %self.index_pos)
+            # rospy.loginfo("index_neg index is: %d" %self.index_neg)
+            self.laserScan.ranges[self.track_index] = math.inf
+            self.laserScan.ranges[self.index_pos] = math.inf
+            self.laserScan.ranges[self.index_neg] = math.inf
+       
+        self.laser_publisher.publish(self.laserScan)
         
-
+        
 if __name__ == '__main__':
-    
-    laser_tracker_filter_obj = laser_tracker_filter()
-    rospy.loginfo("Filtered Laser data published!")
-    while not rospy.is_shutdown():
-        laser_tracker_filter_obj.compute_range_index()
-        laser_tracker_filter_obj.filter_laser_ranges()
-        laser_tracker_filter_obj.publish_laser()
-            
+    try:
+        laser_tracker_filter_obj = laser_tracker_filter()
+        rospy.loginfo("Filtered Laser data published!")
+        while not rospy.is_shutdown():
+            laser_tracker_filter_obj.compute_range_index()
+            laser_tracker_filter_obj.filter_laser_ranges()
+            # laser_tracker_filter_obj.publish_laser()
+            laser_tracker_filter_obj.rate_10.sleep()
+    except rospy.ROSInterruptException: pass
         
 rospy.spin()
