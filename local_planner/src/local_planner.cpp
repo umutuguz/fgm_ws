@@ -113,7 +113,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 20; // index
-            goalDistTolerance_ = 0.25;
+            goalDistTolerance_ = 0.35;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -173,21 +173,22 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.8;
+        coefVel = 0.2;
 
         if (dmin > 6)
             dmin_temp = 6;
         else if (dmin < 0)
             dmin_temp = 0;
         else
-            dmin_temp = dmin - 0.3;
+            dmin_temp = dmin - 0.2;
 
         phiFinal_temp = abs(phiFinal);
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
         linearVel = coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.01));
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
-        angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
+        // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
+        angularVel = phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
         // linearVelocity = min(linearVel, cmdPtr_);
         linearVelocity = min(linearVel, 111.0);
@@ -401,7 +402,8 @@ namespace local_planner
         phiGoal = phiGoal * 180 / M_PI;
         // ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
 
-        if ((odomRX > goalX) && (odomRY < goalY))
+        // if ((odomRX > goalX) && (odomRY < goalY))
+        if ((odomRX >= goalX) && (odomRY <= goalY)) // Belki çözer?
             phiGoal = 450 - phiGoal;
         else
             phiGoal = 90 - phiGoal;
@@ -797,7 +799,7 @@ namespace local_planner
 
         for (int i = 0; i < rows; i++) // her gap icin midpoint makaledeki denklemle hesaplanır
         {
-            ROS_INFO_STREAM("i is: " << i);
+            // ROS_INFO_STREAM("Total gap count is: " << i+1);
             alpha_temp = array_gap[i][0];
             beta_temp = array_gap[i][1];
             // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
@@ -808,30 +810,35 @@ namespace local_planner
             if (beta_temp >= 163)
                 beta_temp = 162.53;
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
-            midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp)) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * beta_temp - (M_PI / 180) * alpha_temp))) + (M_PI / 180) * alpha_temp)/M_PI;
+            midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5))) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5)))) + (M_PI / 180) * (alpha_temp + 8.5))/M_PI;
             gap_midpoints.push_back(midpoint);
             diff_to_goal.push_back(fabs(midpoint - phiGoal));
             // ROS_INFO_STREAM("d1 temp is : " << d1_temp);
             // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
         }
 
+        ROS_INFO_STREAM("Gap count is: " << gap_midpoints.size());
+
         if (gap_midpoints.size() != 0)
         {
             for (int i = 0; i<gap_midpoints.size();i++)
             {
-                ROS_INFO_STREAM("gap midpoints are: " << gap_midpoints[i]);
+                ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
             }
         }
 
         vector<double> gap_sizes;
-        double gap_weight = 0.1;
+        // double gap_weight = 0.1;
+        double gap_slew_rate = 0.7; //Gap büyütme hızını belirler, bu katsayıyı büyütmek hızı üstel olarak büyütür.
+        double gap_expansion = 1.0; //Gap büyütme oranını belirler, bu katsayıyı büyütmek gap genişleme oranını doğrusal arttırır.
 
         for (int i = 0; i < rows; i++) //midpointlerin 
         {
             gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0]));
-            ROS_INFO_STREAM("gap sizes1 are: " << gap_sizes[i]);
-            gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
-            ROS_INFO_STREAM("gap sizes2 are: " << gap_sizes[i]);
+            ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
+            // gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
+            gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion);
+            ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
         }
 
         // gap odullendirme bitisi
@@ -878,7 +885,7 @@ namespace local_planner
         }
         // ROS_INFO_STREAM("d2 2: " << d2);
 
-        ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
+        // ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
         phi_gap = acos((d1 + d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5))) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5)))) + (M_PI / 180) * (alpha + 8.5);
         phi_gap = phi_gap * 180 / M_PI;
@@ -900,7 +907,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 0.1;
+        double alpha_weight = 1.0;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
@@ -921,7 +928,7 @@ namespace local_planner
             phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         }
 
-        ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
+        // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
         double moving_to;
