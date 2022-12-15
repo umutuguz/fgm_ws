@@ -173,7 +173,7 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.7;
+        coefVel = 0.6;
 
         if (dmin > 6)
             dmin_temp = 6;
@@ -191,6 +191,7 @@ namespace local_planner
         angularVel = phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
         linearVelocity = min(linearVel, cmdPtr_);
+        // linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity < 0.0)
         {
@@ -401,7 +402,7 @@ namespace local_planner
             robot_pose_theta = 450 - robot_pose_theta;
         else
             robot_pose_theta = 90 - robot_pose_theta;
-
+        ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
         phiGoal = atan2(goalY - odomRY, goalX - odomRX);
         phiGoal = phiGoal * 180 / M_PI;
         // ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
