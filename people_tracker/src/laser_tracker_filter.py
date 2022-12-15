@@ -81,8 +81,8 @@ class laser_tracker_filter():
                 self.laserScan.ranges[self.track_index] = math.inf
                 self.laserScan.ranges[self.index_pos] = math.inf
                 self.laserScan.ranges[self.index_neg] = math.inf
-        else:
-            rospy.loginfo("No need to laser filter. There is no person!")
+        # else:
+            # rospy.loginfo("No need to laser filter. There is no person!")
        
         # self.laser_publisher.publish(self.laserScan)
         
@@ -95,7 +95,7 @@ if __name__ == '__main__':
             laser_tracker_filter_obj.compute_range_index()
             laser_tracker_filter_obj.filter_laser_ranges()
             laser_tracker_filter_obj.publish_laser()
-            laser_tracker_filter_obj.rate_10.sleep()
+            # laser_tracker_filter_obj.rate_10.sleep()
     except rospy.ROSInterruptException: pass
         
 rospy.spin()

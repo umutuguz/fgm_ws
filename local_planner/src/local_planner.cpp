@@ -173,7 +173,7 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.2;
+        coefVel = 0.7;
 
         if (dmin > 6)
             dmin_temp = 6;
@@ -190,9 +190,13 @@ namespace local_planner
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
-        // linearVelocity = min(linearVel, cmdPtr_);
-        linearVelocity = min(linearVel, 111.0);
-        
+        linearVelocity = min(linearVel, cmdPtr_);
+
+        if (linearVelocity < 0.0)
+        {
+            linearVelocity = 0.0;
+        }
+        // linearVelocity = min(linearVel, 111.0);
         ROS_INFO_STREAM("Lineer velocity: " << linearVel);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
@@ -829,8 +833,8 @@ namespace local_planner
 
         vector<double> gap_sizes;
         // double gap_weight = 0.1;
-        double gap_slew_rate = 0.7; //Gap büyütme hızını belirler, bu katsayıyı büyütmek hızı üstel olarak büyütür.
-        double gap_expansion = 1.0; //Gap büyütme oranını belirler, bu katsayıyı büyütmek gap genişleme oranını doğrusal arttırır.
+        double gap_slew_rate = 0.5; //Gap büyütme hızını belirler, bu katsayıyı büyütmek hızı üstel olarak büyütür.
+        double gap_expansion = 0.5; //Gap büyütme oranını belirler, bu katsayıyı büyütmek gap genişleme oranını doğrusal arttırır.
 
         for (int i = 0; i < rows; i++) //midpointlerin 
         {
@@ -907,7 +911,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 1.0;
+        double alpha_weight = 0.5;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;

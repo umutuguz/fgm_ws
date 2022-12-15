@@ -25,12 +25,13 @@ class people_tracker():
         self.tracking_status = False
         self.diffX = 0.0
         self.diffY = 0.0
-        self.set_point = -1.0
+        self.set_point = -2.0
         self.theta = 0.0
         self.theta_laser = 0.0
         self.pose_theta = 0.0
         self.quaternion = (0.0, 0.0, 0.0, 0.0)
         self.rate_1 = rospy.Rate(1)
+        self.rate_5 = rospy.Rate(5)
         self.rate_10 = rospy.Rate(10)
         
     def publish_dist(self):
@@ -116,17 +117,18 @@ class people_tracker():
         self.theta_laser = self.theta - self.pose_theta + 90.0
         
 if __name__ == '__main__':
+    
     try:
         people_tracker_obj = people_tracker()
         while not rospy.is_shutdown():
             people_tracker_obj.compute_dist()
             # people_tracker_obj.compute_goal()
             people_tracker_obj.publish_dist()
-            # if people_tracker_obj.tracking_status == True:
-            #     # people_tracker_obj.publish_goal()
+            if people_tracker_obj.tracking_status == True:
+                people_tracker_obj.publish_goal()
             #     # rospy.loginfo("Goal published!")
             # else:
-            #     rospy.loginfo("There is no person to track!")
+            #     # rospy.loginfo("There is no person to track!")
             people_tracker_obj.publish_ref()
             # rospy.loginfo("Setpoint published!")
             people_tracker_obj.compute_theta()
@@ -134,6 +136,7 @@ if __name__ == '__main__':
             people_tracker_obj.publish_theta()
             # rospy.loginfo("Theta published!")
             people_tracker_obj.publish_tracking_status()
+            people_tracker_obj.rate_5.sleep()
     except rospy.ROSInterruptException: pass
             
 rospy.spin()
