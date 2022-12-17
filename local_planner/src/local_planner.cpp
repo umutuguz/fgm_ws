@@ -173,14 +173,14 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.6;
+        coefVel = 0.7;
 
         if (dmin > 6)
             dmin_temp = 6;
         else if (dmin < 0)
             dmin_temp = 0;
         else
-            dmin_temp = dmin - 0.2;
+            dmin_temp = dmin - 0.1;
 
         phiFinal_temp = abs(phiFinal);
 
@@ -193,18 +193,17 @@ namespace local_planner
         linearVelocity = min(linearVel, cmdPtr_);
         // linearVelocity = min(linearVel, 10.0);
 
-        if (linearVelocity < 0.0)
+        if (linearVelocity <= 0.0)
         {
             linearVelocity = 0.0;
         }
-        // linearVelocity = min(linearVel, 111.0);
-        ROS_INFO_STREAM("Lineer velocity: " << linearVel);
+
+        ROS_INFO_STREAM("Lineer velocity: " << linearVelocity);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
         ROS_INFO_STREAM("dmin: " << dmin_temp);
 
         // Send velocity commands to robot's base
         cmd_vel.linear.x = linearVelocity;
-        
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
@@ -227,7 +226,7 @@ namespace local_planner
 
         if (!isGapExist_)
         {
-            ROS_INFO("Gap yok!");
+            // ROS_INFO("Gap yok!");
 
             if (!isGoalReached())
             {
@@ -240,12 +239,12 @@ namespace local_planner
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                     cmd_vel.angular.z = angularVel;
-                    ROS_INFO("Gap yok, globale gidiyor.");
+                    cmd_vel.angular.z = angularVel;
+                    // ROS_INFO("Gap yok, globale gidiyor.");
                 }
                 else
                 {
-                ROS_INFO("Gap yok, globale ulasilamadi.");
+                // ROS_INFO("Gap yok, globale ulasilamadi.");
                 cmd_vel.linear.x = 0.0;
                 cmd_vel.linear.y = 0.0;
                 cmd_vel.linear.z = 0.0;
@@ -329,7 +328,7 @@ namespace local_planner
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double robot_pose_theta = tf::getYaw(currentPose_.orientation);
         robot_pose_theta = robot_pose_theta * 180 / M_PI;
-        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
+        // ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
 
 
         double goalX = currentGoalPose_.position.x;
@@ -339,7 +338,7 @@ namespace local_planner
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
-        ROS_INFO_STREAM("size is: " << scanPtr_->ranges.size());
+        // ROS_INFO_STREAM("size is: " << scanPtr_->ranges.size());
 
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
@@ -370,7 +369,7 @@ namespace local_planner
         int dminIdx = std::distance(currRange.begin(), dminIdxItr);
 
         dmin = currRange.at(dminIdx);
-        ROS_INFO_STREAM("curRangesize is " << currRange.size());
+        // ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
@@ -402,7 +401,7 @@ namespace local_planner
             robot_pose_theta = 450 - robot_pose_theta;
         else
             robot_pose_theta = 90 - robot_pose_theta;
-        ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
+        // ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
         phiGoal = atan2(goalY - odomRY, goalX - odomRX);
         phiGoal = phiGoal * 180 / M_PI;
         // ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
@@ -789,8 +788,8 @@ namespace local_planner
             for (int j = 0; j < 2; j++)
             {  
                 counter_array++;
-                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-                ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
+                // ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+                // ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
             }
         }
 
@@ -822,13 +821,13 @@ namespace local_planner
             // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
         }
 
-        ROS_INFO_STREAM("Gap count is: " << gap_midpoints.size());
+        // ROS_INFO_STREAM("Gap count is: " << gap_midpoints.size());
 
         if (gap_midpoints.size() != 0)
         {
             for (int i = 0; i<gap_midpoints.size();i++)
             {
-                ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
+                // ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
             }
         }
 
@@ -840,10 +839,10 @@ namespace local_planner
         for (int i = 0; i < rows; i++) //midpointlerin 
         {
             gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0]));
-            ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
+            // ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
             // gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
             gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion);
-            ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
+            // ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
         }
 
         // gap odullendirme bitisi
