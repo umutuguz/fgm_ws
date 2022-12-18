@@ -203,13 +203,15 @@ namespace local_planner
         ROS_INFO_STREAM("dmin: " << dmin_temp);
 
         // Send velocity commands to robot's base
-        cmd_vel.linear.x = linearVelocity;
+        // cmd_vel.linear.x = linearVelocity;
+        cmd_vel.linear.x = 0.0;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = angularVel;
+        cmd_vel.angular.z = 0.0;
+        // cmd_vel.angular.z = angularVel;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -233,13 +235,15 @@ namespace local_planner
                 if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.50))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVelocity / 1.25;
+                    // cmd_vel.linear.x = linearVelocity / 1.25;
+                    cmd_vel.linear.x = 0.0;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = angularVel;
+                    cmd_vel.angular.z = 0.0;
+                    // cmd_vel.angular.z = angularVel;
                     // ROS_INFO("Gap yok, globale gidiyor.");
                 }
                 else

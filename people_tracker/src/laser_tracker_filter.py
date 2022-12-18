@@ -60,10 +60,12 @@ class laser_tracker_filter():
 
         if self.track_index >= 344:
             self.track_index = 343
+        # rospy.loginfo(self.track_index)
 
     def filter_laser_ranges(self):
-        if self.tracking_status == True:
-            self.filter_indexs = round((-5.0 * (-self.dist_to_goal.data-0.3)) + 40)
+        if self.tracking_status.data == True:
+            self.filter_indexs = round((-5.0 * (-self.dist_to_goal.data-0.2)) + 40)
+            # rospy.loginfo(self.filter_indexs)
             # rospy.loginfo("Filter indexs is: %f" %self.filter_indexs)
             # rospy.loginfo("Track index is: %f" %self.track_index)
             
