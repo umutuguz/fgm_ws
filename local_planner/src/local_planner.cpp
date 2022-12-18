@@ -177,10 +177,10 @@ namespace local_planner
 
         if (dmin > 6)
             dmin_temp = 6;
-        else if (dmin < 0)
-            dmin_temp = 0;
+        else if (dmin <= 0.1)
+            dmin_temp = 0.11;
         else
-            dmin_temp = dmin - 0.1;
+            dmin_temp = dmin - 0.05;
 
         phiFinal_temp = abs(phiFinal);
 
@@ -362,7 +362,7 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.01;
+            currRange[i] -= 0.25;
         }
 
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
