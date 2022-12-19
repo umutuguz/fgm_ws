@@ -136,7 +136,7 @@ if __name__ == '__main__':
             people_tracker_obj.publish_theta()
             # rospy.loginfo("Theta published!")
             people_tracker_obj.publish_tracking_status()
-            people_tracker_obj.rate_10.sleep()
+            people_tracker_obj.rate_5.sleep()
     except rospy.ROSInterruptException: pass
             
 rospy.spin()

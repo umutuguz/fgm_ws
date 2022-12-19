@@ -9,16 +9,16 @@
     <arg name="open_rviz" default="false" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <!-- <arg name="world_name"
-            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_III.world" />  -->  <!-- 0.50 m/s -->
+        <arg name="world_name"
+            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_III.world" />   <!-- 0.50 m/s -->
         <!-- <arg name="world_name"
             value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_IIII.world" /> -->  <!-- 0.75 m/s -->
-        <arg name="world_name"
-            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_V.world" /> 
+        <!-- <arg name="world_name"
+            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_V.world" /> -->
         <!-- <arg name="world_name" value="$(find
-        wheelchair_simulations)/worlds/turtlebot3_meam_closed_doors_basic.world" /> -->
+        wheelchair_simulations)/worlds/meam_closed_doors_basic.world" /> -->
         <!-- <arg name="world_name" value="$(find
-        wheelchair_simulations)/worlds/turtlebot3_meam_closed_doors_stationary.world" /> -->
+        wheelchair_simulations)/worlds/meam_closed_doors_stationary.world" /> -->
         <!-- <arg name="world_name" value="$(find
         wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_II.world" /> -->
         <arg name="paused" value="false" />

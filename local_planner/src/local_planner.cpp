@@ -113,7 +113,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 20; // index
-            goalDistTolerance_ = 0.35;
+            goalDistTolerance_ = 0.25;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -180,15 +180,15 @@ namespace local_planner
         else if (dmin <= 0.1)
             dmin_temp = 0.11;
         else
-            dmin_temp = dmin - 0.05;
+            dmin_temp = dmin + 0.1;
 
         phiFinal_temp = abs(phiFinal);
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
-        linearVel = coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.01));
+        linearVel = (coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.0))) + 0.1;
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
-        angularVel = phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
+        angularVel = 1.25 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
         linearVelocity = min(linearVel, cmdPtr_);
         // linearVelocity = min(linearVel, 10.0);
@@ -203,15 +203,15 @@ namespace local_planner
         ROS_INFO_STREAM("dmin: " << dmin_temp);
 
         // Send velocity commands to robot's base
-        // cmd_vel.linear.x = linearVelocity;
-        cmd_vel.linear.x = 0.0;
+        cmd_vel.linear.x = linearVelocity;
+        // cmd_vel.linear.x = 0.0;
         cmd_vel.linear.y = 0.0;
         cmd_vel.linear.z = 0.0;
 
         cmd_vel.angular.x = 0.0;
         cmd_vel.angular.y = 0.0;
-        cmd_vel.angular.z = 0.0;
-        // cmd_vel.angular.z = angularVel;
+        // cmd_vel.angular.z = 0.0;
+        cmd_vel.angular.z = angularVel;
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -232,30 +232,30 @@ namespace local_planner
 
             if (!isGoalReached())
             {
-                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.50))
+                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.10))
                 {
                     // Use the last refence cmd_vel command
-                    // cmd_vel.linear.x = linearVelocity / 1.25;
-                    cmd_vel.linear.x = 0.0;
+                    cmd_vel.linear.x = linearVelocity * 0.75;
+                    // cmd_vel.linear.x = 0.0;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
 
                     cmd_vel.angular.x = 0.0;
                     cmd_vel.angular.y = 0.0;
-                    cmd_vel.angular.z = 0.0;
-                    // cmd_vel.angular.z = angularVel;
-                    // ROS_INFO("Gap yok, globale gidiyor.");
+                    // cmd_vel.angular.z = 0.0;
+                    cmd_vel.angular.z = angularVel;
+                    ROS_INFO("Gap yok, globale gidiyor.");
                 }
                 else
                 {
-                // ROS_INFO("Gap yok, globale ulasilamadi.");
+                ROS_INFO("Gap yok, globale ulasilamadi.");
                 cmd_vel.linear.x = 0.0;
                 cmd_vel.linear.y = 0.0;
                 cmd_vel.linear.z = 0.0;
 
                 cmd_vel.angular.x = 0.0;
                 cmd_vel.angular.y = 0.0;
-                cmd_vel.angular.z = 0.3; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
+                cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
                 }
             }
             
@@ -366,13 +366,16 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.25;
+            currRange[i] -= 0.15;
         }
 
-        auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        int dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
+        auto dminIdxItr = std::min_element(currRange.begin()+68, currRange.end()-68);
+        // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        int dminIdx = std::distance(currRange.begin()+68, dminIdxItr);
 
-        dmin = currRange.at(dminIdx);
+        // dmin = currRange.at(dminIdx);
+        dmin = currRange.at(dminIdx+68);
         // ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
@@ -400,13 +403,17 @@ namespace local_planner
         }
         double phiGoal;
         double phiFinal;
+        double xDiff;
+        double yDiff;
+        
+        xDiff = goalX - odomRX;
+        yDiff = goalY - odomRY;
 
         if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
             robot_pose_theta = 450 - robot_pose_theta;
         else
             robot_pose_theta = 90 - robot_pose_theta;
-        // ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
-        phiGoal = atan2(goalY - odomRY, goalX - odomRX);
+        phiGoal = atan2(yDiff, xDiff);
         phiGoal = phiGoal * 180 / M_PI;
         // ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
 
@@ -435,10 +442,25 @@ namespace local_planner
         {
             phiGoal = 270;
         }
-        // ROS_INFO_STREAM("Goal angle 2 is: " << phiGoal);
+        // ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
+        // ROS_INFO_STREAM("phi goal is: " << phiGoal);
 
         // phiGoal = phiGoal + robot_pose_theta;
-        phiGoal = phiGoal - (robot_pose_theta-90);
+        phiGoal = phiGoal - (robot_pose_theta - 90);
+
+        ROS_INFO_STREAM("manupule edilmemis phi goal: " << phiGoal);
+
+        if (phiGoal < 0)
+        {
+            phiGoal = phiGoal + 360.0;
+        }
+        else if (phiGoal > 270)
+        {
+            phiGoal = 450.0 - phiGoal;
+        }
+
+        ROS_INFO_STREAM("Onemli phi goal: " << phiGoal);
+        ROS_INFO_STREAM("Onemli robot pose theta: " << robot_pose_theta);
 
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
@@ -915,7 +937,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 0.5;
+        double alpha_weight = 0.75;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
