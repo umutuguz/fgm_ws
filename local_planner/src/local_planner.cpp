@@ -173,14 +173,14 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.7;
+        coefVel = 0.5;
 
         if (dmin > 6)
             dmin_temp = 6;
         else if (dmin <= 0.1)
             dmin_temp = 0.11;
         else
-            dmin_temp = dmin + 0.1;
+            dmin_temp = dmin;
 
         phiFinal_temp = abs(phiFinal);
 
@@ -366,16 +366,16 @@ namespace local_planner
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
         for (unsigned int i = 0; i < currRange.size() ; i++)
         {
-            currRange[i] -= 0.15;
+            currRange[i] -= 0.20;
         }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        auto dminIdxItr = std::min_element(currRange.begin()+68, currRange.end()-68);
+        auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
         // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        int dminIdx = std::distance(currRange.begin()+68, dminIdxItr);
+        int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
 
         // dmin = currRange.at(dminIdx);
-        dmin = currRange.at(dminIdx+68);
+        dmin = currRange.at(dminIdx+75);
         // ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
@@ -446,17 +446,21 @@ namespace local_planner
         // ROS_INFO_STREAM("phi goal is: " << phiGoal);
 
         // phiGoal = phiGoal + robot_pose_theta;
+
+        ROS_INFO_STREAM("hic manupule edilmemis phi goal: " << phiGoal);
+
         phiGoal = phiGoal - (robot_pose_theta - 90);
 
         ROS_INFO_STREAM("manupule edilmemis phi goal: " << phiGoal);
 
-        if (phiGoal < 0)
+        if (phiGoal < 0.0)
         {
             phiGoal = phiGoal + 360.0;
         }
-        else if (phiGoal > 270)
+        else if (phiGoal > 270.0)
         {
-            phiGoal = 450.0 - phiGoal;
+            // phiGoal = 450.0 - phiGoal;
+            phiGoal = phiGoal - 360.0;
         }
 
         ROS_INFO_STREAM("Onemli phi goal: " << phiGoal);
@@ -884,8 +888,9 @@ namespace local_planner
         beta = array_gap[max_gap_idx][1];
         if (beta >= 163)
                 beta = 162.53;
-        // ROS_INFO_STREAM("alpha is: " << alpha);
-        // ROS_INFO_STREAM("beta is: " << beta);
+
+        ROS_INFO_STREAM("alpha is: " << (alpha+8.5));
+        ROS_INFO_STREAM("beta is: " << (beta+8.5));
 
         if (alpha != 0.0)
         {
@@ -939,7 +944,7 @@ namespace local_planner
 
         double alpha_weight = 0.75;
         //double beta_weight = 2.8;
-        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap*M_PI/180)) + (phiGoal*M_PI/180)) / (alpha_weight / exp(dmin) + 1);
+        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;

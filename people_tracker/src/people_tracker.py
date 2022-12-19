@@ -15,7 +15,7 @@ class people_tracker():
         self.ref_publisher = rospy.Publisher('/setpoint', Float64, queue_size = 10)
         self.theta_publisher = rospy.Publisher('/track_theta', Float64, queue_size = 10)
         self.tracking_publisher = rospy.Publisher('/tracking_status', Bool, queue_size = 10)
-        self.goal_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size = 10)
+        self.goal_publisher = rospy.Publisher('/move_base_simple/goal_pub', PoseStamped, queue_size = 10)
         self.pose_subscriber = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.pose_callback)
         self.tracker_subscriber = rospy.Subscriber('/tracked_persons', TrackedPersons, self.tracker_callback)
         self.poseStamped = PoseStamped()
@@ -116,6 +116,11 @@ class people_tracker():
             
         self.theta_laser = self.theta - self.pose_theta + 90.0
         
+        if self.theta_laser < 0:
+            self.theta_laser = self.theta_laser + 360
+        elif self.theta_laser > 270:
+            self.theta_laser = self.theta_laser - 360
+        
 if __name__ == '__main__':
     
     try:
@@ -136,7 +141,7 @@ if __name__ == '__main__':
             people_tracker_obj.publish_theta()
             # rospy.loginfo("Theta published!")
             people_tracker_obj.publish_tracking_status()
-            people_tracker_obj.rate_5.sleep()
+            people_tracker_obj.rate_10.sleep()
     except rospy.ROSInterruptException: pass
             
 rospy.spin()

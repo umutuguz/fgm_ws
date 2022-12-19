@@ -2,7 +2,9 @@
 
     <node pkg="people_tracker" type="people_tracker.py" name="people_tracker" output="screen">
         <remap from="tracked_persons" to="/spencer/perception/tracked_persons" />
-    </node>>
+    </node>
+
+    <node pkg="people_tracker" type="move_goal_publisher.py" name="move_goal_publisher" output="screen"/>
 
     <node pkg="people_tracker" type="laser_tracker_filter.py" name="laser_tracker_filter" output="screen">
         <remap from="scan" to="/front_rp/rp_scan_filtered_front" />
@@ -16,8 +18,8 @@
         <param name="upper_limit" value="1.3" />
         <param name="lower_limit" value="0.0" />
         <param name="windup_limit" value="1.0" />
-        <param name="max_loop_frequency" value="10.0" />
-        <param name="min_loop_frequency" value="1.0" />
+        <param name="max_loop_frequency" value="30.0" />
+        <param name="min_loop_frequency" value="5.0" />
         <remap from="setpoint" to="/setpoint" />
         <remap from="state" to="/dist_to_goal" />
         <remap from="control_effort" to="/cmd_vel_controller" />
