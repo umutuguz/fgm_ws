@@ -113,7 +113,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 20; // index
-            goalDistTolerance_ = 0.25;
+            goalDistTolerance_ = 0.5;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -190,8 +190,8 @@ namespace local_planner
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 1.25 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
-        linearVelocity = min(linearVel, cmdPtr_);
-        // linearVelocity = min(linearVel, 10.0);
+        // linearVelocity = min(linearVel, cmdPtr_);
+        linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity <= 0.0)
         {
@@ -809,7 +809,7 @@ namespace local_planner
         {
             for (int j = 0 ; j < cols ; j++)
             {
-                array_gap[i][j] = array_gap[i][j] * (163.0/ 344.0);
+                array_gap[i][j] = array_gap[i][j] * (163.0/344.0);
             }
         }
         counter_array = 0;
@@ -818,12 +818,29 @@ namespace local_planner
             for (int j = 0; j < 2; j++)
             {  
                 counter_array++;
-                // ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-                // ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
+                ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+                ROS_INFO_STREAM("Array gap's rounded " << counter_array << " element is = " << round(array_gap[i][j]));
             }
         }
 
-        vector<double> memory_array;
+        double memory_array[min_size][4];
+
+        double lidar_coord_x;
+        double lidar_coord_y;
+
+        lidar_coord_x = odomRX + 0.722*sin(robot_pose_theta*(M_PI/180.0));
+        lidar_coord_y = odomRY + 0.722*cos(robot_pose_theta*(M_PI/180.0));
+
+        // ROS_INFO_STREAM("lidar coord x is: "<< lidar_coord_x);
+        // ROS_INFO_STREAM("lidar coord y is: "<< lidar_coord_y);
+        ROS_INFO_STREAM("odomrx is: "<< odomRX);
+        ROS_INFO_STREAM("odomry is: "<< odomRY);
+
+
+
+
+
+
         // Gap odullendirme baslangici
 
         
@@ -844,6 +861,17 @@ namespace local_planner
             if (beta_temp >= 163)
                 beta_temp = 162.53;
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
+
+            memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
+            memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
+            memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
+            memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
+            ROS_INFO_STREAM("d1X is : " << memory_array[i][0]);
+            ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
+            ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
+            ROS_INFO_STREAM("d2Y is : " << memory_array[i][3]);
+
+
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5))) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5)))) + (M_PI / 180) * (alpha_temp + 8.5))/M_PI;
             gap_midpoints.push_back(midpoint);
             diff_to_goal.push_back(fabs(midpoint - phiGoal));
@@ -857,7 +885,7 @@ namespace local_planner
         {
             for (int i = 0; i<gap_midpoints.size();i++)
             {
-                // ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
+                ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
             }
         }
 
