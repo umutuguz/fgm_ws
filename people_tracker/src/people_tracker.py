@@ -25,7 +25,7 @@ class people_tracker():
         self.tracking_status = False
         self.diffX = 0.0
         self.diffY = 0.0
-        self.set_point = -2.0
+        self.set_point = -1.5
         self.theta = 0.0
         self.theta_laser = 0.0
         self.pose_theta = 0.0
@@ -74,12 +74,19 @@ class people_tracker():
 
         self.poseStamped.header = msg.header
         for TrackedPerson in msg.tracks:
-            if TrackedPerson.track_id == '':
-                self.tracking_status = False
-            else:
+            if TrackedPerson.is_matched == True and TrackedPerson.track_id == 0:
+                # if TrackedPerson.track_id == 0:
                 self.tracking_status = True
-            self.poseStamped.pose.position = TrackedPerson.pose.pose.position
-            self.poseStamped.pose.orientation = TrackedPerson.pose.pose.orientation
+                self.poseStamped.pose.position = TrackedPerson.pose.pose.position
+                self.poseStamped.pose.orientation = TrackedPerson.pose.pose.orientation
+                # rospy.loginfo(TrackedPerson.track_id)
+            elif TrackedPerson.is_matched == True and TrackedPerson.track_id != 0:
+                self.tracking_status = True
+                # self.poseStamped.pose.position = TrackedPerson.pose.pose.position
+                # self.poseStamped.pose.orientation = TrackedPerson.pose.pose.orientation
+                # rospy.loginfo(TrackedPerson.track_id)
+            
+            # rospy.loginfo(TrackedPerson.track_id)
     
     def compute_dist(self):
         
@@ -141,7 +148,7 @@ if __name__ == '__main__':
             people_tracker_obj.publish_theta()
             # rospy.loginfo("Theta published!")
             people_tracker_obj.publish_tracking_status()
-            people_tracker_obj.rate_10.sleep()
+            # people_tracker_obj.rate_10.sleep()
     except rospy.ROSInterruptException: pass
             
 rospy.spin()

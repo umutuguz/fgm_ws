@@ -113,7 +113,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 20; // index
-            goalDistTolerance_ = 0.5;
+            goalDistTolerance_ = 0.25;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -173,7 +173,7 @@ namespace local_planner
         double coefVel;
         double linearVelocity;
 
-        coefVel = 0.5;
+        coefVel = 0.7;
 
         if (dmin > 6)
             dmin_temp = 6;
@@ -190,8 +190,8 @@ namespace local_planner
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 1.25 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
-        // linearVelocity = min(linearVel, cmdPtr_);
-        linearVelocity = min(linearVel, 10.0);
+        linearVelocity = min(linearVel, cmdPtr_);
+        // linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity <= 0.0)
         {
@@ -232,10 +232,10 @@ namespace local_planner
 
             if (!isGoalReached())
             {
-                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.10))
+                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.15))
                 {
                     // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVelocity * 0.75;
+                    cmd_vel.linear.x = linearVelocity;
                     // cmd_vel.linear.x = 0.0;
                     cmd_vel.linear.y = 0.0;
                     cmd_vel.linear.z = 0.0;
