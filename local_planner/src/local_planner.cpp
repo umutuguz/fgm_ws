@@ -190,8 +190,8 @@ namespace local_planner
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 1.25 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
 
-        linearVelocity = min(linearVel, cmdPtr_);
-        // linearVelocity = min(linearVel, 10.0);
+        // linearVelocity = min(linearVel, cmdPtr_);
+        linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity <= 0.0)
         {
@@ -318,6 +318,9 @@ namespace local_planner
 
         return hypot(xDist, yDist);
     }
+
+
+    vector<vector<double>> midpoint_memory;
 
     double LocalPlanner::LLCallback()
     {
@@ -823,12 +826,13 @@ namespace local_planner
             }
         }
 
-        double memory_array[min_size][4];
+        double memory_array[min_size][4]; //gaplerin köse noktalarının x ve y koordinatlarını bulunduran array, ilk sütun d1 ölçümünden gelen X koord, 2. sütun d1'in Y koord, 3. sütun d2'nin X koord, 4. sütun d2'nin Y koord
+        double midpoint_coords[min_size][2]; //memory arraydeki X Y koordinatlarının ortalarının hesaplanıp her satırda 1 gapin orta noktası ilk sütunda X ikinci sütunda Y koord olarak tutulur
 
         double lidar_coord_x;
         double lidar_coord_y;
 
-        lidar_coord_x = odomRX + 0.722*sin(robot_pose_theta*(M_PI/180.0));
+        lidar_coord_x = odomRX + 0.722*sin(robot_pose_theta*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
         lidar_coord_y = odomRY + 0.722*cos(robot_pose_theta*(M_PI/180.0));
 
         // ROS_INFO_STREAM("lidar coord x is: "<< lidar_coord_x);
@@ -836,20 +840,17 @@ namespace local_planner
         ROS_INFO_STREAM("odomrx is: "<< odomRX);
         ROS_INFO_STREAM("odomry is: "<< odomRY);
 
-
-
-
-
-
         // Gap odullendirme baslangici
 
         
-        vector<double> gap_midpoints;
-        vector <double> diff_to_goal;
-        double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint;
+        vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
+        vector <double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
+        double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
+
+
 
         for (int i = 0; i < rows; i++) // her gap icin midpoint makaledeki denklemle hesaplanır
-        {
+        {   // Bu for döngüsü içinde hem açısal olarak midpoint hesabı yapılır hem de hafıza kısmından gelen koordinat oluşturma ve onların midpoint hesabı yapılır.
             // ROS_INFO_STREAM("Total gap count is: " << i+1);
             alpha_temp = array_gap[i][0];
             beta_temp = array_gap[i][1];
@@ -862,14 +863,19 @@ namespace local_planner
                 beta_temp = 162.53;
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
 
-            memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
-            memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
-            memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
-            memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
+            memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
+            memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
+            memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);  //d2 den gelen X
+            memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);  //d2 den gelen Y
             ROS_INFO_STREAM("d1X is : " << memory_array[i][0]);
             ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
             ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
             ROS_INFO_STREAM("d2Y is : " << memory_array[i][3]);
+
+            midpoint_coords[i][0] = (memory_array[i][0] + memory_array[i][2])/2.0; //midpointin X koordinatı
+            midpoint_coords[i][1] = (memory_array[i][1] + memory_array[i][3])/2.0; //midpointin Y koordinatı
+
+            ROS_INFO_STREAM("gap midpoint coords are, x: " << midpoint_coords[i][0] << " y: "<< midpoint_coords[i][1]);
 
 
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5))) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5)))) + (M_PI / 180) * (alpha_temp + 8.5))/M_PI;
@@ -881,13 +887,76 @@ namespace local_planner
 
         // ROS_INFO_STREAM("Gap count is: " << gap_midpoints.size());
 
-        if (gap_midpoints.size() != 0)
+        if (gap_midpoints.size() != 0) //sadece midpointlerin hafızasız kısımlarından gelen açı değerlerini yazdırmak için
         {
             for (int i = 0; i<gap_midpoints.size();i++)
             {
-                ROS_INFO_STREAM("Gap mid point is: " << gap_midpoints[i]);
+                ROS_INFO_STREAM("Gap mid point is at angle: " << gap_midpoints[i]);
             }
         }
+        
+        for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
+        {
+            vector<double> midpoint_x_y;
+
+            ROS_INFO_STREAM("rows is : " << rows);
+
+            midpoint_x_y.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
+            midpoint_x_y.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
+            midpoint_memory.push_back(midpoint_x_y);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
+            for (int i = 0; i < midpoint_x_y.size();i++)
+            {
+                ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
+            }
+
+            
+            // ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << "and " << midpoint_memory[i][1]);
+        }
+
+
+        // for (int i = 0; i < midpoint_x_y.size();i++)
+        // {
+        //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
+        // }
+
+
+
+        if (midpoint_memory.size() >= 10) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
+        {
+            int elements_to_delete = midpoint_memory.size() - 10;
+            midpoint_memory.erase(midpoint_memory.begin(),midpoint_memory.begin()+elements_to_delete);
+        }
+
+        ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
+        for (int i = 0; i < midpoint_memory.size();i++)
+        {
+            for (int j = 0; j < midpoint_memory[i].size(); j++)
+            {
+                ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][j]);
+            }
+        }
+
+        //Aşağıdaki yoruma alınmış kod bloğu büyük vektörü array'e dönüştürmek içindi, çalışmadı.
+
+        // double midpoint_memory_array[midpoint_memory.size()][2];
+
+        // for (int i = 0; i < midpoint_memory.size(); i++)
+        // {
+        //     for (int j = 0; j < 2; j++)
+        //     {
+        //         midpoint_memory_array[i][j] = midpoint_memory[i][j];
+        //         ROS_INFO_STREAM("array one is :" << midpoint_memory_array[i][j]);
+        //     }
+        // }
+
+        // int ro = sizeof(midpoint_memory_array) / sizeof(midpoint_memory_array[0]);
+        // int co = sizeof(midpoint_memory_array[0]) / sizeof(midpoint_memory_array[0][0]);
+
+        // ROS_INFO_STREAM("ro is: "<< ro);
+        // ROS_INFO_STREAM("co is: "<< co);
+        
+
+
 
         vector<double> gap_sizes;
         // double gap_weight = 0.1;
@@ -896,10 +965,10 @@ namespace local_planner
 
         for (int i = 0; i < rows; i++) //midpointlerin 
         {
-            gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0]));
+            gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0])); //açısal anlamda gerçek gap size
             // ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
             // gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
-            gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion);
+            gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion); //ödüllendirilmis gap size
             // ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
         }
 
