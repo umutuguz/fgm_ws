@@ -908,9 +908,6 @@ namespace local_planner
             {
                 ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
             }
-
-            
-            // ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << "and " << midpoint_memory[i][1]);
         }
 
 
@@ -930,9 +927,28 @@ namespace local_planner
         ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
         for (int i = 0; i < midpoint_memory.size();i++)
         {
-            for (int j = 0; j < midpoint_memory[i].size(); j++)
+            ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << " and " << midpoint_memory[i][1]);
+        }
+
+        for (int i = 0; i < midpoint_memory.size(); i++)
+        {
+            // ROS_INFO_STREAM("i is now : " << i);
+            // ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << " and " << midpoint_memory[i][1]);
+            for (int j = 0; j < midpoint_memory.size() ; j++)
             {
-                ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][j]);
+                if(j <= i)
+                {
+                    continue;
+                }
+                else
+                {
+                    if(fabs(midpoint_memory[i][0]-midpoint_memory[j][0]) < 0.5 && fabs(midpoint_memory[i][1]-midpoint_memory[j][1] < 0.5))
+                    {
+                        ROS_INFO_STREAM("same gap detected for " << midpoint_memory[i][0] << " and " << midpoint_memory[j][0]);
+                    }
+                }
+                // ROS_INFO_STREAM("j is now: "<< j);
+
             }
         }
 
