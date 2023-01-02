@@ -3,6 +3,9 @@
 
 PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
+double x_buf[2] = {0.0, 0.0};
+double y_buf[2] = {0.0, 0.0};
+
 namespace local_planner
 {
     LocalPlanner::LocalPlanner() : costmapROS_(NULL), tf_(NULL), initialized_(false) {}
@@ -113,7 +116,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 20; // index
-            goalDistTolerance_ = 0.25;
+            goalDistTolerance_ = 0.35;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -172,31 +175,54 @@ namespace local_planner
         double phiFinal_temp;
         double coefVel;
         double linearVelocity;
+        double tau;
+        // double a0, a1, a2, b0, b1, b2;
 
-        coefVel = 0.7;
+        // cut_off_freq = 5.0; 
+        // sampling_rate = 10.0;
+        // omega = cut_off_freq / sampling_rate;
+        tau = 0.1535;
+
+        // b0 = (1 - cos(omega)) / 2;
+        // b1 = 1 - cos(omega);
+        // b2 = (1 - cos(omega)) / 2;
+        // a0 = 1 + alpha;
+        // a1 = -2 * cos(omega);
+        // a2 = 1 - alpha;
+
+        coefVel = 1.0;
 
         if (dmin > 6)
             dmin_temp = 6;
-        else if (dmin <= 0.1)
-            dmin_temp = 0.11;
+        else if (dmin <= 0.15)
+            dmin_temp = 0.151;
         else
             dmin_temp = dmin;
 
         phiFinal_temp = abs(phiFinal);
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
-        linearVel = (coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.0))) + 0.1;
+        // linearVel = (coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.0))) + 0.1;
+        linearVel = (coefVel * ((0.7 * log((3.5 * (dmin_temp - 0.15)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 6.5))) + 0.01;
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
-        angularVel = 1.25 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2) + 1);
+        angularVel = 0.75 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2.0) + 1);
 
-        // linearVelocity = min(linearVel, cmdPtr_);
-        linearVelocity = min(linearVel, 10.0);
+        linearVelocity = min(linearVel, cmdPtr_);
+        // linearVelocity = min(10.0, cmdPtr_);
+        // linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity <= 0.0)
         {
             linearVelocity = 0.0;
         }
+
+        x_buf[1] = x_buf[0];
+        x_buf[0] = linearVelocity;
+        y_buf[1] = y_buf[0];
+
+        y_buf[0] = y_buf[1] * (1 - tau) + tau * x_buf[0];
+        linearVelocity = y_buf[0];
 
         ROS_INFO_STREAM("Lineer velocity: " << linearVelocity);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
@@ -376,6 +402,7 @@ namespace local_planner
         auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
         // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
         int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
+        // ROS_INFO_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
         dmin = currRange.at(dminIdx+75);
@@ -384,6 +411,8 @@ namespace local_planner
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
         // }
+        // ROS_INFO_STREAM("dmin is : " << dmin);
+
 
         std::vector<int> gap_starting_points;
         std::vector<int> gap_ending_points;
@@ -1055,7 +1084,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 0.75;
+        double alpha_weight = 0.85;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
