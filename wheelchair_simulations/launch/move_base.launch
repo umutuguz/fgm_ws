@@ -3,8 +3,8 @@
   <arg name="cmd_vel_topic" default="/cmd_vel" />
   <arg name="odom_topic" default="/odom" />
   <arg name="move_forward_only" default="true" />
-  <!-- <arg name="scan_topic" default="front_rp/rp_scan_filtered_front" /> -->
-  <arg name="scan_topic" default="/front_rp/track_filtered" />
+  <arg name="scan_topic" default="front_rp/rp_scan_filtered_front" />
+  <!-- <arg name="scan_topic" default="/front_rp/track_filtered" /> -->
   <!-- <arg name="scan_topic" default="scan_multi_filtered" />  -->
 
   <!-- move_base -->

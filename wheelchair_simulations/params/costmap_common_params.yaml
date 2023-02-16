@@ -11,8 +11,8 @@ static:
 
 obstacles_laser:
   map_type: costmap
-  # observation_sources: rp_lidar_front
-  observation_sources: two_lidars
+  observation_sources: rp_lidar_front
+  # observation_sources: two_lidars
   rp_lidar_front: {sensor_frame: rp_laser_front, data_type: LaserScan, topic: front_rp/rp_scan_filtered_front, marking: true, clearing: true}
   rs_camera : {sensor_frame: camera_link, data_type: LaserScan, topic: pseudo_scan, marking: true, clearing: true}
   rp_lidar_back: {sensor_frame: rp_laser_back, data_type: LaserScan, topic: back_rp/rp_scan_filtered_back, marking: false, clearing: false}
