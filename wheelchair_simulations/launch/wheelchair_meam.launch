@@ -10,9 +10,9 @@
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <!-- <arg name="world_name"
-            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_III.world" /> -->   <!-- 0.50 m/s -->
+            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_III.world" />   -->
         <arg name="world_name"
-            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_IIII.world" />  <!-- 0.75 m/s -->
+            value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_IIII.world" /> 
         <!-- <arg name="world_name"
             value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_V.world" /> -->
         <!-- <arg name="world_name" value="$(find
