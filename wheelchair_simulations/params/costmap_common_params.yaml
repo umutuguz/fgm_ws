@@ -3,7 +3,7 @@ raytrace_range: 4.0
 max_obstacle_height: 2.0
 min_obstacle_height: 0.0
 
-footprint: [[-0.30, -0.35], [-0.30, 0.35], [0.95, 0.35], [0.95, -0.35]]
+footprint: [[-0.70, -0.35], [-0.70, 0.35], [0.55, 0.35], [0.55, -0.35]]
 
 static:
   map_topic: /map
@@ -19,5 +19,5 @@ obstacles_laser:
   two_lidars: {sensor_frame: base_link, data_type: LaserScan, topic: scan_multi_filtered, marking: true, clearing: true}
 
 inflation:
-  inflation_radius: 0.50
-  cost_scaling_factor: 10
+  inflation_radius: 0.60
+  cost_scaling_factor: 25

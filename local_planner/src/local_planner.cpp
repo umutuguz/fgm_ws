@@ -5,10 +5,8 @@ PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
 double x_buf[2] = {0.0, 0.0};
 double y_buf[2] = {0.0, 0.0};
-<<<<<<< HEAD
-=======
-
->>>>>>> ae4571dd82931d712de3171d6e63868b12066327
+double xx_buf[2] = {0.0, 0.0};
+double yy_buf[2] = {0.0, 0.0};
 namespace local_planner
 {
     LocalPlanner::LocalPlanner() : costmapROS_(NULL), tf_(NULL), initialized_(false) {}
@@ -118,7 +116,7 @@ namespace local_planner
             double diffX = waypointX - currentPose_.position.x;
             double diffY = waypointY - currentPose_.position.y;
 
-            double lookAheadDist_ = 20; // index
+            double lookAheadDist_ = 30; // index
             goalDistTolerance_ = 0.35;
 
             // ROS_INFO("global plan waypoint index: %u", i);
@@ -178,19 +176,15 @@ namespace local_planner
         double phiFinal_temp;
         double coefVel;
         double linearVelocity;
-<<<<<<< HEAD
-        // double cut_off_freq;
-        // double sampling_rate;
-        // double omega;
-=======
->>>>>>> ae4571dd82931d712de3171d6e63868b12066327
-        double tau;
+        double alpha_buf;
+        double beta_buf;
         // double a0, a1, a2, b0, b1, b2;
 
         // cut_off_freq = 5.0; 
         // sampling_rate = 10.0;
         // omega = cut_off_freq / sampling_rate;
-        tau = 0.1535;
+        alpha_buf = 0.1535;
+        beta_buf = 0.8;
 
         // b0 = (1 - cos(omega)) / 2;
         // b1 = 1 - cos(omega);
@@ -217,9 +211,9 @@ namespace local_planner
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 0.75 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2.0) + 1);
 
-        linearVelocity = min(linearVel, cmdPtr_);
+        // linearVelocity = min(linearVel, cmdPtr_);
         // linearVelocity = min(10.0, cmdPtr_);
-        // linearVelocity = min(linearVel, 10.0);
+        linearVelocity = min(linearVel, 10.0);
 
         if (linearVelocity <= 0.0)
         {
@@ -230,8 +224,15 @@ namespace local_planner
         x_buf[0] = linearVelocity;
         y_buf[1] = y_buf[0];
 
-        y_buf[0] = y_buf[1] * (1 - tau) + tau * x_buf[0];
-        linearVelocity = y_buf[0];
+        y_buf[0] = y_buf[1] * (1 - alpha_buf) + alpha_buf * x_buf[0];
+        linearVelocity = y_buf[0]; //linear hız denklemden gelen alınır önce, sonra bir önceki cycledaki linear hız ile alpha, 1-alpha oranında birleştirilir.
+
+        xx_buf[1] = xx_buf[0];
+        xx_buf[0] = angularVel;
+        yy_buf[1] = yy_buf[0];
+
+        yy_buf[0] = yy_buf[1] * (1 - beta_buf) + beta_buf * xx_buf[0]; //aynısı angular hız için beta kullanılarak yapılır.
+        angularVel = yy_buf[0];
 
         ROS_INFO_STREAM("Lineer velocity: " << linearVelocity);
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
@@ -415,12 +416,16 @@ namespace local_planner
 
         // dmin = currRange.at(dminIdx);
         dmin = currRange.at(dminIdx+75);
+        if (dmin <= 0.01)
+        {
+            dmin = 0.01;
+        }
         // ROS_INFO_STREAM("curRangesize is " << currRange.size());
         // for (unsigned int i = 0; i < currRange.size(); i++)
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
         // }
-        // ROS_INFO_STREAM("dmin is : " << dmin);
+        ROS_INFO_STREAM("dmin is : " << dmin);
 
 
         std::vector<int> gap_starting_points;
@@ -902,16 +907,6 @@ namespace local_planner
                 ROS_INFO_STREAM("beta_temp at: " << beta_temp);
             d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
 
-<<<<<<< HEAD
-            memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
-            memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0);
-            memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
-            memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);
-            // ROS_INFO_STREAM("d1X is : " << memory_array[i][0]);
-            // ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
-            // ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
-            // ROS_INFO_STREAM("d2Y is : " << memory_array[i][3]);
-=======
             memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
             memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
             memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);  //d2 den gelen X
@@ -920,7 +915,6 @@ namespace local_planner
             ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
             ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
             ROS_INFO_STREAM("d2Y is : " << memory_array[i][3]);
->>>>>>> ae4571dd82931d712de3171d6e63868b12066327
 
             midpoint_coords[i][0] = (memory_array[i][0] + memory_array[i][2])/2.0; //midpointin X koordinatı
             midpoint_coords[i][1] = (memory_array[i][1] + memory_array[i][3])/2.0; //midpointin Y koordinatı
@@ -1083,6 +1077,15 @@ namespace local_planner
         }
         ROS_INFO_STREAM("d2 2: " << d2);
 
+        if (alpha == 0.0)
+        {
+            d1 = d2;
+        }
+        if (beta == 162.01)
+        {
+            d2 = d1;
+        }
+
         // ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
         phi_gap = acos((d1 + d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5))) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5)))) + (M_PI / 180) * (alpha + 8.5);
@@ -1105,7 +1108,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 0.85;
+        double alpha_weight = 0.5;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
