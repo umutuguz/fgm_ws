@@ -870,13 +870,13 @@ namespace local_planner
         }
 
         double memory_array[min_size][4]; //gaplerin köse noktalarının x ve y koordinatlarını bulunduran array, ilk sütun d1 ölçümünden gelen X koord, 2. sütun d1'in Y koord, 3. sütun d2'nin X koord, 4. sütun d2'nin Y koord
-        double midpoint_coords[min_size][2]; //memory arraydeki X Y koordinatlarının ortalarının hesaplanıp her satırda 1 gapin orta noktası ilk sütunda X ikinci sütunda Y koord olarak tutulur
+        double midpoint_coords[min_size][3]; //memory arraydeki X Y koordinatlarının ortalarının hesaplanıp her satırda 1 gapin orta noktası ilk sütunda X ikinci sütunda Y koord olarak tutulur
 
         double lidar_coord_x;
         double lidar_coord_y;
 
-        lidar_coord_x = odomRX + 0.722*sin(robot_pose_theta*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
-        lidar_coord_y = odomRY + 0.722*cos(robot_pose_theta*(M_PI/180.0));
+        lidar_coord_x = odomRX + 0.322*sin(robot_pose_theta*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
+        lidar_coord_y = odomRY + 0.322*cos(robot_pose_theta*(M_PI/180.0));
 
         // ROS_INFO_STREAM("lidar coord x is: "<< lidar_coord_x);
         // ROS_INFO_STREAM("lidar coord y is: "<< lidar_coord_y);
@@ -888,7 +888,9 @@ namespace local_planner
         
         vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
         vector <double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
-        double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
+        vector<vector<double>> same_gap_memory;
+        vector<double> same_gap_inner;
+        double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint, gap_width; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
 
 
 
@@ -915,11 +917,14 @@ namespace local_planner
             ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
             ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
             ROS_INFO_STREAM("d2Y is : " << memory_array[i][3]);
+            gap_width = sqrt(pow((memory_array[i][0] - memory_array[i][2]),2) + pow((memory_array[i][1] - memory_array[i][3]),2));
+
 
             midpoint_coords[i][0] = (memory_array[i][0] + memory_array[i][2])/2.0; //midpointin X koordinatı
             midpoint_coords[i][1] = (memory_array[i][1] + memory_array[i][3])/2.0; //midpointin Y koordinatı
+            midpoint_coords[i][2] = gap_width;
 
-            ROS_INFO_STREAM("gap midpoint coords are, x: " << midpoint_coords[i][0] << " y: "<< midpoint_coords[i][1]);
+            ROS_INFO_STREAM("gap midpoint coords are, x: " << midpoint_coords[i][0] << " y: "<< midpoint_coords[i][1] << " width: " << gap_width);
 
 
             midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5))) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5)))) + (M_PI / 180) * (alpha_temp + 8.5))/M_PI;
@@ -947,6 +952,7 @@ namespace local_planner
 
             midpoint_x_y.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
             midpoint_x_y.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
+            midpoint_x_y.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
             midpoint_memory.push_back(midpoint_x_y);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
             for (int i = 0; i < midpoint_x_y.size();i++)
             {
@@ -971,13 +977,12 @@ namespace local_planner
         ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
         for (int i = 0; i < midpoint_memory.size();i++)
         {
-            ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << " and " << midpoint_memory[i][1]);
+            ROS_INFO_STREAM("midpoint memory has: X| " << midpoint_memory[i][0] << " Y | " << midpoint_memory[i][1] << "width | " << midpoint_memory[i][2]);
         }
 
         for (int i = 0; i < midpoint_memory.size(); i++)
         {
-            // ROS_INFO_STREAM("i is now : " << i);
-            // ROS_INFO_STREAM("midpoint memory has: " << midpoint_memory[i][0] << " and " << midpoint_memory[i][1]);
+            same_gap_inner.push_back(i);
             for (int j = 0; j < midpoint_memory.size() ; j++)
             {
                 if(j <= i)
@@ -986,37 +991,27 @@ namespace local_planner
                 }
                 else
                 {
-                    if(fabs(midpoint_memory[i][0]-midpoint_memory[j][0]) < 0.5 && fabs(midpoint_memory[i][1]-midpoint_memory[j][1] < 0.5))
+                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.5)
                     {
-                        ROS_INFO_STREAM("same gap detected for " << midpoint_memory[i][0] << " and " << midpoint_memory[j][0]);
+                        same_gap_inner.push_back(j);
+                        ROS_INFO_STREAM("same gap detected for " << i << " and " << j);
                     }
                 }
-                // ROS_INFO_STREAM("j is now: "<< j);
-
             }
+            same_gap_memory.push_back(same_gap_inner);
+            same_gap_inner.clear();
         }
 
-        //Aşağıdaki yoruma alınmış kod bloğu büyük vektörü array'e dönüştürmek içindi, çalışmadı.
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory[i].size(); j++)
+            {
+                ROS_INFO_STREAM(" " << same_gap_memory[i][j]);
+            }
+            ROS_INFO_STREAM("\n");
+        }
 
-        // double midpoint_memory_array[midpoint_memory.size()][2];
-
-        // for (int i = 0; i < midpoint_memory.size(); i++)
-        // {
-        //     for (int j = 0; j < 2; j++)
-        //     {
-        //         midpoint_memory_array[i][j] = midpoint_memory[i][j];
-        //         ROS_INFO_STREAM("array one is :" << midpoint_memory_array[i][j]);
-        //     }
-        // }
-
-        // int ro = sizeof(midpoint_memory_array) / sizeof(midpoint_memory_array[0]);
-        // int co = sizeof(midpoint_memory_array[0]) / sizeof(midpoint_memory_array[0][0]);
-
-        // ROS_INFO_STREAM("ro is: "<< ro);
-        // ROS_INFO_STREAM("co is: "<< co);
-        
-
-
+        same_gap_memory.clear();
 
         vector<double> gap_sizes;
         // double gap_weight = 0.1;
