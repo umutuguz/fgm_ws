@@ -356,7 +356,7 @@ namespace local_planner
     }
 
 
-    vector<vector<double>> midpoint_memory;
+    vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
 
     double LocalPlanner::LLCallback()
     {
@@ -888,8 +888,8 @@ namespace local_planner
         
         vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
         vector <double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
-        vector<vector<double>> same_gap_memory;
-        vector<double> same_gap_inner;
+        vector<vector<double>> same_gap_memory; //dış vektör ama sadece indeks olarak tutan
+        vector<double> same_gap_inner; //iç vektör ama sadece indeks olarak tutan
         double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint, gap_width; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
 
 
@@ -946,7 +946,7 @@ namespace local_planner
         
         for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
         {
-            vector<double> midpoint_x_y;
+            vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
 
             ROS_INFO_STREAM("rows is : " << rows);
 
@@ -1001,14 +1001,93 @@ namespace local_planner
             same_gap_memory.push_back(same_gap_inner);
             same_gap_inner.clear();
         }
-
+        // bu for döngüsü her i elemanı ile aynı gapi gösteren j elemanlarını yazdırmak için kullanılır.
         for (int i = 0; i < same_gap_memory.size(); i++)
         {
             for (int j = 0; j < same_gap_memory[i].size(); j++)
             {
                 ROS_INFO_STREAM(" " << same_gap_memory[i][j]);
             }
-            ROS_INFO_STREAM("\n");
+            ROS_INFO_STREAM("---");
+        }
+        ROS_INFO_STREAM("saglam1");
+        //alttaki parça same_gap_memory i sadeleştirmek için yazılmıştır. İcindeki vektörlerde ortak eleman olanları tespit eder.
+        
+        vector<double> merged_vector;
+        vector<double>::iterator it_common, iter_end;
+        int no_of_common_elements = 0;
+
+        //silinecek sadece yazdırma for döngüsü
+        // for (int i = 0; i<same_gap_memory.size(); i++)
+        // {
+        //     ROS_INFO_STREAM("eleman " << i);
+        //     for (int j = 0; j < same_gap_memory[i].size(); j++)
+        //     {
+        //         ROS_INFO_STREAM(" " << same_gap_memory[i][j]);
+        //     }
+        // }
+
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory.size(); j++)
+            {
+                vector<double> common_elements_in_vectors(same_gap_memory[i].size()+same_gap_memory[j].size());
+                if (j <= i)
+                {
+                    continue;
+                }
+                else
+                {
+                    // ROS_INFO_STREAM("saglam2");
+                    // ROS_INFO_STREAM("i is " << i);
+                    // ROS_INFO_STREAM("j is " << j);
+                    iter_end = set_intersection(same_gap_memory[i].begin(), same_gap_memory[i].end(), same_gap_memory[j].begin(), same_gap_memory[j].end(), common_elements_in_vectors.begin());
+                    // ROS_INFO_STREAM("saglam3");
+
+                    for (it_common = common_elements_in_vectors.begin(); it_common != iter_end; it_common++)
+                    {
+                        // ROS_INFO_STREAM("saglam4");
+                        no_of_common_elements++;
+                    }
+                    if (no_of_common_elements > 0)
+                    {
+                        for (int k : same_gap_memory[i])
+                        {
+                            // ROS_INFO_STREAM("saglam4");
+                            if (find(merged_vector.begin(), merged_vector.end(), k) == merged_vector.end())
+                            {
+                                merged_vector.push_back(k);
+                            }
+                        }
+                        for (int l : same_gap_memory[j])
+                        {
+                            if (find(merged_vector.begin(), merged_vector.end(), l) == merged_vector.end())
+                            {
+                                merged_vector.push_back(l);
+                            }
+                        }
+                        same_gap_memory[i] = merged_vector;
+                        same_gap_memory[j] = merged_vector;
+                        merged_vector.clear();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    no_of_common_elements = 0;
+
+                }
+
+            }
+        }
+
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory[i].size(); j++)
+            {
+                ROS_INFO_STREAM(same_gap_memory[i][j] << " ");
+            }
+            ROS_INFO_STREAM("---");
         }
 
         same_gap_memory.clear();
