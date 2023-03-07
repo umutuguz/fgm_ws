@@ -895,7 +895,7 @@ namespace local_planner
 
         
         vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
-        vector <double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
+        vector<double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
         vector<vector<double>> same_gap_memory; //dış vektör ama sadece indeks olarak tutan
         vector<double> same_gap_inner; //iç vektör ama sadece indeks olarak tutan
         double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint, gap_width; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
@@ -1130,13 +1130,116 @@ namespace local_planner
             final_width = 0.0;
         }
 
+        vector<double> diff_to_goal_new;
+        vector<double> xDiff_new;
+        vector<double> yDiff_new;
+        vector<double> phi_gap_temp;
+        vector<double> gap_sizes_new;
+        double phi_gap_calculator;
+
+
         //en son hafızada birleştirilmiş gaplerin x, y koordinatları ve genişliği
-        ROS_INFO_STREAM("There are total of: " << same_gap_memory.size() << " gaps in memory");
+        ROS_INFO_STREAM("There are total of: " << gaps_in_memory.size() << " gaps in memory");
         for (int i = 0; i < gaps_in_memory.size(); i++)
         {
+            xDiff_new.push_back(gaps_in_memory[i][0] - odomRX);
+            yDiff_new.push_back(gaps_in_memory[i][1] - odomRY);
+            phi_gap_calculator = atan2(yDiff_new[i], xDiff_new[i])*180/M_PI;
+
+            if ((odomRX >= gaps_in_memory[i][0]) && (odomRY <= gaps_in_memory[i][1]))
+                phi_gap_calculator = 450 - phi_gap_calculator;
+            else
+                phi_gap_calculator = 90 - phi_gap_calculator;
+
+            if (gaps_in_memory[i][0] == odomRX && gaps_in_memory[i][1] > odomRY)
+            {
+                phi_gap_calculator = 0;
+            }
+
+            if (gaps_in_memory[i][0] == odomRX && gaps_in_memory[i][1] < odomRY)
+            {
+                phi_gap_calculator = 180;
+            }
+
+            if (gaps_in_memory[i][0] > odomRX && gaps_in_memory[i][1] == odomRY)
+            {
+                phi_gap_calculator = 90;
+            }
+
+            if (gaps_in_memory[i][0] < odomRX && gaps_in_memory[i][1] == odomRY)
+            {
+                phi_gap_calculator = 270;
+            }
+
+            phi_gap_calculator = phi_gap_calculator - (robot_pose_theta - 90);
+
+            if (phi_gap_calculator < 0.0)
+            {
+                phi_gap_calculator = phi_gap_calculator + 360.0;
+            }
+            else if (phi_gap_calculator > 270.0)
+            {
+                // phiGoal = 450.0 - phiGoal;
+                phi_gap_calculator = phi_gap_calculator - 360.0;
+            }
+
+            phi_gap_temp.push_back(phi_gap_calculator);
+            ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
+            diff_to_goal_new.push_back(phi_gap_temp[i] - phiGoal);
             ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
         }
 
+        // hafızadaki gapleri ödüllendirme
+
+
+/*
+        phiGoal = phiGoal * 180 / M_PI;
+
+        if ((odomRX >= goalX) && (odomRY <= goalY))
+            phiGoal = 450 - phiGoal;
+        else
+            phiGoal = 90 - phiGoal;
+
+        if (goalX == odomRX && goalY > odomRY)
+        {
+            phiGoal = 0;
+        }
+
+        if (goalX == odomRX && goalY < odomRY)
+        {
+            phiGoal = 180;
+        }
+
+        if (goalX > odomRX && goalY == odomRY)
+        {
+            phiGoal = 90;
+        }
+
+        if (goalX < odomRX && goalY == odomRY)
+        {
+            phiGoal = 270;
+        }
+        // ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
+        // ROS_INFO_STREAM("phi goal is: " << phiGoal);
+
+        // phiGoal = phiGoal + robot_pose_theta;
+
+        ROS_INFO_STREAM("hic manupule edilmemis phi goal: " << phiGoal);
+
+        phiGoal = phiGoal - (robot_pose_theta - 90);
+
+        ROS_INFO_STREAM("manupule edilmemis phi goal: " << phiGoal);
+
+        if (phiGoal < 0.0)
+        {
+            phiGoal = phiGoal + 360.0;
+        }
+        else if (phiGoal > 270.0)
+        {
+            // phiGoal = 450.0 - phiGoal;
+            phiGoal = phiGoal - 360.0;
+        }
+*/
 
         same_gap_memory.clear();
         gaps_in_memory.clear();
@@ -1146,13 +1249,13 @@ namespace local_planner
         double gap_slew_rate = 0.5; //Gap büyütme hızını belirler, bu katsayıyı büyütmek hızı üstel olarak büyütür.
         double gap_expansion = 0.5; //Gap büyütme oranını belirler, bu katsayıyı büyütmek gap genişleme oranını doğrusal arttırır.
 
-        for (int i = 0; i < rows; i++) //midpointlerin 
+        for (int i = 0; i < rows; i++) //derece cinsinden gap sizelara göre ödüllendirme yapılan kısım, eski klasik FGM için kullanılır. 
         {
             gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0])); //açısal anlamda gerçek gap size
             // ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
             // gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
             gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion); //ödüllendirilmis gap size
-            // ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
+            ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
         }
 
         // gap odullendirme bitisi
@@ -1167,7 +1270,9 @@ namespace local_planner
         alpha = array_gap[max_gap_idx][0];
         beta = array_gap[max_gap_idx][1];
         if (beta >= 163)
+        {
                 beta = 162.01;
+        }
 
         ROS_INFO_STREAM("alpha is: " << (alpha+8.5));
         ROS_INFO_STREAM("beta is: " << (beta+8.5));
@@ -1208,8 +1313,6 @@ namespace local_planner
         {
             d2 = d1;
         }
-
-        // ROS_INFO_STREAM("alpha is: " << alpha << "beta is : " << beta << "sqrt term is : " << d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * beta - (M_PI / 180) * alpha));
 
         phi_gap = acos((d1 + d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5))) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5)))) + (M_PI / 180) * (alpha + 8.5);
         phi_gap = phi_gap * 180 / M_PI;
