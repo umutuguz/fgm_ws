@@ -116,8 +116,8 @@ namespace local_planner
             double diffX = waypointX - currentPose_.position.x;
             double diffY = waypointY - currentPose_.position.y;
 
-            double lookAheadDist_ = 30; // index
-            goalDistTolerance_ = 0.35;
+            double lookAheadDist_ = 100; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
+            goalDistTolerance_ = 0.120;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -374,8 +374,9 @@ namespace local_planner
         double odomRY = posePtr_->pose.pose.position.y;
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double robot_pose_theta = tf::getYaw(currentPose_.orientation);
+        double robot_pose_theta_manipulated;
         robot_pose_theta = robot_pose_theta * 180 / M_PI;
-        // ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
+        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
 
 
         double goalX = currentGoalPose_.position.x;
@@ -385,7 +386,7 @@ namespace local_planner
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
-        ROS_INFO_STREAM("Scan ptr size is: " << scanPtr_->ranges.size());
+        // ROS_INFO_STREAM("Scan ptr size is: " << scanPtr_->ranges.size());
 
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
@@ -396,7 +397,7 @@ namespace local_planner
         currRange = laserRanges;
         // currRange.erase(currRange.begin(), currRange.begin() + 190); //scanmulti filtrelenmiş verisi sandalyenin arkası 0 olacak şekilde saat yönü tersinde geliyor
         // buradan arkadan ilk 90 ve son 90 derece kırpılarak field of view sadece öndeki 180 derece olacak şekilde ayarlanmıştır.
-        ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
+        // ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
         // currRange.erase(currRange.begin() + 380, currRange.end());
         // ROS_INFO_STREAM("currrange size is now: "<< currRange.size());
 
@@ -458,66 +459,37 @@ namespace local_planner
         
         xDiff = goalX - odomRX;
         yDiff = goalY - odomRY;
+        ROS_INFO_STREAM("goalX is : " << goalX << " goalY is : " << goalY);
+        ROS_INFO_STREAM("odomRX is : " << odomRX << " odomRY is : " << odomRY);
 
         if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
-            robot_pose_theta = 450 - robot_pose_theta;
+        {
+            robot_pose_theta_manipulated = 450 - robot_pose_theta;
+        }
         else
-            robot_pose_theta = 90 - robot_pose_theta;
+        {
+            robot_pose_theta_manipulated = 90 - robot_pose_theta;
+        }
+
         phiGoal = atan2(yDiff, xDiff);
         phiGoal = phiGoal * 180 / M_PI;
-        // ROS_INFO_STREAM("Goal angle 1 is: " << phiGoal);
+        ROS_INFO_STREAM("atan2 output is : " << phiGoal);
 
-        // if ((odomRX > goalX) && (odomRY < goalY))
-        if ((odomRX >= goalX) && (odomRY <= goalY)) // Belki çözer?
-            phiGoal = 450 - phiGoal;
-        else
-            phiGoal = 90 - phiGoal;
+        phiGoal = robot_pose_theta - phiGoal + 90;
 
-        if (goalX == odomRX && goalY > odomRY)
+        if (phiGoal < -90)
         {
-            phiGoal = 0;
+            phiGoal = phiGoal + 360;
+        }
+        else if (phiGoal > 270)
+        {
+            phiGoal = phiGoal - 360;
         }
 
-        if (goalX == odomRX && goalY < odomRY)
-        {
-            phiGoal = 180;
-        }
-
-        if (goalX > odomRX && goalY == odomRY)
-        {
-            phiGoal = 90;
-        }
-
-        if (goalX < odomRX && goalY == odomRY)
-        {
-            phiGoal = 270;
-        }
-        // ROS_INFO_STREAM("robot pose theta : " << robot_pose_theta);
-        // ROS_INFO_STREAM("phi goal is: " << phiGoal);
-
-        // phiGoal = phiGoal + robot_pose_theta;
-
-        // ROS_INFO_STREAM("hic manupule edilmemis phi goal: " << phiGoal);
-
-        phiGoal = phiGoal - (robot_pose_theta - 90);
-
-        // ROS_INFO_STREAM("manupule edilmemis phi goal: " << phiGoal);
-
-        if (phiGoal < 0.0)
-        {
-            phiGoal = phiGoal + 360.0;
-        }
-        else if (phiGoal > 270.0)
-        {
-            // phiGoal = 450.0 - phiGoal;
-            phiGoal = phiGoal - 360.0;
-        }
+       
         vector<vector<double>> same_gap_memory; //dış vektör ama sadece indeks olarak tutan
         vector<double> same_gap_inner;
         double phi_gap = 0.0;
-
-        // ROS_INFO_STREAM("Onemli phi goal: " << phiGoal);
-        // ROS_INFO_STREAM("Onemli robot pose theta: " << robot_pose_theta);
         
         //gap olmadığı durum için phifinal ayarlaması sadece
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
@@ -884,8 +856,8 @@ namespace local_planner
             double lidar_coord_x;
             double lidar_coord_y;
 
-            lidar_coord_x = odomRX + 0.322*sin(robot_pose_theta*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
-            lidar_coord_y = odomRY + 0.322*cos(robot_pose_theta*(M_PI/180.0));
+            lidar_coord_x = odomRX + 0.322*sin(robot_pose_theta_manipulated*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
+            lidar_coord_y = odomRY + 0.322*cos(robot_pose_theta_manipulated*(M_PI/180.0));
 
             // ROS_INFO_STREAM("lidar coord x is: "<< lidar_coord_x);
             // ROS_INFO_STREAM("lidar coord y is: "<< lidar_coord_y);
@@ -897,7 +869,7 @@ namespace local_planner
             
             vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
             vector<double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
- //iç vektör ama sadece indeks olarak tutan
+            //iç vektör ama sadece indeks olarak tutan
             double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint, gap_width; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
 
 
@@ -917,10 +889,10 @@ namespace local_planner
                     // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
 
-                memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
-                memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
-                memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);  //d2 den gelen X
-                memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta + (beta_temp+8.5))/180.0);  //d2 den gelen Y
+                memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
+                memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
+                memory_array[i][2] = lidar_coord_x - d2_temp*cos(M_PI*(robot_pose_theta_manipulated + (beta_temp+8.5))/180.0);  //d2 den gelen X
+                memory_array[i][3] = lidar_coord_y + d2_temp*sin(M_PI*(robot_pose_theta_manipulated + (beta_temp+8.5))/180.0);  //d2 den gelen Y
                 // ROS_INFO_STREAM("d1X is : " << memory_array[i][0]);
                 // ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
                 // ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
@@ -985,7 +957,7 @@ namespace local_planner
             midpoint_memory.erase(midpoint_memory.begin(),midpoint_memory.begin()+elements_to_delete);
         }
 
-        ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
+        // ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
         // for (int i = 0; i < midpoint_memory.size();i++)
         // {
         //     ROS_INFO_STREAM("midpoint memory has: X| " << midpoint_memory[i][0] << " Y | " << midpoint_memory[i][1] << " width | " << midpoint_memory[i][2]);
@@ -1148,47 +1120,21 @@ namespace local_planner
             yDiff_new.push_back(gaps_in_memory[i][1] - odomRY);
             phi_gap_calculator = atan2(yDiff_new[i], xDiff_new[i])*180/M_PI;
 
-            if ((odomRX >= gaps_in_memory[i][0]) && (odomRY <= gaps_in_memory[i][1]))
-                phi_gap_calculator = 450 - phi_gap_calculator;
-            else
-                phi_gap_calculator = 90 - phi_gap_calculator;
+            phi_gap_calculator = robot_pose_theta - phi_gap_calculator + 90;
 
-            if (gaps_in_memory[i][0] == odomRX && gaps_in_memory[i][1] > odomRY)
+            if (phi_gap_calculator < -90)
             {
-                phi_gap_calculator = 0;
+                phi_gap_calculator = phi_gap_calculator + 360;
             }
-
-            if (gaps_in_memory[i][0] == odomRX && gaps_in_memory[i][1] < odomRY)
+            else if (phi_gap_calculator > 270)
             {
-                phi_gap_calculator = 180;
-            }
-
-            if (gaps_in_memory[i][0] > odomRX && gaps_in_memory[i][1] == odomRY)
-            {
-                phi_gap_calculator = 90;
-            }
-
-            if (gaps_in_memory[i][0] < odomRX && gaps_in_memory[i][1] == odomRY)
-            {
-                phi_gap_calculator = 270;
-            }
-
-            phi_gap_calculator = phi_gap_calculator - (robot_pose_theta - 90);
-
-            if (phi_gap_calculator < 0.0)
-            {
-                phi_gap_calculator = phi_gap_calculator + 360.0;
-            }
-            else if (phi_gap_calculator > 270.0)
-            {
-                // phiGoal = 450.0 - phiGoal;
-                phi_gap_calculator = phi_gap_calculator - 360.0;
+                phi_gap_calculator = phi_gap_calculator - 360;
             }
 
             phi_gap_temp.push_back(phi_gap_calculator);
             ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
             diff_to_goal_new.push_back(fabs(phi_gap_temp[i] - phiGoal));
-            ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
+            // ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
             ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
         }
 
@@ -1227,6 +1173,8 @@ namespace local_planner
         diff_to_goal_new.clear();
 
         //eski FGM ödüllendirme kısmı
+
+
         /*
 
         vector<double> gap_sizes;
@@ -1339,7 +1287,6 @@ namespace local_planner
         {
             phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         }
-
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
