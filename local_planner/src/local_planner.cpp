@@ -52,6 +52,8 @@ namespace local_planner
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
+            marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("gap_markers", 10);
+
             globalPlanPub_ = nh_.advertise<nav_msgs::Path>("global_plan", 1);
 
             distToGoalPub_ = nh_.advertise<std_msgs::Float32>("distance_to_goal", 1);
@@ -116,8 +118,8 @@ namespace local_planner
             double diffX = waypointX - currentPose_.position.x;
             double diffY = waypointY - currentPose_.position.y;
 
-            double lookAheadDist_ = 100; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
-            goalDistTolerance_ = 0.120;
+            double lookAheadDist_ = 60; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
+            goalDistTolerance_ = 0.65;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -271,7 +273,7 @@ namespace local_planner
 
             if (!isGoalReached())
             {
-                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.15))
+                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.2))
                 {
                     // Use the last refence cmd_vel command
                     cmd_vel.linear.x = linearVelocity;
@@ -294,8 +296,8 @@ namespace local_planner
 
                 cmd_vel.angular.x = 0.0;
                 cmd_vel.angular.y = 0.0;
-                cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
-                // cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
+                // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
+                cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
                 }
             }
             
@@ -951,7 +953,7 @@ namespace local_planner
 
 
 
-        if (midpoint_memory.size() >= 10) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
+        if (midpoint_memory.size() >= 100) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
         {
             int elements_to_delete = midpoint_memory.size() - 10;
             midpoint_memory.erase(midpoint_memory.begin(),midpoint_memory.begin()+elements_to_delete);
@@ -974,7 +976,7 @@ namespace local_planner
                 }
                 else
                 {
-                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.5)
+                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.6)
                     {
                         same_gap_inner.push_back(j); //kıyaslanan ikinci eleman ilkiyla aynıysa sırayla bunlar da iç vektöre pushlanır.
                         //ROS_INFO_STREAM("same gap detected for " << i << " and " << j);
@@ -1082,6 +1084,8 @@ namespace local_planner
         double y_coord = 0.0;
         double final_width = 0.0;
 
+
+
         for (auto& innerVec : same_gap_memory)
         {
             for (auto& element : innerVec)
@@ -1103,6 +1107,30 @@ namespace local_planner
             y_coord = 0.0;
             final_width = 0.0;
         }
+
+        visualization_msgs::MarkerArray markers;
+        markers.markers.reserve(gaps_in_memory.size());
+        for (int i = 0; i < gaps_in_memory.size(); i++)
+        {
+            visualization_msgs::Marker marker;
+            marker.header.frame_id = "map";
+            marker.header.stamp = ros::Time::now();
+            marker.id = i;
+            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.action = visualization_msgs::Marker::ADD;
+            marker.pose.orientation.w = 1.0;
+            marker.scale.z = 0.1;
+            marker.color.a = 1.0;
+            marker.color.r = 1.0;
+            marker.pose.position.x = gaps_in_memory[i][0];
+            marker.pose.position.y = gaps_in_memory[i][1];
+            marker.pose.position.z = 0.05;
+            marker.scale.x = gaps_in_memory[i][2];
+            marker.scale.y = gaps_in_memory[i][2];
+
+            markers.markers.push_back(marker);
+        }
+        marker_pub_.publish(markers);
 
         vector<double> diff_to_goal_new;
         vector<double> xDiff_new;

@@ -13,6 +13,7 @@ Panels:
         - /Local Map1/Costmap1
         - /Local Map1/Planner1
         - /LaserScan2
+        - /MarkerArray1
       Splitter Ratio: 0.5
     Tree Height: 814
   - Class: rviz/Selection
@@ -71,6 +72,7 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
         base_link:
           Alpha: 1
           Show Axes: false
@@ -457,6 +459,14 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /move_base/local_planner/gap_markers
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -490,10 +500,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 46.61558151245117
+      Scale: 16.764572143554688
       Target Frame: <Fixed Frame>
-      X: 2.4380087852478027
-      Y: -2.422630786895752
+      X: 0.5695199370384216
+      Y: -0.2498687207698822
     Saved: ~
 Window Geometry:
   Displays:
@@ -513,5 +523,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1920
-  X: 0
+  X: 133
   Y: 0

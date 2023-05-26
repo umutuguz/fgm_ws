@@ -5,7 +5,8 @@
 #include <ros/ros.h>
 #include <nav_core/base_local_planner.h>
 
-
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <tf2_ros/buffer.h>
 #include <costmap_2d/costmap_2d.h>
 #include <costmap_2d/costmap_2d_ros.h>
@@ -16,6 +17,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float64.h>
@@ -105,6 +107,7 @@ private:
     ros::Publisher globalPlanPub_;
     ros::Publisher distToGoalPub_;
     ros::Publisher wRefPub_;
+    ros::Publisher marker_pub_;
 
     double lookAheadDist_ = 1.1;
     double goalDistTolerance_;
