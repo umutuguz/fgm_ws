@@ -1,11 +1,11 @@
 <launch>
 
-    <arg name="x_pos" default="-1.0" />
-    <arg name="y_pos" default="2.0" />
+    <arg name="x_pos" default="2" />
+    <arg name="y_pos" default="2" />
     <arg name="z_pos" default="0.0" />
     <arg name="roll" default="0.0" />
     <arg name="pitch" default="0.0" />
-    <arg name="yaw" default="-1.5707963268" />2222
+    <arg name="yaw" default="-1.5707963268" />
     <arg name="open_rviz" default="false" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -15,8 +15,9 @@
             value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_IIII.world" />  0.75 m/s -->
         <!-- <arg name="world_name"
             value="$(find wheelchair_simulations)/worlds/meam_closed_doors_people_tracking_mark_V.world" /> -->
-        <arg name="world_name" value="$(find
-        wheelchair_simulations)/worlds/meam_closed_doors_basic.world" />
+        <!-- <arg name="world_name" value="$(find
+        wheelchair_simulations)/worlds/meam_closed_doors_basic.world" /> -->
+        <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world" />
         <!-- <arg name="world_name" value="$(find
         wheelchair_simulations)/worlds/meam_closed_doors_stationary.world" /> -->
         <!-- <arg name="world_name" value="$(find

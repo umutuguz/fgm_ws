@@ -175,7 +175,7 @@ namespace local_planner
         double angularVel;
         double linearVel;
         double dmin_temp;
-        double phiFinal_temp;
+        double phiFinal_abs;
         double coefVel;
         double linearVelocity;
         double alpha_buf;
@@ -204,11 +204,11 @@ namespace local_planner
         else
             dmin_temp = dmin;
 
-        phiFinal_temp = abs(phiFinal);
+        phiFinal_abs = abs(phiFinal);
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
         // linearVel = (coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.0))) + 0.1;
-        linearVel = (coefVel * ((0.4 * log((3.5 * (dmin_temp - 0.15)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 6.5))) + 0.01;
+        linearVel = (coefVel * ((0.4 * log((3.5 * (dmin_temp - 0.15)) + 0.0)) / (exp(0.883 * phiFinal_abs)) + (exp(1.57 - phiFinal_abs) / 6.5))) + 0.01;
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 0.75 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2.0) + 1);
@@ -375,10 +375,10 @@ namespace local_planner
         double odomRX = posePtr_->pose.pose.position.x;
         double odomRY = posePtr_->pose.pose.position.y;
         currentPose_.orientation = posePtr_->pose.pose.orientation;
-        double robot_pose_theta = tf::getYaw(currentPose_.orientation);
+        double robot_pose_theta_real = tf::getYaw(currentPose_.orientation);
         double robot_pose_theta_manipulated;
-        robot_pose_theta = robot_pose_theta * 180 / M_PI;
-        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta);
+        robot_pose_theta_real = robot_pose_theta_real * 180 / M_PI;
+        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta_real);
 
 
         double goalX = currentGoalPose_.position.x;
@@ -410,10 +410,12 @@ namespace local_planner
         // ters çevrilerek ilk indeksli olan nokta sol 90derecede kalan yer olmaktadır buradan sağa doğru taranmış hale gelir.
 
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
-        for (unsigned int i = 0; i < currRange.size() ; i++)
-        {
-            currRange[i] -= 0.25;
-        }
+
+
+        // for (unsigned int i = 0; i < currRange.size() ; i++)
+        // {
+        //     currRange[i] -= 0.25;
+        // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
@@ -464,20 +466,20 @@ namespace local_planner
         ROS_INFO_STREAM("goalX is : " << goalX << " goalY is : " << goalY);
         ROS_INFO_STREAM("odomRX is : " << odomRX << " odomRY is : " << odomRY);
 
-        if ((90 < robot_pose_theta) && (robot_pose_theta < 180))
+        if ((90 < robot_pose_theta_real) && (robot_pose_theta_real < 180))
         {
-            robot_pose_theta_manipulated = 450 - robot_pose_theta;
+            robot_pose_theta_manipulated = 450 - robot_pose_theta_real;
         }
         else
         {
-            robot_pose_theta_manipulated = 90 - robot_pose_theta;
+            robot_pose_theta_manipulated = 90 - robot_pose_theta_real;
         }
 
-        phiGoal = atan2(yDiff, xDiff);
-        phiGoal = phiGoal * 180 / M_PI;
-        ROS_INFO_STREAM("atan2 output is : " << phiGoal);
+        double atan2_output = atan2(yDiff, xDiff);
+        atan2_output = atan2_output * 180 / M_PI;
+        ROS_INFO_STREAM("atan2 output is : " << atan2_output);
 
-        phiGoal = robot_pose_theta - phiGoal + 90;
+        phiGoal = robot_pose_theta_real - atan2_output + 90;
 
         if (phiGoal < -90)
         {
@@ -870,7 +872,7 @@ namespace local_planner
 
             
             vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
-            vector<double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
+            // vector<double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
             //iç vektör ama sadece indeks olarak tutan
             double d1_temp, d2_temp, alpha_temp, beta_temp, midpoint, gap_width; //midpoint hesaplamada kullanılan, her gap için d1 d2 temp değişkenleri
 
@@ -911,7 +913,7 @@ namespace local_planner
 
                 midpoint = 180*(acos((d1_temp + d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5))) / sqrt(d1_temp * d1_temp + d2_temp * d2_temp + 2 * d1_temp * d2_temp * cos((M_PI / 180) * (beta_temp + 8.5) - (M_PI / 180) * (alpha_temp + 8.5)))) + (M_PI / 180) * (alpha_temp + 8.5))/M_PI;
                 gap_midpoints.push_back(midpoint);
-                diff_to_goal.push_back(fabs(midpoint - phiGoal));
+                // diff_to_goal.push_back(fabs(midpoint - phiGoal));
                 // ROS_INFO_STREAM("d1 temp is : " << d1_temp);
                 // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
             }
@@ -928,18 +930,22 @@ namespace local_planner
             
             for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
             {
-                vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
+                if(midpoint_coords[i][2] > 0.65) //genişliği 0.65'ten küçük olan gapler hafızaya atılmaz
+                {
+                    vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
 
-                // ROS_INFO_STREAM("rows is : " << rows);
+                    // ROS_INFO_STREAM("rows is : " << rows);
 
-                midpoint_x_y.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
-                midpoint_x_y.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
-                midpoint_x_y.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
-                midpoint_memory.push_back(midpoint_x_y);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
-                // for (int i = 0; i < midpoint_x_y.size();i++)
-                // {
-                //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
-                // }
+                    midpoint_x_y.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
+                    midpoint_x_y.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
+                    midpoint_x_y.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
+                    midpoint_memory.push_back(midpoint_x_y);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
+                    // for (int i = 0; i < midpoint_x_y.size();i++)
+                    // {
+                    //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
+                    // }
+                }
+
             }
 
 
@@ -955,7 +961,7 @@ namespace local_planner
 
         if (midpoint_memory.size() >= 100) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
         {
-            int elements_to_delete = midpoint_memory.size() - 10;
+            int elements_to_delete = midpoint_memory.size() - 100;
             midpoint_memory.erase(midpoint_memory.begin(),midpoint_memory.begin()+elements_to_delete);
         }
 
@@ -976,7 +982,7 @@ namespace local_planner
                 }
                 else
                 {
-                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.6)
+                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.8)
                     {
                         same_gap_inner.push_back(j); //kıyaslanan ikinci eleman ilkiyla aynıysa sırayla bunlar da iç vektöre pushlanır.
                         //ROS_INFO_STREAM("same gap detected for " << i << " and " << j);
@@ -1109,7 +1115,17 @@ namespace local_planner
         }
 
         visualization_msgs::MarkerArray markers;
+        //önceki markları silme bloğu
+        visualization_msgs::Marker deleteMarker;
+        deleteMarker.header.frame_id= "map";
+        deleteMarker.header.stamp = ros::Time::now();
+        deleteMarker.action = visualization_msgs::Marker::DELETEALL;
+        markers.markers.push_back(deleteMarker);
+        marker_pub_.publish(markers);
+        markers.markers.clear();
+        //silme bloğu bitişi
         markers.markers.reserve(gaps_in_memory.size());
+        // hafızadaki gapleri boyutları oranında haritaya kırmızı silindir olarak çizdirme
         for (int i = 0; i < gaps_in_memory.size(); i++)
         {
             visualization_msgs::Marker marker;
@@ -1130,7 +1146,27 @@ namespace local_planner
 
             markers.markers.push_back(marker);
         }
-        marker_pub_.publish(markers);
+        // hafızadaki gapleri çizdirme bitişi
+
+        // waypoint olarak seçilen hedef noktanın yeşil küp olarak çizdirilmesi kısmı
+        visualization_msgs::Marker goal_marker;
+        goal_marker.header.frame_id = "map";
+        goal_marker.header.stamp = ros::Time::now();
+        goal_marker.id = 50;
+        goal_marker.type = visualization_msgs::Marker::CUBE;
+        goal_marker.action = visualization_msgs::Marker::ADD;
+        goal_marker.pose.orientation.w = 1.0;
+        goal_marker.scale.z = 0.1;
+        goal_marker.pose.position.x = currentGoalPose_.position.x;
+        goal_marker.pose.position.y = currentGoalPose_.position.y;
+        goal_marker.pose.position.z = 0.1;
+        goal_marker.scale.x = 0.3;
+        goal_marker.scale.y = 0.3;
+        goal_marker.color.a = 1.0;
+        goal_marker.color.g = 1.0;
+        markers.markers.push_back(goal_marker);
+        // waypoint çizdirmesi bitişi
+
 
         vector<double> diff_to_goal_new;
         vector<double> xDiff_new;
@@ -1139,16 +1175,18 @@ namespace local_planner
         vector<double> gap_sizes_new;
         double phi_gap_calculator;
 
+        phiGoal += 90; // ödüllendirmede ekseni 90 derece shift etmek için yapıldı.
+
 
         //en son hafızada birleştirilmiş gaplerin x, y koordinatları ve genişliği
-        ROS_INFO_STREAM("There are total of: " << gaps_in_memory.size() << " gaps in memory");
+        ROS_WARN_STREAM("There are total of: " << gaps_in_memory.size() << " gaps in memory");
         for (int i = 0; i < gaps_in_memory.size(); i++)
         {
             xDiff_new.push_back(gaps_in_memory[i][0] - odomRX);
             yDiff_new.push_back(gaps_in_memory[i][1] - odomRY);
             phi_gap_calculator = atan2(yDiff_new[i], xDiff_new[i])*180/M_PI;
 
-            phi_gap_calculator = robot_pose_theta - phi_gap_calculator + 90;
+            phi_gap_calculator = robot_pose_theta_real - phi_gap_calculator + 90;
 
             if (phi_gap_calculator < -90)
             {
@@ -1161,8 +1199,10 @@ namespace local_planner
 
             phi_gap_temp.push_back(phi_gap_calculator);
             ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
-            diff_to_goal_new.push_back(fabs(phi_gap_temp[i] - phiGoal));
-            // ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
+
+            phi_gap_temp[i] += 90; //gap ödüllendirmede 90 derece shift etmek için yapıldı ekseni. gerçek phigap ile alakası yok.
+            diff_to_goal_new.push_back(min(fabs(phi_gap_temp[i] - phiGoal), 360-fabs(phi_gap_temp[i] - phiGoal)));
+            ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
             ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
         }
 
@@ -1170,15 +1210,45 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.75) //0,75 ten kucuk olan gapler odullendirilmez
+            if (gaps_in_memory[i][2] < 0.75) //0,75 ten kucuk olan gapler odullendirilmez.
             {
-                continue;
+                gaps_in_memory[i][2] = 0.1;
+            }
+            else if (diff_to_goal_new[i] <= 30)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2;
+                // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
+            }
+            else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.5;
+            }
+            else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
+            }
+
+            else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.9;
+            }
+            else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.6;
+            }
+            else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.3;
             }
             else
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
+                ROS_WARN_STREAM("bir hata var else e girilmemeliydi");
             }
+
+            phi_gap_temp[i] -= 90; // ödüllendirme için eklenmiş olan 90 geri çıkarıldı.
         }
+        phiGoal -= 90; // ödüllendirme için eklenmiş olan 90 geri çıkarıldı.
+
         double largestWidthIndex = 0;
         double largestWidth = gaps_in_memory[0][2];
         for (int i = 0; i < gaps_in_memory.size(); i++)
@@ -1186,12 +1256,34 @@ namespace local_planner
             if (gaps_in_memory[i][2] > largestWidth)
             {
                 largestWidth = gaps_in_memory[i][2];
+                ROS_INFO_STREAM("largestwidth is: " << largestWidth);
                 largestWidthIndex = i;
             }
         }
 
         ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
         phi_gap = phi_gap_temp[largestWidthIndex];
+
+        // seçilmiş olan gap in ortasına mavi bir silindir çizmek için.
+        visualization_msgs::Marker selected_gap_marker;
+        selected_gap_marker.header.frame_id = "map";
+        selected_gap_marker.header.stamp = ros::Time::now();
+        selected_gap_marker.id = 51;
+        selected_gap_marker.type = visualization_msgs::Marker::CYLINDER;
+        selected_gap_marker.action = visualization_msgs::Marker::ADD;
+        selected_gap_marker.pose.orientation.w = 1.0;
+        selected_gap_marker.scale.z = 0.1;
+        selected_gap_marker.pose.position.x = gaps_in_memory[largestWidthIndex][0];
+        selected_gap_marker.pose.position.y = gaps_in_memory[largestWidthIndex][1];
+        selected_gap_marker.pose.position.z = 0.1;
+        selected_gap_marker.scale.x = 0.4;
+        selected_gap_marker.scale.y = 0.4;
+        selected_gap_marker.color.a = 1.0;
+        selected_gap_marker.color.b = 1.0;
+        markers.markers.push_back(selected_gap_marker);
+        // seçilmiş gap ortasına mavi silindir çizme bitişi
+        ROS_WARN_STREAM("markers has " << markers.markers.size() << " elements");
+        marker_pub_.publish(markers);
 
 
 
@@ -1302,19 +1394,24 @@ namespace local_planner
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
 
-        if (phiFinal > 1.5*M_PI)
-            phiFinal = (2.5*M_PI - phiFinal);
-        else
-            phiFinal = (M_PI_2 - phiFinal);
+        //aşağıdaki phifinal ayarlamalarının hepsi gereksiz duruyor. Normalde zaten o iflere girecek bir şey yok, sadece ilk else her zaman geçerli gibi devam etmek lazım
+        // 31 mayıs 2023
 
-        if (phiFinal > M_PI && phiFinal < 2*M_PI)
-        {
-            phiFinal = phiFinal - 2*M_PI;
-        }
-        else if (phiFinal > 2*M_PI)
-        {
-            phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
-        }
+        phiFinal = (M_PI_2) - phiFinal; //alttaki ifleri açacaksan bunu kapat
+
+        // // if (phiFinal > 1.5*M_PI)
+        // //     phiFinal = (2.5*M_PI - phiFinal);
+        // // else
+        // //     phiFinal = (M_PI_2 - phiFinal);
+
+        // // if (phiFinal > M_PI && phiFinal < 2*M_PI)
+        // // {
+        // //     phiFinal = phiFinal - 2*M_PI;
+        // // }
+        // // else if (phiFinal > 2*M_PI)
+        // // {
+        // //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
+        // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_INFO_STREAM("phi gap is : " << phi_gap);
         ROS_INFO_STREAM("phi goal is : " << phiGoal);
