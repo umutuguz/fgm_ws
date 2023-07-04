@@ -7,6 +7,8 @@ double x_buf[2] = {0.0, 0.0};
 double y_buf[2] = {0.0, 0.0};
 double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
+ros::Time startTime;
+ros::Time endTime;
 namespace local_planner
 {
     LocalPlanner::LocalPlanner() : costmapROS_(NULL), tf_(NULL), initialized_(false) {}
@@ -93,6 +95,8 @@ namespace local_planner
         }
 
         ROS_INFO_ONCE("Computing velocity commands...");
+        startTime = ros::Time::now();
+
 
         // Publish global plan for visualization
         publishGlobalPlan(globalPlan_);
@@ -119,7 +123,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 60; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
-            goalDistTolerance_ = 0.65;
+            goalDistTolerance_ = 0.25;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -243,17 +247,6 @@ namespace local_planner
 
         ROS_INFO_STREAM("dmin: " << dmin_temp);
 
-        // Send velocity commands to robot's base
-        cmd_vel.linear.x = linearVelocity;
-        // cmd_vel.linear.x = 0.0;
-        cmd_vel.linear.y = 0.0;
-        cmd_vel.linear.z = 0.0;
-
-        cmd_vel.angular.x = 0.0;
-        cmd_vel.angular.y = 0.0;
-        // cmd_vel.angular.z = 0.0;
-        cmd_vel.angular.z = angularVel;
-
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
             cmd_vel.linear.x = 0.0;
@@ -266,42 +259,98 @@ namespace local_planner
 
             goalReached_ = true;
         }
+        // else if (midpoint_memory.size() < 1)
+        // {
+        //     cmd_vel.linear.x = 0.0;
+        //     cmd_vel.linear.y = 0.0;
+        //     cmd_vel.linear.z = 0.0;
 
-        if (!isGapExist_)
+        //     cmd_vel.angular.x = 0.0;
+        //     cmd_vel.angular.y = 0.0;
+        //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
+        //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
+        // }
+        else if (dmin < 0.35)
         {
-            // ROS_INFO("Gap yok!");
+            // Send velocity commands to robot's base
+            cmd_vel.linear.x = linearVelocity/5;
+            // cmd_vel.linear.x = 0.0;
+            cmd_vel.linear.y = 0.0;
+            cmd_vel.linear.z = 0.0;
 
-            if (!isGoalReached())
-            {
-                if ((distanceToGlobalGoal() > 0.25) && (dmin > 0.2))
-                {
-                    // Use the last refence cmd_vel command
-                    cmd_vel.linear.x = linearVelocity;
-                    // cmd_vel.linear.x = 0.0;
-                    cmd_vel.linear.y = 0.0;
-                    cmd_vel.linear.z = 0.0;
-
-                    cmd_vel.angular.x = 0.0;
-                    cmd_vel.angular.y = 0.0;
-                    // cmd_vel.angular.z = 0.0;
-                    cmd_vel.angular.z = angularVel;
-                    ROS_INFO_STREAM("su an gap yok if 1 in içinde");
-                }
-                else
-                {
-                ROS_INFO("else 1 in icinde");
-                cmd_vel.linear.x = 0.0;
-                cmd_vel.linear.y = 0.0;
-                cmd_vel.linear.z = 0.0;
-
-                cmd_vel.angular.x = 0.0;
-                cmd_vel.angular.y = 0.0;
-                // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
-                cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
-                }
-            }
-            
+            cmd_vel.angular.x = 0.0;
+            cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.z = angularVel/5;
         }
+        else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
+        {
+            // Send velocity commands to robot's base
+            cmd_vel.linear.x = linearVelocity/5;
+            // cmd_vel.linear.x = 0.0;
+            cmd_vel.linear.y = 0.0;
+            cmd_vel.linear.z = 0.0;
+
+            cmd_vel.angular.x = 0.0;
+            cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.z = angularVel/5;
+        }
+        else
+        {
+            // Send velocity commands to robot's base
+            cmd_vel.linear.x = linearVelocity;
+            // cmd_vel.linear.x = 0.0;
+            cmd_vel.linear.y = 0.0;
+            cmd_vel.linear.z = 0.0;
+
+            cmd_vel.angular.x = 0.0;
+            cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.z = angularVel;
+        }
+        // BURAYI NORMAL FGMDE KULLANMAK LAZIM OLACAK SILME
+
+        // if (!isGapExist_)
+        // {
+        //     // ROS_INFO("Gap yok!");
+
+        //     if (!isGoalReached())
+        //     {
+        //         if ((distanceToGlobalGoal() > goalDistTolerance_) && (dmin > 0.2))
+        //         {
+        //             // Use the last refence cmd_vel command
+        //             cmd_vel.linear.x = linearVelocity;
+        //             // cmd_vel.linear.x = 0.0;
+        //             cmd_vel.linear.y = 0.0;
+        //             cmd_vel.linear.z = 0.0;
+
+        //             cmd_vel.angular.x = 0.0;
+        //             cmd_vel.angular.y = 0.0;
+        //             // cmd_vel.angular.z = 0.0;
+        //             cmd_vel.angular.z = angularVel;
+        //             ROS_WARN_STREAM("Güncel gap yok hafizadan gidiyor");
+        //         }
+        //         else
+        //         {
+        //         ROS_INFO("else 1 in icinde");
+        //         cmd_vel.linear.x = 0.0;
+        //         cmd_vel.linear.y = 0.0;
+        //         cmd_vel.linear.z = 0.0;
+
+        //         cmd_vel.angular.x = 0.0;
+        //         cmd_vel.angular.y = 0.0;
+        //         // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
+        //         cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
+        //         }
+        //     }
+            
+        // }
+        endTime = ros::Time::now();
+
+        ros::Duration executionTime = endTime - startTime;
+
+        ROS_INFO("Execution time: %f seconds", executionTime.toSec());
         return true;
     }
 
@@ -499,21 +548,21 @@ namespace local_planner
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
             isGapExist_ = false;
-            if (phiGoal > 270)
-                phiFinal = (450 - phiGoal) * (M_PI / 180);
-            else
-                phiFinal = (90 - phiGoal) * (M_PI / 180);
+            // if (phiGoal > 270)
+            //     phiFinal = (450 - phiGoal) * (M_PI / 180);
+            // else
+            //     phiFinal = (90 - phiGoal) * (M_PI / 180);
 
-            if (phiFinal > M_PI && phiFinal < 2*M_PI)
-            {
-                phiFinal = phiFinal - 2*M_PI;
-            }
-            else if (phiFinal > 2*M_PI)
-            {
-                phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
-            }
-            // ROS_ERROR("No gap found, FGM failed.");
-            ROS_WARN("No current gaps found, moving from memory.");
+            // if (phiFinal > M_PI && phiFinal < 2*M_PI)
+            // {
+            //     phiFinal = phiFinal - 2*M_PI;
+            // }
+            // else if (phiFinal > 2*M_PI)
+            // {
+            //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
+            // }
+            // // ROS_ERROR("No gap found, FGM failed.");
+            // ROS_WARN("No current gaps found, moving from memory.");
             //return phiFinal; //tubitak raporunda gap gorulmediginde fail olacak sekilde ayarlandıgı icin kapatıldı
             //return 0;
         }
@@ -1089,23 +1138,29 @@ namespace local_planner
         double x_coord = 0.0;
         double y_coord = 0.0;
         double final_width = 0.0;
+        double weighted_average_param = 1.0;
+        double weighting_counter = 0.0;
 
 
-
+        // Aynı gapi işaret eden farklı ölçümlerin aritmetik ortalamaya göre veya ağırlıklı ortalamaya göre birleştirildiği yer
         for (auto& innerVec : same_gap_memory)
         {
+            weighted_average_param = 1.0;
+            weighting_counter = 0.0;
+
             for (auto& element : innerVec)
             {
-
-                x_coord = x_coord + midpoint_memory[element][0];
-                y_coord = y_coord + midpoint_memory[element][1];
-                final_width = final_width + midpoint_memory[element][2];
+                x_coord = x_coord + midpoint_memory[element][0]*weighted_average_param;
+                y_coord = y_coord + midpoint_memory[element][1]*weighted_average_param;
+                final_width = final_width + midpoint_memory[element][2]*weighted_average_param;
+                weighted_average_param += 0.4;
+                weighting_counter += 1;
                 // ROS_INFO_STREAM(element << " ");
             }
             // ROS_INFO_STREAM("--");
-            x_coord = x_coord / innerVec.size();
-            y_coord = y_coord / innerVec.size();
-            final_width = final_width / innerVec.size();
+            x_coord = x_coord / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
+            y_coord = y_coord / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
+            final_width = final_width / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
 
             gaps_in_memory.push_back({x_coord, y_coord, final_width});
 
@@ -1256,11 +1311,12 @@ namespace local_planner
             if (gaps_in_memory[i][2] > largestWidth)
             {
                 largestWidth = gaps_in_memory[i][2];
-                ROS_INFO_STREAM("largestwidth is: " << largestWidth);
+                
                 largestWidthIndex = i;
             }
         }
 
+        ROS_INFO_STREAM("largestwidth is: " << largestWidth);
         ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
         phi_gap = phi_gap_temp[largestWidthIndex];
 
