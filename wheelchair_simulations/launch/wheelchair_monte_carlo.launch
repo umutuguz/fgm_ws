@@ -1,0 +1,43 @@
+<launch>
+
+    <arg name="x_pos" default="-45.0" />
+    <arg name="y_pos" default="45.0" />
+    <arg name="z_pos" default="0.0" />
+    <arg name="roll" default="0.0" />
+    <arg name="pitch" default="0.0" />
+    <arg name="yaw" default="-1.5707963268" />
+    <arg name="open_rviz" default="false" />
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+
+        <arg name="world_name" value="$(find wheelchair_simulations)/worlds/base_sim_world.world" />
+
+        <arg name="paused" value="false" />
+        <arg name="use_sim_time" value="true" />
+        <arg name="gui" value="true" />
+        <arg name="headless" value="false" />
+        <arg name="debug" value="false" />
+    </include>
+
+    <include file="$(find wheelchair_simulations)/launch/wheelchair_bringup.launch" />
+
+    <!-- RP merge -->
+    <include file="$(find wheelchair_simulations)/launch/laserscan_multi_merger.launch" />
+
+    <!-- Scan Multi Filter -->
+    <include file="$(find wheelchair_simulations)/launch/scan_multi_filter.launch" />
+
+    <param name="robot_description"
+        command="$(find xacro)/xacro --inorder $(find wheelchair_description)/urdf/wheel_chair.urdf.xacro" />
+
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"
+        args="-urdf -model wheel_chair -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+
+    <!-- rviz -->
+    <group if="$(arg open_rviz)">
+        <node pkg="rviz" type="rviz" name="rviz" required="true"
+            args="-d $(find wheelchair_simulations)/rviz/wheelchair.rviz" />
+    </group>
+
+</launch>
+  
