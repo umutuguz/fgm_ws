@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+  <model name="my_cylinder">
+    <pose>0 0 0.5 0 0 0</pose>
+    <static>true</static>
+    <link name="link">
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.5</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.5</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.5</radius>
+            <length>2.5</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.5</radius>
+            <length>2.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0 1 0 1</ambient>
+          <diffuse>0 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

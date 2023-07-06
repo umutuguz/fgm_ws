@@ -5,26 +5,43 @@ import random
 from gazebo_msgs.srv import SpawnModel
 from geometry_msgs.msg import Pose
 
-def spawn_box(model_name, sdf_path, x_range, y_range, z_range, size_range):
+def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_cylinder):
     rospy.wait_for_service('/gazebo/spawn_sdf_model')
     try:
         spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
         with open(sdf_path, 'r') as f:
             sdf = f.read()
+
+        if is_cylinder:
+            # Generate random radius and length
+            radius = random.uniform(size_range[0], size_range[1])
+            length = 5
+
+            # Replace the radius and length values in the SDF string
+            sdf = sdf.replace('<radius>1</radius>', f'<cylinder radius="{radius}" length="{length}"/>')
+        else:
+            # Generate random size
+            size_x = random.uniform(size_range[0], size_range[1])
+            size_y = random.uniform(size_range[0], size_range[1])
+            size_z = 2.5
+
+            # Replace the size values in the SDF string
+            sdf = sdf.replace('<size>1 1 2.5</size>', f'<size>{size_x} {size_y} {size_z}</size>')
         
-        # Generate random size
-        size_x = random.uniform(size_range[0], size_range[1])
-        size_y = random.uniform(size_range[0], size_range[1])
-        size_z = 2.5
-
-        # Replace the size values in the SDF string
-        sdf = sdf.replace('<size>1 1 2.5</size>', f'<size>{size_x} {size_y} {size_z}</size>')
-
         # Generate random position
         pose = Pose()
-        pose.position.x = random.uniform(x_range[0], x_range[1])
         pose.position.y = random.uniform(y_range[0], y_range[1])
-        pose.position.z = random.uniform(z_range[0], z_range[1])
+
+        if pose.position.y > 30 or pose.position.y < -30:
+            pose.position.x = random.uniform(-25, 25)
+        else:
+            pose.position.x = random.uniform(x_range[0], x_range[1])
+        
+        # Adjust z coordinate based on size
+        if is_cylinder:
+            pose.position.z = 1.25
+        else:
+            pose.position.z = 1.25
 
         resp = spawn_sdf(model_name, sdf, '', pose, 'world')
         if resp.success:
@@ -34,23 +51,31 @@ def spawn_box(model_name, sdf_path, x_range, y_range, z_range, size_range):
     except rospy.ServiceException as e:
         rospy.logerr("Service call failed: %s" % str(e))
 
+
+
 if __name__ == '__main__':
-    rospy.init_node('spawn_boxes')
+    rospy.init_node('spawn_models')
 
-    # Set the path to your SDF file
-    sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_box.sdf'
+    # Set the path to your SDF files
+    box_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_box.sdf'
+    cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
-    # Set the number of boxes to spawn
-    num_boxes = 100
+    # Set the number of models to spawn
+    num_cylinders = 60
+    num_boxes = 60
 
-    # Set the range of random positions for the boxes
+    # Set the range of random positions for the models
     x_range = [-50, 50]
-    y_range = [-30, 30]
+    y_range = [-50, 50]
     z_range = [1.25, 1.25]
 
-    # Set the range of random sizes for the boxes
+    # Set the range of random sizes for the models
     size_range = [0.5, 2.0]
 
+    for i in range(num_cylinders):
+        model_name = 'cylinder{}'.format(i+1)
+        spawn_model(model_name, cylinder_sdf_path, x_range, y_range, z_range, size_range, True)
+
     for i in range(num_boxes):
-        box_name = 'box{}'.format(i+1)
-        spawn_box(box_name, sdf_path, x_range, y_range, z_range, size_range)
+        model_name = 'box{}'.format(i+1)
+        spawn_model(model_name, box_sdf_path, x_range, y_range, z_range, size_range, False)
