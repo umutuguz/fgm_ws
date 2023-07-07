@@ -1,7 +1,7 @@
 <launch>
 
-    <arg name="x_pos" default="-45.0" />
-    <arg name="y_pos" default="45.0" />
+    <arg name="x_pos" default="0.0" />
+    <arg name="y_pos" default="0.0" />
     <arg name="z_pos" default="0.0" />
     <arg name="roll" default="0.0" />
     <arg name="pitch" default="0.0" />
@@ -9,7 +9,7 @@
     <arg name="open_rviz" default="false" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find wheelchair_simulations)/worlds/base_sim_world.world" />
+        <arg name="world_name" value="$(find wheelchair_simulations)/worlds/new_sim_world_empty.world" />
         <arg name="paused" value="false" />
         <arg name="use_sim_time" value="true" />
         <arg name="gui" value="true" />

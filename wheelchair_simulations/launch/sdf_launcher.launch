@@ -8,7 +8,9 @@
 
 
 
-  <arg name="model" default="$(find wheelchair_simulations)/models/base_sim_world/model.sdf"/>
+  <!-- <arg name="model" default="$(find wheelchair_simulations)/models/base_sim_world/model.sdf"/> -->
+  <arg name="model" default="$(find wheelchair_simulations)/models/new_sim_world/model.sdf"/>
+
 
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'"/>
 

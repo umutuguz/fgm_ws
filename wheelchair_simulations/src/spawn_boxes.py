@@ -14,15 +14,21 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
 
         if is_cylinder:
             # Generate random radius and length
-            radius = random.uniform(size_range[0], size_range[1])
-            length = 5
+            radius = random.uniform(0.3, 0.7)
+            # length = 5
 
             # Replace the radius and length values in the SDF string
-            sdf = sdf.replace('<radius>1</radius>', f'<cylinder radius="{radius}" length="{length}"/>')
+            sdf = sdf.replace('<radius>0.5</radius>', f'<radius>{radius}</radius>')
         else:
             # Generate random size
             size_x = random.uniform(size_range[0], size_range[1])
-            size_y = random.uniform(size_range[0], size_range[1])
+            if (size_x > 1.3):
+                size_y = random.uniform(0.5,0.9)
+            elif (size_x < 0.9):
+                size_y = random.uniform(1.3, 2.1)
+            else:
+                size_y = random.uniform(0.9, 1.3)
+            # size_y = random.uniform(size_range[0], size_range[1])
             size_z = 2.5
 
             # Replace the size values in the SDF string
@@ -32,8 +38,8 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
         pose = Pose()
         pose.position.y = random.uniform(y_range[0], y_range[1])
 
-        if pose.position.y > 30 or pose.position.y < -30:
-            pose.position.x = random.uniform(-25, 25)
+        if pose.position.y > 18 or pose.position.y < 4:
+            pose.position.x = random.uniform(-4, -18)
         else:
             pose.position.x = random.uniform(x_range[0], x_range[1])
         
@@ -61,16 +67,16 @@ if __name__ == '__main__':
     cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
     # Set the number of models to spawn
-    num_cylinders = 60
-    num_boxes = 60
+    num_cylinders = 12
+    num_boxes = 12
 
     # Set the range of random positions for the models
-    x_range = [-50, 50]
-    y_range = [-50, 50]
+    x_range = [-26, 4]
+    y_range = [-4, 26]
     z_range = [1.25, 1.25]
 
     # Set the range of random sizes for the models
-    size_range = [0.5, 2.0]
+    size_range = [0.5, 2.1]
 
     for i in range(num_cylinders):
         model_name = 'cylinder{}'.format(i+1)
