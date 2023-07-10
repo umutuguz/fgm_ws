@@ -463,7 +463,7 @@ namespace local_planner
 
         // for (unsigned int i = 0; i < currRange.size() ; i++)
         // {
-        //     ROS_INFO_STREAM("Currrange is: " << currRange[i] << " at "<< i);
+        //     currRange[i] -= 0.25;
         // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
@@ -862,14 +862,14 @@ namespace local_planner
             // ROS_INFO_STREAM("min_size is = " << min_size);
             int counter_array = 0;
 
-            for (int i = 0; i < min_size; i++)
-            {
-                for (int j = 0; j < 2; j++)
-                {
-                    counter_array++;
-                    // ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-                }
-            }
+            // for (int i = 0; i < min_size; i++)
+            // {
+            //     for (int j = 0; j < 2; j++)
+            //     {
+            //         counter_array++;
+            //         ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+            //     }
+            // }
 
             common_angles.erase(common_angles.begin(), common_angles.end());
 
@@ -932,28 +932,15 @@ namespace local_planner
                 // ROS_INFO_STREAM("Total gap count is: " << i+1);
                 alpha_temp = array_gap[i][0];
                 beta_temp = array_gap[i][1];
-
-                if(alpha_temp == 0.0)
-                {
-                    alpha_temp = beta_temp;
-                }
-                if(beta_temp == 163.0)
-                {
-                    beta_temp = alpha_temp;
-                }
                 // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
-                // ROS_INFO_STREAM("alpha_temp is: " << alpha_temp);
+                // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
                 d1_temp = currRange.at(round(alpha_temp*(344.0/163.0)));
-                // ROS_INFO_STREAM("d1_temp is: " << d1_temp);
                 // ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
-                // ROS_INFO_STREAM("beta_temp is: " << beta_temp);
-                // if (beta_temp >= 163.0)
-                //     beta_temp = 162.91;
+                // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
+                if (beta_temp >= 163.0)
+                    beta_temp = 162.01;
                     // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
-                // ROS_INFO_STREAM("currangeat inside is: " << round(beta_temp*(344.0/163.0)));
-                // ROS_INFO_STREAM("d2_temp is: " << d2_temp);
-
 
                 memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
                 memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
@@ -992,7 +979,6 @@ namespace local_planner
             
             for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
             {
-                // ROS_INFO_STREAM("midpoint x are: " << midpoint_coords[i][0]);
                 if(midpoint_coords[i][2] > 0.45) //genişliği 0.45'ten küçük olan gapler hafızaya atılmaz
                 {
                     vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
@@ -1279,7 +1265,7 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.65) //0,65 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
@@ -1345,7 +1331,7 @@ namespace local_planner
         selected_gap_marker.scale.z = 0.1;
         selected_gap_marker.pose.position.x = gaps_in_memory[largestWidthIndex][0];
         selected_gap_marker.pose.position.y = gaps_in_memory[largestWidthIndex][1];
-        selected_gap_marker.pose.position.z = 0.3;
+        selected_gap_marker.pose.position.z = 0.1;
         selected_gap_marker.scale.x = 0.4;
         selected_gap_marker.scale.y = 0.4;
         selected_gap_marker.color.a = 1.0;
@@ -1457,7 +1443,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 15;
+        double alpha_weight = 8;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;

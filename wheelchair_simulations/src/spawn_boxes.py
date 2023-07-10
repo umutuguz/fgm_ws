@@ -67,12 +67,12 @@ if __name__ == '__main__':
     cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
     # Set the number of models to spawn
-    num_cylinders = 12
-    num_boxes = 12
+    num_cylinders = 9
+    num_boxes = 9
 
     # Set the range of random positions for the models
     x_range = [-26, 4]
-    y_range = [-4, 26]
+    y_range = [-3, 25]
     z_range = [1.25, 1.25]
 
     # Set the range of random sizes for the models
