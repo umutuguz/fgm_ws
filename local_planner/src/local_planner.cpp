@@ -1,5 +1,8 @@
 #include <pluginlib/class_list_macros.h>
 #include "local_planner/local_planner.h"
+#include <ros/console.h>
+#include <fstream>
+
 
 PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
@@ -9,6 +12,7 @@ double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
 ros::Time startTime;
 ros::Time endTime;
+ofstream myfile;
 namespace local_planner
 {
     LocalPlanner::LocalPlanner() : costmapROS_(NULL), tf_(NULL), initialized_(false) {}
@@ -64,6 +68,10 @@ namespace local_planner
 
             ROS_INFO("Local planner has been initialized successfully.");
             initialized_ = true;
+            myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+            myfile << "Simulation Started!  ";
+            myfile.close();
+
         }
         else
         {
@@ -371,6 +379,9 @@ namespace local_planner
         if (goalReached_)
         {
             ROS_INFO("Goal reached!");
+            myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+            myfile << "Goal Reached!  Total distance traveled is: " << dist_travelled << "\n";
+            myfile.close();
             return true;
         }
 
@@ -412,6 +423,8 @@ namespace local_planner
 
 
     vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
+    double prev_odomRX = 0.0;
+    double prev_odomRY = 0.0;
 
     double LocalPlanner::LLCallback()
     {
@@ -421,8 +434,18 @@ namespace local_planner
         // Get odometry informations
         // WARNING: These are not odometry information! Variable names remained
         // unchanged since the latest update. These are AMCL positions.
+        
+
         double odomRX = posePtr_->pose.pose.position.x;
         double odomRY = posePtr_->pose.pose.position.y;
+
+        dist_travelled += sqrt((odomRX - prev_odomRX)*(odomRX - prev_odomRX) +(odomRY - prev_odomRY)*(odomRY - prev_odomRY)) ;
+        ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
+
+        prev_odomRX = odomRX;
+        prev_odomRY = odomRY;
+
+
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double robot_pose_theta_real = tf::getYaw(currentPose_.orientation);
         double robot_pose_theta_manipulated;

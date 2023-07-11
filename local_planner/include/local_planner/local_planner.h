@@ -110,6 +110,7 @@ private:
     ros::Publisher marker_pub_;
 
     double lookAheadDist_ = 1.1;
+    double dist_travelled = 0.0;
     double goalDistTolerance_;
     int currentGoalPoseIdx_;
     bool isGapExist_;
