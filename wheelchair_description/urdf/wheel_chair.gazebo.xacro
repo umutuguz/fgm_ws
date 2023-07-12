@@ -4,8 +4,34 @@
   <xacro:arg name="imu_visual"   default="false"/>
   <xacro:arg name="camera_name"   default="camera"/>
 
+  <gazebo reference="base_footprint">
+    <material>Gazebo/DarkGrey</material>
+    <sensor name="base_footprint_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>base_footprint_collision</collision>
+      </contact>
+      <plugin name="base_footprint_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>base_footprint_contact_sensor_state</bumperTopicName>
+        <frameName>base_footprint</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
   <gazebo reference="base_link">
     <material>Gazebo/DarkGrey</material>
+    <sensor name="base_link_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>base_link_collision</collision>
+      </contact>
+      <plugin name="base_link_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>base_link_contact_sensor_state</bumperTopicName>
+        <frameName>base_link</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
  
   <gazebo reference="left_big_wheel">
@@ -17,6 +43,17 @@
     <maxVel>0.1</maxVel>
     <!-- <fdir1>1 0 0</fdir1> -->
     <material>Gazebo/FlatBlack</material>
+    <sensor name="left_big_wheel_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>left_big_wheel_collision</collision>
+      </contact>
+      <plugin name="left_big_wheel_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>left_big_wheel_contact_sensor_state</bumperTopicName>
+        <frameName>left_big_wheel</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
 
   <gazebo reference="right_big_wheel">
@@ -28,6 +65,17 @@
     <maxVel>0.1</maxVel>
     <!-- <fdir1>1 0 0</fdir1> -->
     <material>Gazebo/FlatBlack</material>
+    <sensor name="right_big_wheel_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>right_big_wheel_collision</collision>
+      </contact>
+      <plugin name="right_big_wheel_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>right_big_wheel_contact_sensor_state</bumperTopicName>
+        <frameName>right_big_wheel</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
 
   <gazebo reference="left_small_wheel">
@@ -39,6 +87,17 @@
     <maxVel>0.1</maxVel>
     <!-- <fdir1>1 0 0</fdir1> -->
     <material>Gazebo/FlatBlack</material>
+    <sensor name="left_small_wheel_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>left_small_wheel_collision</collision>
+      </contact>
+      <plugin name="left_small_wheel_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>left_small_wheel_contact_sensor_state</bumperTopicName>
+        <frameName>left_small_wheel</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
 
 
@@ -51,6 +110,17 @@
     <maxVel>0.1</maxVel>
     <!-- <fdir1>1 0 0</fdir1> -->
     <material>Gazebo/FlatBlack</material>
+    <sensor name="right_smaal_wheel_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>right_smaal_wheel_collision</collision>
+      </contact>
+      <plugin name="right_smaal_wheel_bumper" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>right_smaal_wheel_contact_sensor_state</bumperTopicName>
+        <frameName>right_smaal_wheel</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
 
   <gazebo reference="imu_link">

@@ -22,6 +22,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float64.h>
 #include <tf/tfMessage.h>
+#include <gazebo_msgs/ContactsState.h>
 
 #include <boost/shared_ptr.hpp>
 #include <base_local_planner/goal_functions.h>
@@ -63,6 +64,8 @@ public:
     
     void cmdCallback(const std_msgs::Float64::ConstPtr& msg);
 
+    void collisionCallback(const gazebo_msgs::ContactsState::ConstPtr& msg);
+
     double distanceToGlobalGoal();
 
     double LLCallback();
@@ -98,6 +101,7 @@ private:
     ros::Subscriber scanSub_;
     ros::Subscriber poseSub_;
     ros::Subscriber cmdSub_;
+    ros::Subscriber collisionSub_;
     boost::shared_ptr<nav_msgs::Odometry const> odomPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanPtr_;
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> posePtr_;
@@ -110,6 +114,7 @@ private:
     ros::Publisher marker_pub_;
 
     double lookAheadDist_ = 1.1;
+    int collision_counter = 0;
     double dist_travelled = 0.0;
     double goalDistTolerance_;
     int currentGoalPoseIdx_;

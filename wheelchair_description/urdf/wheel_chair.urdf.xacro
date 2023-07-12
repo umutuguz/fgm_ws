@@ -4,18 +4,55 @@
   <xacro:include filename="$(find wheelchair_description)/urdf/wheel_chair.gazebo.xacro" />
 
   <link name="base_footprint" >
+    <inertial>
+      <origin
+        xyz="8.32667268468867E-17 -0.0275 9.43689570931383E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.0222055020892376"
+        ixy="2.73068863816006E-19"
+        ixz="-2.79570503430672E-17"
+        iyy="0.0429444812918596"
+        iyz="-3.90098376880016E-20"
+        izz="0.0222055020892377" />
+    </inertial>
     <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
       <geometry>
         <cylinder length = "0.2" radius="0.05" />
       </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
     </visual>
+    <collision>
+      <origin
+        xyz="-0.4 0 0.15345"
+        rpy="0 0 0" /> <!-- contact sensorle ilgili ypailmis degisikliklerden oturu sorun cikarsa burda cok sey degisecek direkt 11 temmuz 2023 lü github versiyonuna döndür -->
+      <geometry>
+        <mesh
+          filename="package://wheel_chair/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+    <!-- <visual>
+      <geometry>
+        <cylinder length = "0.2" radius="0.05" /> Contact icin yapilmis footprint degisikligi geri alindiginda bu commentli kisim aktif edilecek
+      </geometry>
+    </visual> -->
   
 </link>
 
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint" />
     <child link="base_link" />
-    <origin xyz="-0.40 0.0 0.15345" rpy="0 0 0" />
+    <!-- <origin xyz="-0.40 0.0 -0.14655" rpy="0 0 0" /> -->
+    <origin xyz="-0.40 0.0 0.15345" rpy="0 0 0" /><!--Bu contact icin yapilmis footprint degisikligi geri alindiginda aktif edilecek -->
   </joint>
 
   <link
@@ -55,7 +92,7 @@
       <geometry>
         <mesh
           filename="package://wheel_chair/meshes/base_link.STL" />
-          <!-- <box size="0.8 0.6 0.0" /> -->
+          <!-- <box size="0.8 0.6 1.0" /> -->
       </geometry>
     </collision>
   </link>

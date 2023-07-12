@@ -55,6 +55,8 @@ namespace local_planner
             
             cmdSub_ = nh_.subscribe("/cmd_vel_controller", 100, &LocalPlanner::cmdCallback, this);
 
+            collisionSub_ = nh_.subscribe("/base_footprint_contact_sensor_state", 100, &LocalPlanner::collisionCallback, this);
+
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
@@ -407,6 +409,27 @@ namespace local_planner
     {
         cmdPtr_ = msg->data;
     } // end function cmdCallback
+
+    void LocalPlanner::collisionCallback(const gazebo_msgs::ContactsState::ConstPtr& msg)
+    {
+        if (msg->states.empty())
+        {
+            // No Collision Occured
+        }
+        else
+        {
+            // Collision occurred
+            ROS_WARN("Collision occurred!");
+            if (collision_counter == 0)
+            {
+                myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+                myfile << "Collision occured!\n";
+                myfile.close();
+                collision_counter++;
+            }
+            
+        }
+    }
 
     double LocalPlanner::distanceToGlobalGoal()
     {
