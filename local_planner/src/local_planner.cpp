@@ -133,7 +133,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 200; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
-            goalDistTolerance_ = 0.25;
+            goalDistTolerance_ = 0.55;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -1503,7 +1503,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 15;
+        double alpha_weight = 8;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;

@@ -1,51 +1,116 @@
-import random
 import xml.etree.ElementTree as ET
+import random
 
-# Load the original .world file
 tree = ET.parse('montecarloworld_1.world')
 root = tree.getroot()
 
-# Define the limits for randomization
-x_range1 = [-26, 4]
-x_range2 = [-4, -18]
-y_range = [-3, 25]
+def find_collision_box_size(model_element):
+    if model_element is not None:
+        linkk_element = model_element.find('link')
+        if linkk_element is not None:
+            collision_element = linkk_element.find('collision')
+        if collision_element is not None:
+            geometry_element = collision_element.find('geometry')
+            if geometry_element is not None:
+                box_element = geometry_element.find('box')
+                if box_element is not None:
+                    size_element = box_element.find('size')
+                    if size_element is not None:
+                        return size_element
+    
+    return None  # Any step returned None or 'radius' not found
 
-# Define the number of variations to generate
-num_variations = 500
+def find_visual_box_size(model_element):
+    if model_element is not None:
+        linkk_element = model_element.find('link')
+        if linkk_element is not None:
+            visual_element = linkk_element.find('visual')
+        if visual_element is not None:
+            geometry_element = visual_element.find('geometry')
+            if geometry_element is not None:
+                box_element = geometry_element.find('box')
+                if box_element is not None:
+                    size_element = box_element.find('size')
+                    if size_element is not None:
+                        return size_element
+    
+    return None  # Any step returned None or 'radius' not found
 
-# Generate and save multiple variations
-for i in range(num_variations):
-    # Create a copy of the original root element for each variation
-    variation_root = ET.Element(root.tag)
+def find_collision_radius(model_element):
+    if model_element is not None:
+        linkk_element = model_element.find('link')
+        if linkk_element is not None:
+            collision_element = linkk_element.find('collision')
+        if collision_element is not None:
+            geometry_element = collision_element.find('geometry')
+            if geometry_element is not None:
+                cylinder_element = geometry_element.find('cylinder')
+                if cylinder_element is not None:
+                    radius_element = cylinder_element.find('radius')
+                    if radius_element is not None:
+                        return radius_element
+    
+    return None  # Any step returned None or 'radius' not found
 
-    # Copy the attributes of the original root element
-    variation_root.attrib = root.attrib
+def find_visual_radius(model_element):
+    if model_element is not None:
+        linkk_element = model_element.find('link')
+        if linkk_element is not None:
+            visual_element = linkk_element.find('visual')
+        if visual_element is not None:
+            geometry_element = visual_element.find('geometry')
+            if geometry_element is not None:
+                cylinder_element = geometry_element.find('cylinder')
+                if cylinder_element is not None:
+                    radius_element = cylinder_element.find('radius')
+                    if radius_element is not None:
+                        return radius_element
+    
+    return None  # Any step returned None or 'radius' not found
 
-    # Randomize the x and y values for each box
-    for model in root.findall(".//model"):
-        model_name = model.attrib.get('name')
-        if model_name.startswith('box'):
-            x = random.uniform(*x_range1) if int(model_name[3:]) in [1, 4, 6, 7] else random.uniform(*x_range2)
-            y = random.uniform(*y_range)
-            pose_element = model.find('pose')
-            pose_element.text = f'{x} {y} 1.25 0 -0 0'
-        variation_root.append(model)
+for i in range(1,500):
+    for model_element in root.findall('.//model'):
+        name = model_element.get('name')
+        if name.startswith('box') or name.startswith('cylinder'):
+            randy = random.uniform(-3, 25)
+            if (randy<4 or randy > 18):
+                randx = random.uniform(-18, -4)
+            else:
+                randx = random.uniform(-26, 4)
 
-    # Randomize the x and y values for each cylinder
-    for model in root.findall(".//model"):
-        model_name = model.attrib.get('name')
-        if model_name.startswith('cylinder'):
-            x = random.uniform(*x_range1) if int(model_name[8:]) in [1, 2, 3, 8] else random.uniform(*x_range2)
-            y = random.uniform(*y_range)
-            pose_element = model.find('pose')
-            pose_element.text = f'{x} {y} 1.25 0 -0 0'
-        variation_root.append(model)
+            rand_radius = random.uniform(0.3, 0.7)
 
-    # Save the modified .world file
-    variation_file_name = f'variation_{i+1}.world'
-    variation_tree = ET.ElementTree(variation_root)
-    variation_tree.write(variation_file_name)
+            rand_size_x = random.uniform(0.5, 2.1)
+            if rand_size_x > 1.3:
+                rand_size_y = random.uniform(0.5, 0.9)
+            elif rand_size_x < 0.9:
+                rand_size_y = random.uniform(1.3, 2.1)
+            else:
+                rand_size_y = random.uniform(0.9, 1.3)
 
-    print(f'Saved {variation_file_name}')
+            pose_element = model_element.find('pose')
 
-print('All variations saved!')
+            link_element = model_element.find('link')
+
+            link_pose = link_element.find('pose')
+
+            collision_radius_element = find_collision_radius(model_element)
+            visual_radius_element = find_visual_radius(model_element)
+
+            box_visual_size_element = find_visual_box_size(model_element)
+            box_collision_size_element = find_collision_box_size(model_element)
+
+            if pose_element is not None:
+                pose_element.text = f"{randx} {randy} 1.25 0 0 0"
+            if link_pose is not None:
+                link_pose.text = f"{randx} {randy} 1.25 0 0 0"
+            if collision_radius_element is not None:
+                collision_radius_element.text = f"{rand_radius}"
+            if visual_radius_element is not None:
+                visual_radius_element.text = f"{rand_radius}"
+            if box_visual_size_element is not None:
+                box_visual_size_element.text = f"{rand_size_x} {rand_size_y} 2.5"
+            if box_collision_size_element is not None:
+                box_collision_size_element.text = f"{rand_size_x} {rand_size_y} 2.5"
+
+    tree.write(f"montecarloworld_{i+1}.world")
