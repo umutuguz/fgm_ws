@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rospy
 import os
 import time
@@ -14,11 +16,23 @@ def get_world_number(launch_file_path):
     # Use regular expressions to find the world number
     match = re.search(r"montecarloworld_(\d+)", launch_content)
     if match:
-        world_number = match.group(1)
+        world_number = int(match.group(1))
     else:
-        world_number = "unknown"
+        world_number = 1
 
     return world_number
+
+def modify_launch_file(file_path, world_number):
+    # Read the launch file content
+    with open(file_path, 'r') as launch_file:
+        launch_content = launch_file.read()
+
+    # Replace the world file name with the updated version
+    modified_content = re.sub(r"montecarloworld_(\d+).world", "montecarloworld_{}.world".format(world_number+1), launch_content)
+
+    # Write the modified content back to the launch file
+    with open(file_path, 'w') as launch_file:
+        launch_file.write(modified_content)
 
 def publish_goal(world_number):
     # Create a publisher to send the navigation goal
@@ -28,8 +42,8 @@ def publish_goal(world_number):
     # Create a navigation goal message
     goal_msg = MoveBaseActionGoal()
     goal_msg.goal.target_pose.header.frame_id = "map"
-    goal_msg.goal.target_pose.pose.position.x = -23.0
-    goal_msg.goal.target_pose.pose.position.y = 23.0
+    goal_msg.goal.target_pose.pose.position.x = -22.0
+    goal_msg.goal.target_pose.pose.position.y = 22.0
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
     goal_msg.goal.target_pose.pose.orientation.w = 1.0
 
@@ -60,21 +74,26 @@ def check_log_file(log_file_path, world_number):
     if last_world_occurrence != -1:
         additional_content = log_content[last_world_occurrence + len('world {}'.format(world_number)):].strip()
         if additional_content:
-            # Terminate the remaining terminals by sending SIGINT signals
-            script_pid = os.getpid()  # Get the current script's PID
-            process_ids = subprocess.check_output(["pgrep", "gnome-terminal"]).splitlines()  # Find process IDs of gnome-terminal
+            # Terminate the remaining terminals associated with my.unique.app
+            process_ids = subprocess.check_output(["pgrep", "-f", "my.unique.app"]).splitlines()  # Find process IDs of terminals
             for pid in process_ids:
                 pid = int(pid)
-                if pid != script_pid:
-                    os.kill(pid, signal.SIGINT)
-            time.sleep(10)  # Wait for 10 seconds
+                os.kill(pid, signal.SIGINT)
+            time.sleep(20)  # Wait for 20 seconds
+
+            # Modify the world file path in the launch file
+            launch_file_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch'
+            modify_launch_file(launch_file_path, world_number)
+
             script_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/automatesimulations.py'  # Update with the absolute path of your script
             os.system("python3 {}".format(script_path))  # Rerun the script
 
 def launch_file(file_path):
-    # Launch the file using roslaunch command in a new terminal
+    # Launch the file using roslaunch command in a new terminal with unique App ID
     command = "roslaunch {}".format(file_path)
-    os.system("gnome-terminal --command='{}'".format(command))
+    terminal_command = "gnome-terminal --app-id my.unique.app -- bash -c '{}'".format(command)
+    subprocess.Popen(terminal_command, shell=True)
+
 
 if __name__ == '__main__':
     # Launch the first launch file
@@ -85,7 +104,7 @@ if __name__ == '__main__':
     # Extract the world number from the first launch file
     world_number = get_world_number(first_launch_file)
 
-    # Launch the second launch file in a new terminal
+    # Launch the second launch file in a new gnome-terminal window
     second_launch_file = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_navigation.launch'
     launch_file(second_launch_file)
 

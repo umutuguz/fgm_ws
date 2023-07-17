@@ -211,8 +211,8 @@ namespace local_planner
 
         coefVel = 0.7;
 
-        if (dmin > 6)
-            dmin_temp = 6;
+        if (dmin > 8)
+            dmin_temp = 8;
         else if (dmin <= 0.15)
             dmin_temp = 0.151;
         else
@@ -1503,7 +1503,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 8;
+        double alpha_weight = 7;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
