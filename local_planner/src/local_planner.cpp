@@ -280,10 +280,10 @@ namespace local_planner
         //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
         //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
         // }
-        else if (dmin < 0.35)
+        else if (dmin < 2)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/5;
+            cmd_vel.linear.x = linearVelocity*exp(-(2.5 -dmin));
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -291,12 +291,12 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/5;
+            cmd_vel.angular.z = angularVel*2;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/5;
+            cmd_vel.linear.x = linearVelocity/3;
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -304,7 +304,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/5;
+            cmd_vel.angular.z = angularVel/3;
         }
         else
         {
@@ -1066,6 +1066,12 @@ namespace local_planner
 
         }
 
+        if (midpoint_memory.empty())
+        {
+            ROS_WARN("No gap in memory, heading to phiGoal");
+            return phiGoal;
+        }
+
 
 
         if (midpoint_memory.size() >= 100) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
@@ -1331,12 +1337,12 @@ namespace local_planner
             }
             else if (diff_to_goal_new[i] <= 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
                 // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
             }
             else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.5;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
             }
             else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
             {

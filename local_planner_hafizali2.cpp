@@ -1,5 +1,8 @@
 #include <pluginlib/class_list_macros.h>
 #include "local_planner/local_planner.h"
+#include <ros/console.h>
+#include <fstream>
+
 
 PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
@@ -9,6 +12,7 @@ double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
 ros::Time startTime;
 ros::Time endTime;
+ofstream myfile;
 namespace local_planner
 {
     LocalPlanner::LocalPlanner() : costmapROS_(NULL), tf_(NULL), initialized_(false) {}
@@ -51,6 +55,8 @@ namespace local_planner
             
             cmdSub_ = nh_.subscribe("/cmd_vel_controller", 100, &LocalPlanner::cmdCallback, this);
 
+            collisionSub_ = nh_.subscribe("/base_footprint_contact_sensor_state", 100, &LocalPlanner::collisionCallback, this);
+
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
@@ -64,6 +70,10 @@ namespace local_planner
 
             ROS_INFO("Local planner has been initialized successfully.");
             initialized_ = true;
+            myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+            myfile << "Simulation Started!  ";
+            myfile.close();
+
         }
         else
         {
@@ -123,7 +133,7 @@ namespace local_planner
             double diffY = waypointY - currentPose_.position.y;
 
             double lookAheadDist_ = 200; // index //global plan size ına göre farklı haritalarda güncellenmesi gereklidir.
-            goalDistTolerance_ = 0.25;
+            goalDistTolerance_ = 0.55;
 
             // ROS_INFO("global plan waypoint index: %u", i);
             // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
@@ -201,8 +211,8 @@ namespace local_planner
 
         coefVel = 0.7;
 
-        if (dmin > 6)
-            dmin_temp = 6;
+        if (dmin > 8)
+            dmin_temp = 8;
         else if (dmin <= 0.15)
             dmin_temp = 0.151;
         else
@@ -270,10 +280,10 @@ namespace local_planner
         //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
         //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
         // }
-        else if (dmin < 0.35)
+        else if (dmin < 2)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/5;
+            cmd_vel.linear.x = linearVelocity*exp(-(2.5 -dmin));
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -281,12 +291,12 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/5;
+            cmd_vel.angular.z = angularVel*2;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/5;
+            cmd_vel.linear.x = linearVelocity/3;
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -294,7 +304,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/5;
+            cmd_vel.angular.z = angularVel/3;
         }
         else
         {
@@ -371,6 +381,9 @@ namespace local_planner
         if (goalReached_)
         {
             ROS_INFO("Goal reached!");
+            myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+            myfile << "Goal Reached!  Total distance traveled is: " << dist_travelled << "\n";
+            myfile.close();
             return true;
         }
 
@@ -397,6 +410,27 @@ namespace local_planner
         cmdPtr_ = msg->data;
     } // end function cmdCallback
 
+    void LocalPlanner::collisionCallback(const gazebo_msgs::ContactsState::ConstPtr& msg)
+    {
+        if (msg->states.empty())
+        {
+            // No Collision Occured
+        }
+        else
+        {
+            // Collision occurred
+            ROS_WARN("Collision occurred!");
+            if (collision_counter == 0)
+            {
+                myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
+                myfile << "Collision occured!\n";
+                myfile.close();
+                collision_counter++;
+            }
+            
+        }
+    }
+
     double LocalPlanner::distanceToGlobalGoal()
     {
         currentPose_.position.x = posePtr_->pose.pose.position.x;
@@ -412,6 +446,8 @@ namespace local_planner
 
 
     vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
+    double prev_odomRX = 0.0;
+    double prev_odomRY = 0.0;
 
     double LocalPlanner::LLCallback()
     {
@@ -421,8 +457,18 @@ namespace local_planner
         // Get odometry informations
         // WARNING: These are not odometry information! Variable names remained
         // unchanged since the latest update. These are AMCL positions.
+        
+
         double odomRX = posePtr_->pose.pose.position.x;
         double odomRY = posePtr_->pose.pose.position.y;
+
+        dist_travelled += sqrt((odomRX - prev_odomRX)*(odomRX - prev_odomRX) +(odomRY - prev_odomRY)*(odomRY - prev_odomRY)) ;
+        ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
+
+        prev_odomRX = odomRX;
+        prev_odomRY = odomRY;
+
+
         currentPose_.orientation = posePtr_->pose.pose.orientation;
         double robot_pose_theta_real = tf::getYaw(currentPose_.orientation);
         double robot_pose_theta_manipulated;
@@ -1020,6 +1066,12 @@ namespace local_planner
 
         }
 
+        if (midpoint_memory.empty())
+        {
+            ROS_WARN("No gap in memory, heading to phiGoal");
+            return phiGoal;
+        }
+
 
 
         if (midpoint_memory.size() >= 100) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
@@ -1285,12 +1337,12 @@ namespace local_planner
             }
             else if (diff_to_goal_new[i] <= 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
                 // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
             }
             else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.5;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
             }
             else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
             {
@@ -1457,7 +1509,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 15;
+        double alpha_weight = 7;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;

@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import random
 
-tree = ET.parse('montecarloworld_1.world')
+tree = ET.parse('ornekworld.world')
 root = tree.getroot()
 
 def find_collision_box_size(model_element):
@@ -68,7 +68,7 @@ def find_visual_radius(model_element):
     
     return None  # Any step returned None or 'radius' not found
 
-for i in range(1,500):
+for i in range(1,5):
     for model_element in root.findall('.//model'):
         name = model_element.get('name')
         if name.startswith('box') or name.startswith('cylinder'):

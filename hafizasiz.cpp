@@ -582,12 +582,16 @@ namespace local_planner
         vector<vector<double>> gaps_in_memory; //en son halinde gaplerin koordinatlarını tutacak olan vektör
 
         double phi_gap = 0.0;
+
+        return (90.0 - phiGoal);
         
         //gap olmadığı durum için phifinal ayarlaması sadece
+        ROS_INFO_STREAM("gapstarttaki eleman: " <<gap_starting_points[0]);
+        ROS_INFO_STREAM("gapenddeki eleman: " <<gap_ending_points[0]);
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
             isGapExist_ = false;
-            return phiGoal;
+            return (90.0 - phiGoal);
             // if (phiGoal > 270)
             //     phiFinal = (450 - phiGoal) * (M_PI / 180);
             // else
@@ -1092,6 +1096,11 @@ namespace local_planner
         vector<double> gap_sizes_new;
         double phi_gap_calculator;
 
+        if (true)
+        {
+            return (90.0 - phiGoal);
+        }
+
         phiGoal += 90; // ödüllendirmede ekseni 90 derece shift etmek için yapıldı.
 
 
@@ -1209,7 +1218,7 @@ namespace local_planner
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 
-        double alpha_weight = 15;
+        double alpha_weight = 7;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
