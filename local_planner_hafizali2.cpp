@@ -1069,7 +1069,7 @@ namespace local_planner
         if (midpoint_memory.empty())
         {
             ROS_WARN("No gap in memory, heading to phiGoal");
-            return phiGoal;
+            return (M_PI_2 - (M_PI*phiGoal)/180);
         }
 
 

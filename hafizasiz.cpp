@@ -9,6 +9,10 @@ double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
 ros::Time startTime;
 ros::Time endTime;
+ros::Time totalTimeEnd;
+ros::Duration totalExecutionTime;
+std::vector<ros::Duration> executionTimes;
+double averageExecTime;
 ofstream myfile;
 namespace local_planner
 {
@@ -68,7 +72,7 @@ namespace local_planner
             ROS_INFO("Local planner has been initialized successfully.");
             initialized_ = true;
             myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
-            myfile << "Simulation Started!  ";
+            myfile << "Simulation Started!  ||  ";
             myfile.close();
         }
         else
@@ -102,7 +106,6 @@ namespace local_planner
 
         ROS_INFO_ONCE("Computing velocity commands...");
         startTime = ros::Time::now();
-
 
         // Publish global plan for visualization
         publishGlobalPlan(globalPlan_);
@@ -317,7 +320,6 @@ namespace local_planner
         }
         // BURAYI NORMAL FGMDE KULLANMAK LAZIM OLACAK SILME
 
-
         // if (!isGapExist_)
         // {
         //     // ROS_INFO("Gap yok!");
@@ -358,6 +360,7 @@ namespace local_planner
         ros::Duration executionTime = endTime - startTime;
 
         ROS_INFO("Execution time: %f seconds", executionTime.toSec());
+        executionTimes.push_back(executionTime);
         return true;
     }
 
@@ -378,9 +381,20 @@ namespace local_planner
         if (goalReached_)
         {
             ROS_INFO("Goal reached!");
+
+            if(!executionTimes.empty())
+            {
+                for (const auto& time: executionTimes)
+                {
+                    totalExecutionTime += time;
+                }
+                averageExecTime = (totalExecutionTime.toSec() / executionTimes.size());
+            }
             myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
-            myfile << "Goal Reached!  Total distance traveled is: " << dist_travelled << "\n";
+            myfile << "Goal Reached!  Total distance traveled is: " << dist_travelled << " || " << "Avg execution time per cycle is: " << averageExecTime << "\n";
             myfile.close();
+
+
             return true;
         }
 
@@ -416,14 +430,27 @@ namespace local_planner
         else
         {
             // Collision occurred
+            if(!executionTimes.empty())
+            {
+                for (const auto& time: executionTimes)
+                {
+                    totalExecutionTime += time;
+                }
+                averageExecTime = (totalExecutionTime.toSec() / executionTimes.size());
+            }
+
             ROS_WARN("Collision occurred!");
             if (collision_counter == 0)
             {
                 myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
-                myfile << "Collision occured!\n";
+                myfile << "Collision occured!  ||  Avg execution time per cycle is: " << averageExecTime << "\n";
                 myfile.close();
                 collision_counter++;
             }
+
+            
+
+
             
         }
     }
@@ -582,16 +609,13 @@ namespace local_planner
         vector<vector<double>> gaps_in_memory; //en son halinde gaplerin koordinatlarını tutacak olan vektör
 
         double phi_gap = 0.0;
-
-        return (90.0 - phiGoal);
         
         //gap olmadığı durum için phifinal ayarlaması sadece
-        ROS_INFO_STREAM("gapstarttaki eleman: " <<gap_starting_points[0]);
-        ROS_INFO_STREAM("gapenddeki eleman: " <<gap_ending_points[0]);
+    
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
             isGapExist_ = false;
-            return (90.0 - phiGoal);
+            return (M_PI_2 - (M_PI*phiGoal)/180);
             // if (phiGoal > 270)
             //     phiFinal = (450 - phiGoal) * (M_PI / 180);
             // else
@@ -602,7 +626,7 @@ namespace local_planner
             //     phiFinal = phiFinal - 2*M_PI;
             // }
             // else if (phiFinal > 2*M_PI)
-            // {
+            // {ca
             //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
             // }
             // // ROS_ERROR("No gap found, FGM failed.");
@@ -1096,9 +1120,9 @@ namespace local_planner
         vector<double> gap_sizes_new;
         double phi_gap_calculator;
 
-        if (true)
+        if (gaps_in_memory.size() == 0)
         {
-            return (90.0 - phiGoal);
+            return (M_PI_2 - (M_PI*phiGoal)/180);
         }
 
         phiGoal += 90; // ödüllendirmede ekseni 90 derece shift etmek için yapıldı.
