@@ -279,7 +279,7 @@ namespace local_planner
         //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
         //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
         // }
-        else if (dmin < 2)
+        else if (dmin < 2.5)
         {
             // Send velocity commands to robot's base
             cmd_vel.linear.x = linearVelocity*exp(-(2.5 - dmin));
@@ -1160,7 +1160,7 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.75) //0,45 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
@@ -1242,9 +1242,9 @@ namespace local_planner
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 
-        double alpha_weight = 7;
+        double alpha_weight = 22;
         //double beta_weight = 2.8;
-        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
+        phiFinal = (((alpha_weight / exp(0.8*dmin*sqrt(dmin))) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(0.8*dmin*sqrt(dmin)) + 1);
         // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;

@@ -33,6 +33,7 @@
 #include <cmath>
 #include <algorithm>
 #include <exception>
+#include <deque>
 
 using namespace std;
 
@@ -59,6 +60,8 @@ public:
     void odomCallback(boost::shared_ptr<nav_msgs::Odometry const> msg);
 
     void scanCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg);
+
+    void scanMultiCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg);
         
     void poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg);
     
@@ -98,12 +101,14 @@ private:
     
     // Sensor subscriptions
     ros::Subscriber odomSub_;
+    ros::Subscriber multiScanSub_;
     ros::Subscriber scanSub_;
     ros::Subscriber poseSub_;
     ros::Subscriber cmdSub_;
     ros::Subscriber collisionSub_;
     boost::shared_ptr<nav_msgs::Odometry const> odomPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanPtr_;
+    boost::shared_ptr<sensor_msgs::LaserScan const> scanMultiPtr_;
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> posePtr_;
     double cmdPtr_;
 
