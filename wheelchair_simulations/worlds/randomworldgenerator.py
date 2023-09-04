@@ -68,15 +68,18 @@ def find_visual_radius(model_element):
     
     return None  # Any step returned None or 'radius' not found
 
-for i in range(1,500):
+for i in range(1,100):
     for model_element in root.findall('.//model'):
         name = model_element.get('name')
         if name.startswith('box') or name.startswith('cylinder'):
-            randy = random.uniform(-3, 25)
-            if (randy<4 or randy > 18):
-                randx = random.uniform(-18, -4)
-            else:
-                randx = random.uniform(-26, 4)
+            # commente alınmış kısımlar kare world için kullanılanlar
+            # randy = random.uniform(-3, 25)
+            randy = random.uniform(-3.5, 3.5)
+            # if (randy<4 or randy > 18):
+            #     randx = random.uniform(-18, -4)
+            # else:
+            #     randx = random.uniform(-26, 4)
+            randx = random.uniform(2, 20.5)
 
             rand_radius = random.uniform(0.3, 0.7)
 

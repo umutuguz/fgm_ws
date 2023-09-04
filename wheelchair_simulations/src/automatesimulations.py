@@ -42,8 +42,10 @@ def publish_goal(world_number):
     # Create a navigation goal message
     goal_msg = MoveBaseActionGoal()
     goal_msg.goal.target_pose.header.frame_id = "map"
-    goal_msg.goal.target_pose.pose.position.x = -22.0
-    goal_msg.goal.target_pose.pose.position.y = 22.0
+    # goal_msg.goal.target_pose.pose.position.x = -22.0
+    # goal_msg.goal.target_pose.pose.position.y = 22.0
+    goal_msg.goal.target_pose.pose.position.x = 22.0
+    goal_msg.goal.target_pose.pose.position.y = 0.0
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
     goal_msg.goal.target_pose.pose.orientation.w = 1.0
 
@@ -77,6 +79,7 @@ def check_log_file(log_file_path, world_number):
             # Terminate the remaining terminals associated with my.unique.app
             process_ids = subprocess.check_output(["pgrep", "-f", "my.unique.app"]).splitlines()  # Find process IDs of terminals
             for pid in process_ids:
+                print(pid)
                 pid = int(pid)
                 os.kill(pid, signal.SIGINT)
             time.sleep(20)  # Wait for 20 seconds

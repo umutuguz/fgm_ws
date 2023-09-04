@@ -60,8 +60,6 @@ public:
     void odomCallback(boost::shared_ptr<nav_msgs::Odometry const> msg);
 
     void scanCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg);
-
-    void scanMultiCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg);
         
     void poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg);
     

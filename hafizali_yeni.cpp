@@ -10,6 +10,9 @@ double x_buf[2] = {0.0, 0.0};
 double y_buf[2] = {0.0, 0.0};
 double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
+double final_dmin = 2.0;
+bool below_2 = false;
+ros::Time time_below_2;
 ros::Time startTime;
 ros::Time endTime;
 ros::Time totalTimeEnd;
@@ -287,7 +290,7 @@ namespace local_planner
         else if (dmin < 2.5)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity*exp(-(2.5 -dmin));
+            cmd_vel.linear.x = 2*linearVelocity*exp(-(2.5 -dmin));
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -1358,44 +1361,36 @@ namespace local_planner
             {
                 gaps_in_memory[i][2] = 0.1;
             }
-            else if (diff_to_goal_new[i] = 0.0)
+            else if (diff_to_goal_new[i] <= 20)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 5;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 6;
+                // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
+            }
+            else if (diff_to_goal_new[i] <= 45 && diff_to_goal_new[i] > 20)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
+            }
+            else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 45)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
+            }
+
+            else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.7;
+            }
+            else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.4;
+            }
+            else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
+            {
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.2;
             }
             else
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * (5*cos(diff_to_goal_new[i]*M_1_PI/180));
+                ROS_WARN_STREAM("bir hata var else e girilmemeliydi");
             }
-            // else if (diff_to_goal_new[i] <= 30)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
-            //     // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
-            // }
-            // else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
-            // }
-            // else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
-            // }
-
-            // else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.9;
-            // }
-            // else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.6;
-            // }
-            // else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
-            // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.3;
-            // }
-            // else
-            // {
-            //     ROS_WARN_STREAM("bir hata var else e girilmemeliydi");
-            // }
 
             phi_gap_temp[i] -= 90; // ödüllendirme için eklenmiş olan 90 geri çıkarıldı.
         }
@@ -1539,10 +1534,55 @@ namespace local_planner
 
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
+        
+        if(dmin < 2.0)
+        {
+            below_2 = true;
+            time_below_2 = ros::Time::now();
+            // ROS_WARN_STREAM("true oldu");
+            
+
+            if(below_2 && dmin < final_dmin)
+            {
+                time_below_2 = ros::Time::now();
+                // ROS_WARN_STREAM("tazelendi");
+            }
+            final_dmin = std::min(final_dmin, dmin);
+            dmin = final_dmin;
+        }
+
+        ros::Duration elapsed_seconds = ros::Time::now() - time_below_2;
+        double seconds_elapsed = elapsed_seconds.toSec();
+
+        ROS_WARN_STREAM("geçen zaman: " << seconds_elapsed);
+        if (below_2 && seconds_elapsed < 5.0)
+        {
+            dmin = final_dmin;
+        }
+        else if (below_2 && seconds_elapsed >= 5.0)
+        {
+            // ROS_WARN_STREAM("bu ifteyiz");
+            below_2 = false;
+            final_dmin = 2.0;
+        }
+
+        // if(below_2)
+        // {
+        //     final_dmin = std::min(final_dmin, dmin);
+        //     ROS_WARN_STREAM("diğer ifteyiz");
+        //     dmin = final_dmin;
+        // }
+        // else
+        // {
+        //     final_dmin = dmin;
+        //     ROS_WARN_STREAM("elsedeyiz");
+        // }
+
+        ROS_WARN_STREAM("dmin now is: " << dmin);
 
         double alpha_weight = 22;
         //double beta_weight = 2.8;
-        phiFinal = (((alpha_weight / exp(0.8*dmin*sqrt(dmin))) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(0.8*dmin*sqrt(dmin)) + 1);
+        phiFinal = (((alpha_weight / exp(1.1*dmin*sqrt(dmin))) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(1.1*dmin*sqrt(dmin)) + 1);
         // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;

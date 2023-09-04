@@ -38,10 +38,12 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
         pose = Pose()
         pose.position.y = random.uniform(y_range[0], y_range[1])
 
-        if pose.position.y > 18 or pose.position.y < 4:
-            pose.position.x = random.uniform(-4, -18)
-        else:
-            pose.position.x = random.uniform(x_range[0], x_range[1])
+        # eski kare şeklindeki world için kullanılan kısım
+        # if pose.position.y > 18 or pose.position.y < 4:
+        #     pose.position.x = random.uniform(-4, -18)
+        # else:
+        #     pose.position.x = random.uniform(x_range[0], x_range[1])
+        pose.position.x = random.uniform(x_range[0], x_range[1])
         
         # Adjust z coordinate based on size
         if is_cylinder:
@@ -67,12 +69,14 @@ if __name__ == '__main__':
     cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
     # Set the number of models to spawn
-    num_cylinders = 7
-    num_boxes = 7
+    num_cylinders = 4
+    num_boxes = 4
 
     # Set the range of random positions for the models
-    x_range = [-26, 4]
-    y_range = [-3, 25]
+    x_range = [2, 20.5]
+    y_range = [-3.5, 3.5]
+    # x_range = [-26, 4] #eski kare world için kullanılan
+    # y_range = [-3, 25]
     z_range = [1.25, 1.25]
 
     # Set the range of random sizes for the models
