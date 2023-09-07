@@ -74,7 +74,7 @@ for i in range(1,100):
         if name.startswith('box') or name.startswith('cylinder'):
             # commente alınmış kısımlar kare world için kullanılanlar
             # randy = random.uniform(-3, 25)
-            randy = random.uniform(-3.5, 3.5)
+            randy = random.uniform(-3.3, 3.3)
             # if (randy<4 or randy > 18):
             #     randx = random.uniform(-18, -4)
             # else:
@@ -83,11 +83,12 @@ for i in range(1,100):
 
             rand_radius = random.uniform(0.3, 0.7)
 
-            rand_size_x = random.uniform(0.5, 2.1)
-            if rand_size_x > 1.3:
+            # rand_size_x = random.uniform(0.5, 2.1)
+            rand_size_x = random.uniform(0.5, 1.8)
+            if rand_size_x > 1.15: #1.3
                 rand_size_y = random.uniform(0.5, 0.9)
-            elif rand_size_x < 0.9:
-                rand_size_y = random.uniform(1.3, 2.1)
+            elif rand_size_x < 0.8:
+                rand_size_y = random.uniform(1.3, 1.8)
             else:
                 rand_size_y = random.uniform(0.9, 1.3)
 

@@ -5,7 +5,7 @@
   <arg name="base_frame"     default="base_footprint"/>
   <arg name="initial_pose_x" default="0.0"/>
   <arg name="initial_pose_y" default="0.0"/>
-  <arg name="initial_pose_a" default="0.0"/>
+  <arg name="initial_pose_a" default="-3.141592654"/>
   
   <!-- AMCL -->
   <node pkg="amcl" type="amcl" name="amcl">

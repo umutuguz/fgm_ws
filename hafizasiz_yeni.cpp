@@ -7,14 +7,12 @@ double x_buf[2] = {0.0, 0.0};
 double y_buf[2] = {0.0, 0.0};
 double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
-double final_dmin = 2.0;
-bool below_2 = false;
-ros::Time time_below_2;
 ros::Time startTime;
 ros::Time endTime;
 ros::Time totalTimeEnd;
 ros::Duration totalExecutionTime;
 std::vector<ros::Duration> executionTimes;
+int dminIdx;
 double averageExecTime;
 ofstream myfile;
 namespace local_planner
@@ -282,10 +280,10 @@ namespace local_planner
         //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
         //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
         // }
-        else if (dmin < 2.5)
+        else if (dmin < 2.0)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = 2*linearVelocity*exp(-(2.5 - dmin));
+            cmd_vel.linear.x = linearVelocity*exp(-(2.5 - dmin));
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -293,7 +291,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2;
+            cmd_vel.angular.z = angularVel*2 +(81 - dminIdx)/1200;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
@@ -1163,7 +1161,7 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.75) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
@@ -1245,38 +1243,38 @@ namespace local_planner
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 
-        double alpha_weight = 22;
-                
-        if(dmin < 2.0)
-        {
-            below_2 = true;
-            time_below_2 = ros::Time::now();
-            // ROS_WARN_STREAM("true oldu");
+        double alpha_weight = 7;
+        // Dmin tutma işi yapıldığında kullanılıyordu    
+        // if(dmin < 2.0)
+        // {
+        //     below_2 = true;
+        //     time_below_2 = ros::Time::now();
+        //     // ROS_WARN_STREAM("true oldu");
             
 
-            if(below_2 && dmin < final_dmin)
-            {
-                time_below_2 = ros::Time::now();
-                // ROS_WARN_STREAM("tazelendi");
-            }
-            final_dmin = std::min(final_dmin, dmin);
-            dmin = final_dmin;
-        }
+        //     if(below_2 && dmin < final_dmin)
+        //     {
+        //         time_below_2 = ros::Time::now();
+        //         // ROS_WARN_STREAM("tazelendi");
+        //     }
+        //     final_dmin = std::min(final_dmin, dmin);
+        //     dmin = final_dmin;
+        // }
 
-        ros::Duration elapsed_seconds = ros::Time::now() - time_below_2;
-        double seconds_elapsed = elapsed_seconds.toSec();
+        // ros::Duration elapsed_seconds = ros::Time::now() - time_below_2;
+        // double seconds_elapsed = elapsed_seconds.toSec();
 
-        ROS_WARN_STREAM("geçen zaman: " << seconds_elapsed);
-        if (below_2 && seconds_elapsed < 5.0)
-        {
-            dmin = final_dmin;
-        }
-        else if (below_2 && seconds_elapsed >= 5.0)
-        {
-            // ROS_WARN_STREAM("bu ifteyiz");
-            below_2 = false;
-            final_dmin = 2.0;
-        }
+        // ROS_WARN_STREAM("geçen zaman: " << seconds_elapsed);
+        // if (below_2 && seconds_elapsed < 5.0)
+        // {
+        //     dmin = final_dmin;
+        // }
+        // else if (below_2 && seconds_elapsed >= 5.0)
+        // {
+        //     // ROS_WARN_STREAM("bu ifteyiz");
+        //     below_2 = false;
+        //     final_dmin = 2.0;
+        // }
 
         // if(below_2)
         // {
@@ -1293,7 +1291,7 @@ namespace local_planner
         ROS_WARN_STREAM("dmin now is: " << dmin);//double beta_weight = 2.8;
 
 
-        phiFinal = (((alpha_weight / exp(0.8*dmin*sqrt(dmin))) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(0.8*dmin*sqrt(dmin)) + 1);
+        phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
         //double phiFinal = 0; //(90-phiGoal)*M_PI/180;
