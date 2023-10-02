@@ -14,6 +14,7 @@
 #include <geometry_msgs/Twist.h>
 #include <tf/transform_listener.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -67,6 +68,8 @@ public:
 
     void collisionCallback(const gazebo_msgs::ContactsState::ConstPtr& msg);
 
+    void costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& costmap_msg);
+
     double distanceToGlobalGoal();
 
     double LLCallback();
@@ -104,10 +107,12 @@ private:
     ros::Subscriber poseSub_;
     ros::Subscriber cmdSub_;
     ros::Subscriber collisionSub_;
+    ros::Subscriber costmapSub_;
     boost::shared_ptr<nav_msgs::Odometry const> odomPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanMultiPtr_;
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> posePtr_;
+    boost::shared_ptr<nav_msgs::OccupancyGrid const> costmapPtr_;
     double cmdPtr_;
 
     // Publishers

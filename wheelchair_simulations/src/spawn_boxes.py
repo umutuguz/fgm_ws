@@ -14,7 +14,8 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
 
         if is_cylinder:
             # Generate random radius and length
-            radius = random.uniform(0.3, 0.7)
+            # radius = random.uniform(0.3, 0.7)
+            radius = random.uniform(0.05, 0.15)
             # length = 5
 
             # Replace the radius and length values in the SDF string
@@ -69,8 +70,8 @@ if __name__ == '__main__':
     cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
     # Set the number of models to spawn
-    num_cylinders = 3
-    num_boxes = 3
+    num_cylinders = 5
+    num_boxes = 0
 
     # Set the range of random positions for the models
     x_range = [2, 20.5]

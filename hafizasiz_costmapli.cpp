@@ -59,7 +59,7 @@ namespace local_planner
 
             collisionSub_ = nh_.subscribe("/base_footprint_contact_sensor_state", 100, &LocalPlanner::collisionCallback, this);
 
-            costmapSub_ = nh_.subscribe("/move_base/local_costmap/costmap", 100, &LocalPlanner::costmapCallback, this);
+            costmapSub_ = nh_.subscribe("/move_base/local_planner/costmap", 100, &LocalPlanner::costmapCallBack, this);
 
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
@@ -174,6 +174,7 @@ namespace local_planner
         }
         ROS_INFO_STREAM("Global plan size is:  " << globalPlan_.size());
         ROS_INFO_STREAM("Current goal index: " << currentGoalPoseIdx_);
+
         // ROS_INFO("patlamadi1");
 
         currentGoalPose_ = globalPlan_.at(currentGoalPoseIdx_).pose;
@@ -411,7 +412,7 @@ namespace local_planner
     void LocalPlanner::scanCallback(boost::shared_ptr<sensor_msgs::LaserScan const> msg)
     {
         scanPtr_ = msg;
-    } // end function laserScanCallback
+        } // end function laserScanCallback
 
     void LocalPlanner::poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg)
     {
@@ -452,9 +453,9 @@ namespace local_planner
         }
     }
 
-    void LocalPlanner::costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& costmap_msg)
+    void LocalPlanner::costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& costmap)
     {
-        costmapPtr_ = costmap_msg;
+        std::vector<int8_t> costmapData = costmap->data;
     }
 
     double LocalPlanner::distanceToGlobalGoal()
@@ -507,16 +508,6 @@ namespace local_planner
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
-        std::vector<double> costmapData;
-
-        for (unsigned int i = 0; i < costmapPtr_->data.size(); i++)
-        {
-            costmapData.push_back(costmapPtr_->data[i]);
-        }
-
-        ROS_WARN_STREAM("costmapData size is: " << costmapData.size());
-        ROS_WARN_STREAM("first element of costmap is : " << costmapData[0]);
-        ROS_WARN_STREAM("second element of costmap is : " << costmapData[1]);
         // ROS_INFO_STREAM("Scan ptr size is: " << scanPtr_->ranges.size());
 
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)

@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def calculate_influence(alpha_weight, dmin):
-    weight = alpha_weight / np.exp(dmin*np.sqrt(dmin))
+    weight = alpha_weight / np.exp(dmin)
     return (weight / (weight + 1)) * 100
 
 # Define the range of dmin values
 dmin_values = np.linspace(0, 10, 100)  # Example range from 0 to 10
 
 # Define the alpha_weight value
-alpha_weight = 22
+alpha_weight = 7
 # Calculate corresponding influence percentages for each dmin value
 influence_percentages = calculate_influence(alpha_weight, dmin_values)
 

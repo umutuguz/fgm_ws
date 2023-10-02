@@ -81,7 +81,8 @@ for i in range(1,100):
             #     randx = random.uniform(-26, 4)
             randx = random.uniform(2, 20.5)
 
-            rand_radius = random.uniform(0.3, 0.7)
+            # rand_radius = random.uniform(0.3, 0.7)
+            rand_radius = random.uniform(0.05, 0.15)
 
             # rand_size_x = random.uniform(0.5, 2.1)
             rand_size_x = random.uniform(0.5, 1.8)
