@@ -543,10 +543,13 @@ namespace local_planner
         int centerY = gridHeight / 2;
 
         // Iterate through angles within FOV
-        for (double angle = -fov / 2.0; angle < fov / 2.0; angle += angularResolution) 
+        for (double angle = robot_pose_theta_real - fov / 2.0; angle < robot_pose_theta_real + fov / 2.0; angle += angularResolution) 
         {
+            // Make sure the angle wraps around to the range [-180, 180] degrees
+            double adjustedAngle = fmod(angle + 180.0, 360.0) - 180.0;
+            
             // Convert angle to radians
-            double radAngle = angle * M_PI / 180.0;
+            double radAngle = adjustedAngle * M_PI / 180.0;
 
             // Initialize ray's position and distance
             int rayX = centerX;
@@ -677,6 +680,7 @@ namespace local_planner
         double atan2_output = atan2(yDiff, xDiff);
         atan2_output = atan2_output * 180 / M_PI;
         ROS_INFO_STREAM("atan2 output is : " << atan2_output);
+        ROS_INFO_STREAM("robot pose theta manipulated is: " << robot_pose_theta_manipulated);
 
         phiGoal = robot_pose_theta_real - atan2_output + 90;
 
@@ -905,7 +909,7 @@ namespace local_planner
                     }
                     if (counter == 0)
                     {
-                        gap_ending_points.push_back(344);
+                        gap_ending_points.push_back(344); //FOV bitişini pushlayan
                     }
                     // ROS_INFO_STREAM("gap ending points are : ");
                     // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -952,7 +956,7 @@ namespace local_planner
 
             if (gap_ending_points[0] < gap_starting_points[0])
             {
-                gap_starting_points.insert(gap_starting_points.begin(), 0);
+                gap_starting_points.insert(gap_starting_points.begin(), 0); //FOV başlangıcını pushlayan
             }
             // ROS_INFO_STREAM("gap ending points are : ");
             // for (unsigned int z = 0; z < gap_ending_points.size(); z++)

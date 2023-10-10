@@ -8,13 +8,13 @@ double y_buf[2] = {0.0, 0.0};
 double xx_buf[2] = {0.0, 0.0};
 double yy_buf[2] = {0.0, 0.0};
 // Define the grid map dimensions
-const int gridWidth = 160;
-const int gridHeight = 160;
+const int gridWidth = 400;
+const int gridHeight = 400;
 
 // LIDAR parameters
 const double fov = 360.0;  // degrees
-const double angularResolution = 1.0;  // degree per beam
-const double maxRange = 10.0;  // maximum range of the LIDAR in grid cells
+const double angularResolution = 0.4709;  // degree per beam
+const double maxRange = 200.0;  // maximum range of the LIDAR in grid cells
 ros::Time startTime;
 ros::Time endTime;
 ros::Time totalTimeEnd;
@@ -482,6 +482,14 @@ namespace local_planner
     vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
     double prev_odomRX = 0.0;
     double prev_odomRY = 0.0;
+    bool isOccupied(const std::vector<double>& gridMap, int x, int y) 
+    {
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) {
+            // Out of bounds
+            return true;
+        }
+        return gridMap[y * gridWidth + x] > 20.0;  // Adjust the threshold as needed
+    }
 
     double LocalPlanner::LLCallback()
     {
@@ -526,6 +534,63 @@ namespace local_planner
         ROS_WARN_STREAM("first element of costmap is : " << costmapData[0]);
         ROS_WARN_STREAM("second element of costmap is : " << costmapData[1]);
         // ROS_INFO_STREAM("Scan ptr size is: " << scanPtr_->ranges.size());
+
+        // Create a vector to store LIDAR measurements
+        std::vector<double> lidarRanges;
+
+        // Center of the grid
+        int centerX = gridWidth / 2;
+        int centerY = gridHeight / 2;
+
+        // Iterate through angles within FOV
+        for (double angle = robot_pose_theta_real - fov / 2.0; angle < robot_pose_theta_real + fov / 2.0; angle += angularResolution) 
+        {
+            // Make sure the angle wraps around to the range [-180, 180] degrees
+            double adjustedAngle = fmod(angle + 180.0, 360.0) - 180.0;
+            
+            // Convert angle to radians
+            double radAngle = adjustedAngle * M_PI / 180.0;
+
+            // Initialize ray's position and distance
+            int rayX = centerX;
+            int rayY = centerY;
+            double distance = 0.0;
+            bool obstacleHit = false;
+
+            while (distance < maxRange*0.05) {
+                // Calculate the next position along the ray
+                rayX = centerX + static_cast<int>(distance * cos(radAngle) / 0.05);
+                rayY = centerY + static_cast<int>(distance * sin(radAngle) / 0.05);
+                distance += 0.05;  // assuming each step is 0.05 unit in the grid
+
+                // Check if the current cell is occupied (an obstacle)
+                if (isOccupied(costmapData, rayX, rayY)) {
+                    lidarRanges.push_back(distance);
+                    obstacleHit = true;
+                    break;
+                }
+            }
+
+            if (!obstacleHit) {
+                // If the ray reached maxRange without hitting an obstacle
+                lidarRanges.push_back(std::numeric_limits<double>::infinity());
+            }
+
+            // if (distance >= maxRange) {
+            //     // If the ray reached maxRange without hitting an obstacle
+            //     lidarRanges.push_back(std::numeric_limits<double>::infinity());
+            //     // If the ray reached maxRange without hitting an obstacle
+            //     // lidarRanges.push_back(maxRange);
+            // }
+        }
+
+        // Now, lidarRanges vector contains the LIDAR measurements
+        ROS_INFO_STREAM("lidar ranges has: ");
+
+        for(int i = 0; i < lidarRanges.size(); i++)
+        {
+            ROS_INFO_STREAM(lidarRanges[i] << ", ");
+        }
 
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
         {
@@ -615,6 +680,7 @@ namespace local_planner
         double atan2_output = atan2(yDiff, xDiff);
         atan2_output = atan2_output * 180 / M_PI;
         ROS_INFO_STREAM("atan2 output is : " << atan2_output);
+        ROS_INFO_STREAM("robot pose theta manipulated is: " << robot_pose_theta_manipulated);
 
         phiGoal = robot_pose_theta_real - atan2_output + 90;
 
@@ -843,7 +909,7 @@ namespace local_planner
                     }
                     if (counter == 0)
                     {
-                        gap_ending_points.push_back(344);
+                        gap_ending_points.push_back(344); //FOV bitişini pushlayan
                     }
                     // ROS_INFO_STREAM("gap ending points are : ");
                     // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -890,7 +956,7 @@ namespace local_planner
 
             if (gap_ending_points[0] < gap_starting_points[0])
             {
-                gap_starting_points.insert(gap_starting_points.begin(), 0);
+                gap_starting_points.insert(gap_starting_points.begin(), 0); //FOV başlangıcını pushlayan
             }
             // ROS_INFO_STREAM("gap ending points are : ");
             // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -1364,11 +1430,4 @@ namespace local_planner
         pub.publish(msg);
     } // end function publishWRef
     // Function to check if a cell is occupied
-    bool isOccupied(const std::vector<double>& gridMap, int x, int y) {
-        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) {
-            // Out of bounds
-            return true;
-        }
-        return gridMap[y * gridWidth + x] > 20.0;  // Adjust the threshold as needed
-    }
 }
