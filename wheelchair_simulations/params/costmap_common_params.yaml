@@ -19,5 +19,5 @@ obstacles_laser:
   two_lidars: {sensor_frame: base_link, data_type: LaserScan, topic: scan_multi_filtered, marking: true, clearing: true}
 
 inflation:
-  inflation_radius: 1.2
+  inflation_radius: 0.7
   cost_scaling_factor: 5

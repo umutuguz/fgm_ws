@@ -120,6 +120,7 @@ private:
     ros::Publisher distToGoalPub_;
     ros::Publisher wRefPub_;
     ros::Publisher marker_pub_;
+    ros::Publisher virtual_lidar_pub_;
 
     double lookAheadDist_ = 1.1;
     int collision_counter = 0;
