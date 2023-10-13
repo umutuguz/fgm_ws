@@ -266,7 +266,7 @@ namespace local_planner
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
 
 
-        ROS_INFO_STREAM("dmin: " << dmin_temp);
+        ROS_WARN_STREAM("hiz kosullamasi icin dmin: " << dmin_temp);
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -302,7 +302,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2 +(81 - dminIdx)/1200;
+            cmd_vel.angular.z = angularVel*2 +(81 - dmin)/1200;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
@@ -588,7 +588,7 @@ namespace local_planner
         reverse(lidarRanges.begin(), lidarRanges.end());
 
         // Now, lidarRanges vector contains the LIDAR measurements
-        ROS_INFO_STREAM("lidar ranges has: ");
+        // ROS_INFO_STREAM("lidar ranges has: ");
 
         for(int i = 0; i < lidarRanges.size(); i++)
         {
@@ -623,13 +623,17 @@ namespace local_planner
         // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
+        // auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
+
+        auto dminIdxItr = std::min_element(lidarRanges.begin()+90, lidarRanges.end()-90);
         // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
+        // int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
+
+        int dminIdx = std::distance(lidarRanges.begin()+90, dminIdxItr);
         // ROS_INFO_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
-        dmin = currRange.at(dminIdx+75);
+        dmin = lidarRanges.at(dminIdx+90);
         if (dmin <= 0.01)
         {
             dmin = 0.01;
@@ -639,7 +643,7 @@ namespace local_planner
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
         // }
-        ROS_INFO_STREAM("dmin is : " << dmin);
+        ROS_WARN_STREAM("hakiki dmin is : " << dmin);
 
 
         std::vector<int> gap_starting_points;
@@ -1276,31 +1280,31 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.1) //0,45 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
             else if (diff_to_goal_new[i] <= 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.8;
                 // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
             }
             else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2.2;
             }
             else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.1;
             }
 
             else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.9;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.8;
             }
             else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.6;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.5;
             }
             else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
             {
@@ -1407,8 +1411,8 @@ namespace local_planner
         // //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
-        ROS_INFO_STREAM("phi gap is : " << phi_gap);
-        ROS_INFO_STREAM("phi goal is : " << phiGoal);
+        ROS_WARN_STREAM("phi gap is : " << phi_gap);
+        ROS_ERROR_STREAM("phi goal is : " << phiGoal);
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);

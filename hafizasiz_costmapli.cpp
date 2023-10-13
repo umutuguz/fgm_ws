@@ -266,7 +266,7 @@ namespace local_planner
         ROS_INFO_STREAM("Angular velocity: " << angularVel);
 
 
-        ROS_INFO_STREAM("dmin: " << dmin_temp);
+        ROS_WARN_STREAM("hiz kosullamasi icin dmin: " << dmin_temp);
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -302,7 +302,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2 +(81 - dminIdx)/1200;
+            cmd_vel.angular.z = angularVel*2 +(81 - dmin)/1200;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
@@ -490,7 +490,7 @@ namespace local_planner
             // Out of bounds
             return true;
         }
-        return gridMap[y * gridWidth + x] > 20.0;  // Adjust the threshold as needed
+        return gridMap[y * gridWidth + x] > 50.0;  // Adjust the threshold as needed
     }
 
     double LocalPlanner::LLCallback()
@@ -588,7 +588,7 @@ namespace local_planner
         reverse(lidarRanges.begin(), lidarRanges.end());
 
         // Now, lidarRanges vector contains the LIDAR measurements
-        ROS_INFO_STREAM("lidar ranges has: ");
+        // ROS_INFO_STREAM("lidar ranges has: ");
 
         for(int i = 0; i < lidarRanges.size(); i++)
         {
@@ -623,13 +623,17 @@ namespace local_planner
         // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
+        // auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
+
+        auto dminIdxItr = std::min_element(lidarRanges.begin()+90, lidarRanges.end()-90);
         // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
+        // int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
+
+        int dminIdx = std::distance(lidarRanges.begin()+90, dminIdxItr);
         // ROS_INFO_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
-        dmin = currRange.at(dminIdx+75);
+        dmin = lidarRanges.at(dminIdx+90);
         if (dmin <= 0.01)
         {
             dmin = 0.01;
@@ -639,7 +643,7 @@ namespace local_planner
         // {
         //     ROS_INFO_STREAM("currrange vector is: "<< currRange[i] << "for index : " << i);
         // }
-        ROS_INFO_STREAM("dmin is : " << dmin);
+        ROS_WARN_STREAM("hakiki dmin is : " << dmin);
 
 
         std::vector<int> gap_starting_points;
@@ -1001,21 +1005,45 @@ namespace local_planner
             min_size = min(gap_starting_points.size(), gap_ending_points.size());
 
             double array_gap[min_size][2];
-
-            for (int i = 0; i < min_size; i++)
+            
+            if(gap_ending_points[0] < gap_starting_points[0])
             {
-                for (int j = 0; j < 2; j++)
+                for (int i = 0; i < min_size - 1; i++)
                 {
-                    if (j == 0)
+                    for (int j = 0; j < 2 ; j++)
                     {
-                        array_gap[i][j] = gap_starting_points[i];
+                        if (j==0)
+                        {
+                            array_gap[i][j] = gap_starting_points[i];
+                        }
+                        else
+                        {
+                            array_gap[i][j] = gap_ending_points[i+1];
+                        }
                     }
-                    else
+                }
+                array_gap[min_size - 1][0] = gap_starting_points[min_size - 1];
+                array_gap[min_size - 1][1] = gap_ending_points[0];
+            }
+            else
+            {
+                for (int i = 0; i < min_size; i++)
+                {
+                    for (int j = 0; j < 2; j++)
                     {
-                        array_gap[i][j] = gap_ending_points[i];
+                        if (j == 0)
+                        {
+                            array_gap[i][j] = gap_starting_points[i];
+                        }
+                        else
+                        {
+                            array_gap[i][j] = gap_ending_points[i];
+                        }
                     }
                 }
             }
+
+            
             // ROS_INFO_STREAM("min_size is = " << min_size);
             int counter_array = 0;
 
@@ -1047,6 +1075,7 @@ namespace local_planner
                 for (int j = 0 ; j < cols ; j++)
                 {
                     array_gap[i][j] = array_gap[i][j] * (360.0/765.0);
+                    ROS_INFO_STREAM("array gap " << i << " and " << j << " is " << array_gap[i][j]);
                 }
             }
             counter_array = 0;
@@ -1096,16 +1125,18 @@ namespace local_planner
                 // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
                 d1_temp = lidarRanges.at(round(alpha_temp*(765.0/360.0)));
                 // ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
+                ROS_INFO_STREAM("d1_temp is : " << d1_temp);
                 // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 // if (beta_temp >= 163.0)
                 //     beta_temp = 162.01;
                     // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 d2_temp = lidarRanges.at(round(beta_temp*(765.0/360.0)));
+                ROS_INFO_STREAM("d2_temp is : " << d2_temp);
 
-                memory_array[i][0] = odomRX - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp) + 90)/180.0); //d1 den gelen X koord
-                memory_array[i][1] = odomRY + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp) + 90)/180.0); //d1 den gelen y koord
-                memory_array[i][2] = odomRX - d2_temp*cos(M_PI*(robot_pose_theta_manipulated + (beta_temp) + 90)/180.0);  //d2 den gelen X
-                memory_array[i][3] = odomRY + d2_temp*sin(M_PI*(robot_pose_theta_manipulated + (beta_temp) + 90)/180.0);  //d2 den gelen Y
+                memory_array[i][0] = odomRX - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp) - 90)/180.0); //d1 den gelen X koord
+                memory_array[i][1] = odomRY + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp) - 90)/180.0); //d1 den gelen y koord
+                memory_array[i][2] = odomRX - d2_temp*cos(M_PI*(robot_pose_theta_manipulated + (beta_temp) - 90)/180.0);  //d2 den gelen X
+                memory_array[i][3] = odomRY + d2_temp*sin(M_PI*(robot_pose_theta_manipulated + (beta_temp) - 90)/180.0);  //d2 den gelen Y
                 // ROS_INFO_STREAM("d1X is : " << memory_array[i][0]);
                 // ROS_INFO_STREAM("d1Y is : " << memory_array[i][1]);
                 // ROS_INFO_STREAM("d2X is : " << memory_array[i][2]);
@@ -1249,31 +1280,31 @@ namespace local_planner
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.1) //0,45 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
             else if (diff_to_goal_new[i] <= 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.8;
                 // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
             }
             else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2.2;
             }
             else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 60)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.1;
             }
 
             else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.9;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.8;
             }
             else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.6;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.5;
             }
             else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
             {
@@ -1380,8 +1411,8 @@ namespace local_planner
         // //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
-        ROS_INFO_STREAM("phi gap is : " << phi_gap);
-        ROS_INFO_STREAM("phi goal is : " << phiGoal);
+        ROS_WARN_STREAM("phi gap is : " << phi_gap);
+        ROS_ERROR_STREAM("phi goal is : " << phiGoal);
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);

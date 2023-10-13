@@ -291,7 +291,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2 +(81 - dminIdx)/1200;
+            cmd_vel.angular.z = angularVel*2 +(81 - dmin)/1200;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {

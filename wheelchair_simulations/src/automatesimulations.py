@@ -42,10 +42,10 @@ def publish_goal(world_number):
     # Create a navigation goal message
     goal_msg = MoveBaseActionGoal()
     goal_msg.goal.target_pose.header.frame_id = "map"
-    goal_msg.goal.target_pose.pose.position.x = -22.0
-    goal_msg.goal.target_pose.pose.position.y = 22.0
-    # goal_msg.goal.target_pose.pose.position.x = 22.0
-    # goal_msg.goal.target_pose.pose.position.y = 0.0
+    # goal_msg.goal.target_pose.pose.position.x = -22.0
+    # goal_msg.goal.target_pose.pose.position.y = 22.0
+    goal_msg.goal.target_pose.pose.position.x = 22.0
+    goal_msg.goal.target_pose.pose.position.y = 0.0
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
     goal_msg.goal.target_pose.pose.orientation.w = 1.0
 
