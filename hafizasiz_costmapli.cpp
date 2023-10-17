@@ -224,8 +224,8 @@ namespace local_planner
 
         if (dmin > 8)
             dmin_temp = 8;
-        else if (dmin <= 0.15)
-            dmin_temp = 0.151;
+        else if (dmin <= 0.2)
+            dmin_temp = 0.2;
         else
             dmin_temp = dmin;
 
@@ -233,7 +233,7 @@ namespace local_planner
 
         // linearVel = 0.3 * ((0.292 * log((10 * dmin_temp) + 1)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 8.01));
         // linearVel = (coefVel * ((0.7 * log((4 * (dmin_temp - 0.1)) + 0.0)) / (exp(0.883 * phiFinal_temp)) + (exp(1.57 - phiFinal_temp) / 5.0))) + 0.1;
-        linearVel = (coefVel * ((0.4 * log((3.5 * (dmin_temp - 0.15)) + 0.0)) / (exp(0.883 * phiFinal_abs)) + (exp(1.57 - phiFinal_abs) / 6.5))) + 0.01;
+        linearVel = (coefVel * ((0.4 * log((2.5 * (dmin_temp - 0.15)) + 0.0)) / (exp(0.883 * phiFinal_abs)) + (exp(1.57 - phiFinal_abs) / 6.5))) + 0.01;
         // angularVel = phiFinal * 0.5 * (exp(dmin_temp - 10) - exp(-4 * dmin_temp) + 1);
         // angularVel = phiFinal * coefVel * (exp(dmin_temp - 10) - exp(-1 * dmin_temp) + (0.1 / (dmin_temp + 0.1)) + 1);
         angularVel = 0.75 * phiFinal * coefVel * ((exp(-4 * dmin_temp) / 2.0) + 1);
@@ -291,10 +291,10 @@ namespace local_planner
         //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
         //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
         // }
-        else if (dmin < 2.0)
+        else if (dmin < 1.5)
         {
             // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity*exp(-(2.5 - dmin));
+            cmd_vel.linear.x = linearVelocity*exp(-(2.0 - dmin));
             // cmd_vel.linear.x = 0.0;
             cmd_vel.linear.y = 0.0;
             cmd_vel.linear.z = 0.0;
@@ -302,7 +302,7 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2 +(81 - dmin)/1200;
+            cmd_vel.angular.z = angularVel*2;
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
@@ -490,7 +490,7 @@ namespace local_planner
             // Out of bounds
             return true;
         }
-        return gridMap[y * gridWidth + x] > 50.0;  // Adjust the threshold as needed
+        return gridMap[y * gridWidth + x] > 60.0;  // Adjust the threshold as needed
     }
 
     double LocalPlanner::LLCallback()
@@ -592,7 +592,7 @@ namespace local_planner
 
         for(int i = 0; i < lidarRanges.size(); i++)
         {
-            // ROS_INFO_STREAM(lidarRanges[i] << ", ");
+            ROS_INFO_STREAM(lidarRanges[i] << ", ");
         }
 
         for (unsigned int i = 0; i < scanPtr_->ranges.size(); i++)
@@ -630,7 +630,7 @@ namespace local_planner
         // int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
 
         int dminIdx = std::distance(lidarRanges.begin()+90, dminIdxItr);
-        // ROS_INFO_STREAM("dminidx is : " << dminIdx);
+        ROS_INFO_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
         dmin = lidarRanges.at(dminIdx+90);
@@ -1360,9 +1360,9 @@ namespace local_planner
 
         gaps_in_memory.clear();
         phi_gap_temp.clear();
-        diff_to_goal_new.clear();
+        
 
-        double alpha_weight = 7;
+        double alpha_weight = 10;
 
         sensor_msgs::LaserScan virtual_scan_msg;
         virtual_scan_msg.header.frame_id = "base_footprint";
@@ -1412,10 +1412,34 @@ namespace local_planner
         // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
         ROS_WARN_STREAM("phi gap is : " << phi_gap);
-        ROS_ERROR_STREAM("phi goal is : " << phiGoal);
+        ROS_WARN_STREAM("phi goal is : " << phiGoal);
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);
+
+        bool thereisgapinforward = false;
+
+        for(int i = 0 ; i < diff_to_goal_new.size(); i++)
+        {
+            ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
+        }
+
+        for(int i = 0 ; i < diff_to_goal_new.size(); i++)
+        {
+            if(diff_to_goal_new[i] < 90)
+            {
+                thereisgapinforward = true;
+                break;
+            }
+        }
+
+        if(!thereisgapinforward)
+        {
+            ROS_WARN_STREAM("Going to phiGoal");
+            return (M_PI_2 - (M_PI*phiGoal)/180);
+        }
+
+        diff_to_goal_new.clear();
 
         return phiFinal;
     }
