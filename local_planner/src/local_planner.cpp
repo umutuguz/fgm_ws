@@ -916,7 +916,7 @@ namespace local_planner
                     }
                     if (counter == 0)
                     {
-                        // gap_ending_points.push_back(344); //FOV bitişini pushlayan
+                        gap_ending_points.push_back(765); //FOV bitişini pushlayan
                     }
                     // ROS_INFO_STREAM("gap ending points are : ");
                     // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -963,7 +963,7 @@ namespace local_planner
 
             if (gap_ending_points[0] < gap_starting_points[0])
             {
-                // gap_starting_points.insert(gap_starting_points.begin(), 0); //FOV başlangıcını pushlayan
+                gap_starting_points.insert(gap_starting_points.begin(), 0); //FOV başlangıcını pushlayan
             }
             // ROS_INFO_STREAM("gap ending points are : ");
             // for (unsigned int z = 0; z < gap_ending_points.size(); z++)
@@ -1005,43 +1005,62 @@ namespace local_planner
             min_size = min(gap_starting_points.size(), gap_ending_points.size());
 
             double array_gap[min_size][2];
+
             
-            if(gap_ending_points[0] < gap_starting_points[0])
+            // ŞU FOR 360 DERECE CİRCULAR İŞLENMEDİĞİNDE KULLANILMALI, DİĞER TÜRLÜ AŞAĞIDAKİ İF ELSE AÇILMALI (CİRCULAR İÇİN FOV BİTİŞ FOV BAŞLANGIÇ KISIMLARINI UNUTMA)
+            // AYRICA FOV BAŞLANGIÇ VE BİTİŞİNE ORANIN d1 d2 PARAMETRELERİ İÇİN BİRAZ DAHA AŞAĞIDA BULUNAN İF ALPHATEMP == İF BETATEMP == KISIMLARI DA AÇILMALI
+            for (int i = 0; i < min_size; i++)
             {
-                for (int i = 0; i < min_size - 1; i++)
+                for (int j = 0; j<2; j++)
                 {
-                    for (int j = 0; j < 2 ; j++)
+                    if(j==0)
                     {
-                        if (j==0)
-                        {
-                            array_gap[i][j] = gap_starting_points[i];
-                        }
-                        else
-                        {
-                            array_gap[i][j] = gap_ending_points[i+1];
-                        }
+                        array_gap[i][j] = gap_starting_points[i];
                     }
-                }
-                array_gap[min_size - 1][0] = gap_starting_points[min_size - 1];
-                array_gap[min_size - 1][1] = gap_ending_points[0];
-            }
-            else
-            {
-                for (int i = 0; i < min_size; i++)
-                {
-                    for (int j = 0; j < 2; j++)
+                    else
                     {
-                        if (j == 0)
-                        {
-                            array_gap[i][j] = gap_starting_points[i];
-                        }
-                        else
-                        {
-                            array_gap[i][j] = gap_ending_points[i];
-                        }
+                        array_gap[i][j] = gap_ending_points[i];
                     }
                 }
             }
+
+            // ŞU İF ELSE, 360 DERECE CİRCULAR İŞLENECEĞİNDE AÇILMALI
+            // if(gap_ending_points[0] < gap_starting_points[0])
+            // {
+            //     for (int i = 0; i < min_size - 1; i++)
+            //     {
+            //         for (int j = 0; j < 2 ; j++)
+            //         {
+            //             if (j==0)
+            //             {
+            //                 array_gap[i][j] = gap_starting_points[i];
+            //             }
+            //             else
+            //             {
+            //                 array_gap[i][j] = gap_ending_points[i+1];
+            //             }
+            //         }
+            //     }
+            //     array_gap[min_size - 1][0] = gap_starting_points[min_size - 1];
+            //     array_gap[min_size - 1][1] = gap_ending_points[0];
+            // }
+            // else
+            // {
+            //     for (int i = 0; i < min_size; i++)
+            //     {
+            //         for (int j = 0; j < 2; j++)
+            //         {
+            //             if (j == 0)
+            //             {
+            //                 array_gap[i][j] = gap_starting_points[i];
+            //             }
+            //             else
+            //             {
+            //                 array_gap[i][j] = gap_ending_points[i];
+            //             }
+            //         }
+            //     }
+            // }
 
             
             // ROS_INFO_STREAM("min_size is = " << min_size);
@@ -1112,15 +1131,15 @@ namespace local_planner
                 alpha_temp = array_gap[i][0];
                 beta_temp = array_gap[i][1];
 
-                // if(alpha_temp == 0.0)
-                // {
-                //     alpha_temp = beta_temp;
-                // }
+                if(alpha_temp == 0.0)
+                {
+                    alpha_temp = beta_temp;
+                }
 
-                // if(beta_temp == 163.0)
-                // {
-                //     beta_temp = alpha_temp;
-                // }
+                if(beta_temp == 360.0)
+                {
+                    beta_temp = alpha_temp;
+                }
                 // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
                 // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
                 d1_temp = lidarRanges.at(round(alpha_temp*(765.0/360.0)));
