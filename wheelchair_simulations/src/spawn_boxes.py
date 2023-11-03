@@ -14,8 +14,8 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
 
         if is_cylinder:
             # Generate random radius and length
-            # radius = random.uniform(0.3, 0.7)
-            radius = random.uniform(0.05, 0.15)
+            radius = random.uniform(0.15, 0.5)
+            # radius = random.uniform(0.05, 0.15)
             # length = 5
 
             # Replace the radius and length values in the SDF string
@@ -23,12 +23,12 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
         else:
             # Generate random size
             size_x = random.uniform(size_range[0], size_range[1])
-            if (size_x > 1.15):
-                size_y = random.uniform(0.5,0.9)
-            elif (size_x < 0.8):
-                size_y = random.uniform(1.3, 1.8)
+            if (size_x > 1.0):
+                size_y = random.uniform(0.3,0.6)
+            elif (size_x < 0.6):
+                size_y = random.uniform(1.0, 1.2)
             else:
-                size_y = random.uniform(0.9, 1.3)
+                size_y = random.uniform(0.6, 1.0)
             # size_y = random.uniform(size_range[0], size_range[1])
             size_z = 2.5
 
@@ -70,18 +70,20 @@ if __name__ == '__main__':
     cylinder_sdf_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/my_cylinder.sdf' 
 
     # Set the number of models to spawn
-    num_cylinders = 5
-    num_boxes = 0
+    num_cylinders = 4
+    num_boxes = 4
 
     # Set the range of random positions for the models
-    x_range = [2, 20.5]
-    y_range = [-3.5, 3.5]
+    # x_range = [2, 20.5] # koridor world
+    # y_range = [-3.5, 3.5] #koridor world
+    x_range = [-10, 10]
+    y_range = [-6,2]
     # x_range = [-26, 4] #eski kare world için kullanılan
     # y_range = [-3, 25]
     z_range = [1.25, 1.25]
 
     # Set the range of random sizes for the models
-    size_range = [0.5, 2.1]
+    size_range = [0.3, 1.2]
 
     for i in range(num_cylinders):
         model_name = 'cylinder{}'.format(i+1)

@@ -44,10 +44,10 @@ def publish_goal(world_number):
     goal_msg.goal.target_pose.header.frame_id = "map"
     # goal_msg.goal.target_pose.pose.position.x = -22.0
     # goal_msg.goal.target_pose.pose.position.y = 22.0
-    goal_msg.goal.target_pose.pose.position.x = 22.0
-    goal_msg.goal.target_pose.pose.position.y = 0.0
+    goal_msg.goal.target_pose.pose.position.x = -8.0
+    goal_msg.goal.target_pose.pose.position.y = 4.0
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
-    goal_msg.goal.target_pose.pose.orientation.w = 1.0
+    goal_msg.goal.target_pose.pose.orientation.w = 0.5
 
     rospy.sleep(1)
 
