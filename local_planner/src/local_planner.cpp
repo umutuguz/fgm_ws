@@ -249,6 +249,7 @@ namespace local_planner
         linearVel = (0.2+dmin_temp/3)-(0.2+dmin_temp/3)*angularVel;
         ROS_WARN_STREAM("angularVel is : " << angularVel << " linearVel is : " << linearVel);
         ROS_WARN_STREAM("dmintemp is :" << dmin_temp);
+
         // angularVel = 0.2 * phiFinal/2.2 * 0.7 * ((exp(-4 * 0.1) / 2.0) + 1);
 
         // linearVelocity = min(linearVel, cmdPtr_);
@@ -291,22 +292,52 @@ namespace local_planner
             cmd_vel.angular.x = 0.0;
             cmd_vel.angular.y = 0.0;
             cmd_vel.angular.z = 0.0;
+            ROS_WARN_STREAM("are we heere? ");
 
             goalReached_ = true;
         }
         
-        else if (dmin < 1.0)
+        else if (dmin_temp < 1.5)
         {
-            // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVel;
-            // cmd_vel.linear.x = 0.0;
-            cmd_vel.linear.y = 0.0;
-            cmd_vel.linear.z = 0.0;
+            ROS_ERROR_STREAM("INSIDE THE LOOP!");
+            if(dminIdx > 150 && dminIdx < 200)
+            {
+                cmd_vel.linear.x = 0.1;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
 
-            cmd_vel.angular.x = 0.0;
-            cmd_vel.angular.y = 0.0;
-            // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*1.5;
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = 1.0;
+                ROS_ERROR_STREAM("here3");
+            }
+            else if(dminIdx > 200 && dminIdx < 250)
+            {
+                cmd_vel.linear.x = 0.1;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = -1.0;
+                ROS_ERROR_STREAM("here4");
+            }
+            else
+            {
+                cmd_vel.linear.x = linearVel;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = angularVel;  
+            }
         }
         else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
         {
@@ -323,6 +354,7 @@ namespace local_planner
         }
         else
         {
+            ROS_INFO_STREAM("we are in else.");
             // Send velocity commands to robot's base
             cmd_vel.linear.x = linearVel;
             // cmd_vel.linear.x = 0.0;
@@ -334,6 +366,11 @@ namespace local_planner
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel;
         }
+
+        ROS_ERROR_STREAM("cmd vel x is : " << cmd_vel.linear.x);
+        ROS_ERROR_STREAM("cmd vel z is : " << cmd_vel.angular.z);
+
+        
         // BURAYI NORMAL FGMDE KULLANMAK LAZIM OLACAK SILME
 
         // if (!isGapExist_)
@@ -619,7 +656,7 @@ namespace local_planner
         // int dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
 
         int dminIdx = std::distance(lidarRanges.begin()+140, dminIdxItr);
-        // ROS_INFO_STREAM("dminidx is : " << dminIdx);
+        ROS_INFO_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
         dmin = lidarRanges.at(dminIdx+140);
@@ -703,7 +740,7 @@ namespace local_planner
             phiGoal = phiGoal - 360;
         }
 
-        if (distanceToGlobalGoal() < 1.5)
+        if (distanceToGlobalGoal() < 2.0)
         {
             return (M_PI_2 - (M_PI*phiGoal)/180);
         }
