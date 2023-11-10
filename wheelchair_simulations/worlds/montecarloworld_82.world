@@ -88,65 +88,65 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <state world_name="default">
-      <sim_time>89 649000000</sim_time>
-      <real_time>42 77591353</real_time>
-      <wall_time>1699278999 966433608</wall_time>
-      <iterations>41808</iterations>
+      <sim_time>346 914000000</sim_time>
+      <real_time>299 554117647</real_time>
+      <wall_time>1699523097 449540232</wall_time>
+      <iterations>299073</iterations>
       <model name="box1">
-        <pose>12.657670928270672 -1.688737217229947 1.25 0 0 0</pose>
+        <pose>11.036580220572638 -3.0992324856622098 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>12.657670928270672 -1.688737217229947 1.25 0 0 0</pose>
+          <pose>11.036580220572638 -3.0992324856622098 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name="box2">
-        <pose>3.5098306046499843 0.8189897248209945 1.25 0 0 0</pose>
+        <pose>14.183642247071083 2.740373611662368 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>3.5098306046499843 0.8189897248209945 1.25 0 0 0</pose>
+          <pose>14.183642247071083 2.740373611662368 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name="box3">
-        <pose>7.701461773323871 0.8104247668921927 1.25 0 0 0</pose>
+        <pose>16.333876648185033 -0.4666847049462248 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>7.701461773323871 0.8104247668921927 1.25 0 0 0</pose>
+          <pose>16.333876648185033 -0.4666847049462248 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name="cylinder1">
-        <pose>12.106040264243058 2.5372729972413426 1.25 0 0 0</pose>
+        <pose>11.58696819896718 2.917563782301701 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>12.106040264243058 2.5372729972413426 1.25 0 0 0</pose>
+          <pose>11.58696819896718 2.917563782301701 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name="cylinder2">
-        <pose>14.527769284406686 1.714216563235503 1.25 0 0 0</pose>
+        <pose>13.986725556084183 -0.7514829462617443 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>14.527769284406686 1.714216563235503 1.25 0 0 0</pose>
+          <pose>13.986725556084183 -0.7514829462617443 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name="cylinder3">
-        <pose>3.433553303208118 -3.312766422501954 1.25 0 0 0</pose>
+        <pose>10.127625932349563 2.6990177953667187 1.25 0 0 0</pose>
         <scale>1 1 1</scale>
         <link name="link">
-          <pose>3.433553303208118 -3.312766422501954 1.25 0 0 0</pose>
+          <pose>10.127625932349563 2.6990177953667187 1.25 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -232,7 +232,7 @@
     </state>
     <gui fullscreen="0">
       <camera name="user_camera">
-        <pose>45.0437 -11.4865 63.9679 -0 1.00764 2.89619</pose>
+        <pose>31.4437 -5.15338 52.3856 -0 1.18364 2.89219</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -708,7 +708,7 @@
         <collision name="collision">
           <geometry>
             <cylinder>
-              <radius>0.16897113489131488</radius>
+              <radius>0.3165215681497052</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -729,7 +729,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>0.16897113489131488</radius>
+              <radius>0.3165215681497052</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -744,7 +744,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>2.5475750794175767 -1.7853986458542765 1.25 0 0 0</pose>
+      <pose>6.587803336795243 0.9955276181076691 1.25 0 0 0</pose>
     </model>
     <model name="cylinder2">
       <static>1</static>
@@ -763,7 +763,7 @@
         <collision name="collision">
           <geometry>
             <cylinder>
-              <radius>0.24520885983010812</radius>
+              <radius>0.2977445455247796</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -784,7 +784,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>0.24520885983010812</radius>
+              <radius>0.2977445455247796</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -799,7 +799,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>11.333447816345823 0.06259953319445044 1.25 0 0 0</pose>
+      <pose>2.298065501006997 -1.0620524411341097 1.25 0 0 0</pose>
     </model>
     <model name="cylinder3">
       <static>1</static>
@@ -818,7 +818,7 @@
         <collision name="collision">
           <geometry>
             <cylinder>
-              <radius>0.3175935968380133</radius>
+              <radius>0.24839552297189363</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -839,7 +839,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>0.3175935968380133</radius>
+              <radius>0.24839552297189363</radius>
               <length>2.5</length>
             </cylinder>
           </geometry>
@@ -854,7 +854,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>14.564951719242806 1.691378553795876 1.25 0 0 0</pose>
+      <pose>11.804398779598637 1.8040081573528406 1.25 0 0 0</pose>
     </model>
     <model name="box1">
       <static>1</static>
@@ -873,7 +873,7 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.7726710224376423 0.34200181915374916 2.5</size>
+              <size>0.3127788864110344 0.5235712081452067 2.5</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -893,7 +893,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.7726710224376423 0.34200181915374916 2.5</size>
+              <size>0.3127788864110344 0.5235712081452067 2.5</size>
             </box>
           </geometry>
           <material>
@@ -913,7 +913,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>12.134249281844431 2.8056421124167175 1.25 0 0 0</pose>
+      <pose>8.382000500251007 2.4729061192197985 1.25 0 0 0</pose>
     </model>
     <model name="box2">
       <static>1</static>
@@ -932,7 +932,7 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.7761643289566285 0.36904645573620637 2.5</size>
+              <size>0.5332335804990207 0.28452055130541837 2.5</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -952,7 +952,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.7761643289566285 0.36904645573620637 2.5</size>
+              <size>0.5332335804990207 0.28452055130541837 2.5</size>
             </box>
           </geometry>
           <material>
@@ -972,7 +972,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>3.75448961633362 2.6612375813828413 1.25 0 0 0</pose>
+      <pose>10.412549311055157 3.0783631169426373 1.25 0 0 0</pose>
     </model>
     <model name="box3">
       <static>1</static>
@@ -991,7 +991,7 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.375565612479654 0.6225258416359238 2.5</size>
+              <size>0.41159290213932154 0.28736175627365995 2.5</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -1011,7 +1011,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.375565612479654 0.6225258416359238 2.5</size>
+              <size>0.41159290213932154 0.28736175627365995 2.5</size>
             </box>
           </geometry>
           <material>
@@ -1031,7 +1031,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>16.278200235060368 -3.4593778742290198 1.25 0 0 0</pose>
+      <pose>16.79434692224929 1.0225216554498724 1.25 0 0 0</pose>
     </model>
   </world>
 </sdf>

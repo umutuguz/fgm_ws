@@ -23,12 +23,12 @@ def spawn_model(model_name, sdf_path, x_range, y_range, z_range, size_range, is_
         else:
             # Generate random size
             size_x = random.uniform(size_range[0], size_range[1])
-            if (size_x > 0.6):
+            if (size_x > 0.4):
                 size_y = random.uniform(0.2,0.4)
             elif (size_x < 0.4):
-                size_y = random.uniform(0.6, 0.8)
+                size_y = random.uniform(0.4, 0.6)
             else:
-                size_y = random.uniform(0.3, 0.7)
+                size_y = random.uniform(0.2, 0.6)
             # size_y = random.uniform(size_range[0], size_range[1])
             size_z = 2.5
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     z_range = [1.25, 1.25]
 
     # Set the range of random sizes for the models
-    size_range = [0.2, 0.8]
+    size_range = [0.2, 0.6]
 
     for i in range(num_cylinders):
         model_name = 'cylinder{}'.format(i+1)

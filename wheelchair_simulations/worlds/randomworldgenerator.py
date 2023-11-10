@@ -68,7 +68,7 @@ def find_visual_radius(model_element):
     
     return None  # Any step returned None or 'radius' not found
 
-for i in range(1,100):
+for i in range(1,300):
     for model_element in root.findall('.//model'):
         name = model_element.get('name')
         if name.startswith('box') or name.startswith('cylinder'):
@@ -84,14 +84,14 @@ for i in range(1,100):
             rand_radius = random.uniform(0.15, 0.35)
             # rand_radius = random.uniform(0.05, 0.15)
 
-            rand_size_x = random.uniform(0.2, 0.8)
+            rand_size_x = random.uniform(0.2, 0.6)
             # rand_size_x = random.uniform(0.5, 1.8)
-            if rand_size_x > 0.6: #1.3
+            if rand_size_x > 0.4: #1.3
                 rand_size_y = random.uniform(0.2, 0.4)
             elif rand_size_x < 0.4:
-                rand_size_y = random.uniform(0.6, 0.8)
+                rand_size_y = random.uniform(0.4, 0.6)
             else:
-                rand_size_y = random.uniform(0.3, 0.7)
+                rand_size_y = random.uniform(0.2, 0.4)
 
             pose_element = model_element.find('pose')
 

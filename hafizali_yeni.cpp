@@ -76,7 +76,7 @@ namespace local_planner
             ROS_INFO("Local planner has been initialized successfully.");
             initialized_ = true;
             myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
-            myfile << "Simulation Started!  ";
+            myfile << "Simulation Started!  ||  ";
             myfile.close();
 
         }
@@ -256,11 +256,12 @@ namespace local_planner
         angularVel = yy_buf[0];
 
 
-        ROS_INFO_STREAM("Lineer velocity: " << linearVelocity);
-        ROS_INFO_STREAM("Angular velocity: " << angularVel);
+        ROS_WARN_STREAM("Lineer velocity: " << linearVelocity);
+        ROS_WARN_STREAM("Angular velocity: " << angularVel);
 
 
         ROS_INFO_STREAM("dmin: " << dmin_temp);
+        ROS_WARN_STREAM("dminidx is: " <<dminIdx);
 
         if (distanceToGlobalGoal() < goalDistTolerance_)
         {
@@ -274,31 +275,7 @@ namespace local_planner
 
             goalReached_ = true;
         }
-        // else if (midpoint_memory.size() < 1)
-        // {
-        //     cmd_vel.linear.x = 0.0;
-        //     cmd_vel.linear.y = 0.0;
-        //     cmd_vel.linear.z = 0.0;
-
-        //     cmd_vel.angular.x = 0.0;
-        //     cmd_vel.angular.y = 0.0;
-        //     // cmd_vel.angular.z = 0.0; //tubitak raporu icin eklendi
-        //     cmd_vel.angular.z =-0.5; //çözümsüz kaldığı durumlarda kendi etrafında dönsün diye 
-        // }
-        else if (dmin < 2.0)
-        {
-            // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity*exp(-(2.5 -dmin));
-            // cmd_vel.linear.x = 0.0;
-            cmd_vel.linear.y = 0.0;
-            cmd_vel.linear.z = 0.0;
-
-            cmd_vel.angular.x = 0.0;
-            cmd_vel.angular.y = 0.0;
-            // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel*2 + (81 - dmin)/1200;
-        }
-        else if (distanceToGlobalGoal() < goalDistTolerance_ + 1)
+        else if (distanceToGlobalGoal() < goalDistTolerance_ + 2)
         {
             // Send velocity commands to robot's base
             cmd_vel.linear.x = linearVelocity/3;
@@ -310,6 +287,126 @@ namespace local_planner
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel/3;
+        }
+        else if (dmin < 1.4 && dminIdx > 135 && dminIdx < 191 && dmin >= 1.0)
+        {
+            ROS_WARN_STREAM("Hiyaa!");
+            if(dminIdx < 167)
+            {
+                cmd_vel.linear.x = 0.2;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = 0.7;
+            }
+            else
+            {
+                cmd_vel.linear.x = 0.2;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = -0.7;
+            }
+        }
+        else if (dmin < 1.0 && dmin > 0.75)
+        {
+            ROS_WARN_STREAM("We are in low dmin!");
+            if(dminIdx > 129 && dminIdx < 167)
+            {
+                ROS_ERROR_STREAM("here1!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = 0.2;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = 0.7;
+            }
+            else if(dminIdx < 167 && dminIdx < 195)
+            {
+                ROS_ERROR_STREAM("here2!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = 0.2;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = -0.7;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("here3!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = linearVelocity*0.5;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = angularVel*1.5;
+            }
+        }
+        else if (dmin <= 0.75)
+        {
+            ROS_WARN_STREAM("We are in lowest dmin!");
+            if(dminIdx < 167)
+            {
+                ROS_ERROR_STREAM("here4!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = 0.15;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = -0.8;
+            }
+            else if(dminIdx > 167)
+            {
+                ROS_ERROR_STREAM("here5!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = 0.15;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = 0.8;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("here6!");
+                // Send velocity commands to robot's base
+                cmd_vel.linear.x = linearVelocity*0.5;
+                // cmd_vel.linear.x = 0.0;
+                cmd_vel.linear.y = 0.0;
+                cmd_vel.linear.z = 0.0;
+
+                cmd_vel.angular.x = 0.0;
+                cmd_vel.angular.y = 0.0;
+                // cmd_vel.angular.z = 0.0;
+                cmd_vel.angular.z = angularVel*1.5;
+            }
         }
         else
         {
@@ -324,6 +421,9 @@ namespace local_planner
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel;
         }
+
+        ROS_ERROR_STREAM("cmd vel x is : " << cmd_vel.linear.x);
+        ROS_ERROR_STREAM("cmd vel z is: " << cmd_vel.angular.z);
         // BURAYI NORMAL FGMDE KULLANMAK LAZIM OLACAK SILME
 
         // if (!isGapExist_)
@@ -443,7 +543,7 @@ namespace local_planner
                 averageExecTime = (totalExecutionTime.toSec() / executionTimes.size());
             }
 
-            ROS_WARN("Collision occurred!");
+            ROS_ERROR_STREAM("Collision occurred!");
             if (collision_counter == 0)
             {
                 myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
@@ -481,8 +581,6 @@ namespace local_planner
         // Get odometry informations
         // WARNING: These are not odometry information! Variable names remained
         // unchanged since the latest update. These are AMCL positions.
-        
-
         double odomRX = posePtr_->pose.pose.position.x;
         double odomRY = posePtr_->pose.pose.position.y;
 
@@ -538,13 +636,13 @@ namespace local_planner
         // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        auto dminIdxItr = std::min_element(currRange.begin()+75, currRange.end()-75);
+        auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         // dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        dminIdx = std::distance(currRange.begin()+75, dminIdxItr);
-        // ROS_INFO_STREAM("dminidx is : " << dminIdx);
+        dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        ROS_ERROR_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
-        dmin = currRange.at(dminIdx+75);
+        dmin = currRange.at(dminIdx);
         if (dmin <= 0.01)
         {
             dmin = 0.01;
@@ -583,8 +681,8 @@ namespace local_planner
         
         xDiff = goalX - odomRX;
         yDiff = goalY - odomRY;
-        ROS_INFO_STREAM("goalX is : " << goalX << " goalY is : " << goalY);
-        ROS_INFO_STREAM("odomRX is : " << odomRX << " odomRY is : " << odomRY);
+        // ROS_INFO_STREAM("goalX is : " << goalX << " goalY is : " << goalY);
+        // ROS_INFO_STREAM("odomRX is : " << odomRX << " odomRY is : " << odomRY);
 
         if ((90 < robot_pose_theta_real) && (robot_pose_theta_real < 180))
         {
@@ -597,7 +695,7 @@ namespace local_planner
 
         double atan2_output = atan2(yDiff, xDiff);
         atan2_output = atan2_output * 180 / M_PI;
-        ROS_INFO_STREAM("atan2 output is : " << atan2_output);
+        // ROS_INFO_STREAM("atan2 output is : " << atan2_output);
 
         phiGoal = robot_pose_theta_real - atan2_output + 90;
 
@@ -1064,7 +1162,7 @@ namespace local_planner
             for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
             {
                 // ROS_INFO_STREAM("midpoint x are: " << midpoint_coords[i][0]);
-                if(midpoint_coords[i][2] > 0.45) //genişliği 0.45'ten küçük olan gapler hafızaya atılmaz
+                if(midpoint_coords[i][2] > 0.65) //genişliği 0.45'ten küçük olan gapler hafızaya atılmaz
                 {
                     vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
 
@@ -1344,25 +1442,25 @@ namespace local_planner
             }
 
             phi_gap_temp.push_back(phi_gap_calculator);
-            ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
+            // ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
 
             phi_gap_temp[i] += 90; //gap ödüllendirmede 90 derece shift etmek için yapıldı ekseni. gerçek phigap ile alakası yok.
             diff_to_goal_new.push_back(min(fabs(phi_gap_temp[i] - phiGoal), 360-fabs(phi_gap_temp[i] - phiGoal)));
-            ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
-            ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
+            // ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
+            // ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
         }
 
         // hafızadaki gapleri ödüllendirme
 
         for (int i=0; i < gaps_in_memory.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.45) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory[i][2] < 0.65) //0,45 ten kucuk olan gapler odullendirilmez.
             {
                 gaps_in_memory[i][2] = 0.1;
             }
             else if (diff_to_goal_new[i] <= 30)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 3.2;
+                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2.2;
                 // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
             }
             else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
@@ -1407,8 +1505,8 @@ namespace local_planner
             }
         }
 
-        ROS_INFO_STREAM("largestwidth is: " << largestWidth);
-        ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
+        // ROS_INFO_STREAM("largestwidth is: " << largestWidth);
+        // ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
         phi_gap = phi_gap_temp[largestWidthIndex];
 
         // seçilmiş olan gap in ortasına mavi bir silindir çizmek için.
@@ -1429,7 +1527,7 @@ namespace local_planner
         selected_gap_marker.color.b = 1.0;
         markers.markers.push_back(selected_gap_marker);
         // seçilmiş gap ortasına mavi silindir çizme bitişi
-        ROS_WARN_STREAM("markers has " << markers.markers.size() << " elements");
+        // ROS_WARN_STREAM("markers has " << markers.markers.size() << " elements");
         marker_pub_.publish(markers);
 
 
@@ -1534,7 +1632,7 @@ namespace local_planner
         // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
         // ROS_WARN_STREAM("Phi final: " << phiFinal);
 
-        double alpha_weight = 7;
+        double alpha_weight = 12;
         //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
@@ -1560,8 +1658,8 @@ namespace local_planner
         // //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
-        ROS_INFO_STREAM("phi gap is : " << phi_gap);
-        ROS_INFO_STREAM("phi goal is : " << phiGoal);
+        // ROS_INFO_STREAM("phi gap is : " << phi_gap);
+        // ROS_INFO_STREAM("phi goal is : " << phiGoal);
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);
