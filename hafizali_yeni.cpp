@@ -288,10 +288,10 @@ namespace local_planner
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel/3;
         }
-        else if (dmin < 1.4 && dminIdx > 135 && dminIdx < 191 && dmin >= 1.0)
+        else if (dmin < 1.4 && dminIdx > 137 && dminIdx < 207 && dmin >= 1.0)
         {
             ROS_WARN_STREAM("Hiyaa!");
-            if(dminIdx < 167)
+            if(dminIdx < 172)
             {
                 cmd_vel.linear.x = 0.2;
                 // cmd_vel.linear.x = 0.0;
@@ -319,7 +319,7 @@ namespace local_planner
         else if (dmin < 1.0 && dmin > 0.75)
         {
             ROS_WARN_STREAM("We are in low dmin!");
-            if(dminIdx > 129 && dminIdx < 167)
+            if(dminIdx > 127 && dminIdx < 172)
             {
                 ROS_ERROR_STREAM("here1!");
                 // Send velocity commands to robot's base
@@ -333,7 +333,7 @@ namespace local_planner
                 // cmd_vel.angular.z = 0.0;
                 cmd_vel.angular.z = 0.7;
             }
-            else if(dminIdx < 167 && dminIdx < 195)
+            else if(dminIdx < 172 && dminIdx < 217)
             {
                 ROS_ERROR_STREAM("here2!");
                 // Send velocity commands to robot's base
@@ -365,7 +365,7 @@ namespace local_planner
         else if (dmin <= 0.75)
         {
             ROS_WARN_STREAM("We are in lowest dmin!");
-            if(dminIdx < 167)
+            if(dminIdx < 172)
             {
                 ROS_ERROR_STREAM("here4!");
                 // Send velocity commands to robot's base
@@ -379,7 +379,7 @@ namespace local_planner
                 // cmd_vel.angular.z = 0.0;
                 cmd_vel.angular.z = -0.8;
             }
-            else if(dminIdx > 167)
+            else if(dminIdx > 172)
             {
                 ROS_ERROR_STREAM("here5!");
                 // Send velocity commands to robot's base

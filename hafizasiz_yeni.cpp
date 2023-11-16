@@ -640,7 +640,7 @@ namespace local_planner
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        int dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        dminIdx = std::distance(currRange.begin(), dminIdxItr);
         ROS_ERROR_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);

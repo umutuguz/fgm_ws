@@ -3,6 +3,7 @@
 #include <ros/console.h>
 #include <fstream>
 
+
 PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
 double x_buf[2] = {0.0, 0.0};
@@ -77,6 +78,7 @@ namespace local_planner
             myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
             myfile << "Simulation Started!  ||  ";
             myfile.close();
+
         }
         else
         {
@@ -109,6 +111,7 @@ namespace local_planner
 
         ROS_INFO_ONCE("Computing velocity commands...");
         startTime = ros::Time::now();
+
 
         // Publish global plan for visualization
         publishGlobalPlan(globalPlan_);
@@ -253,8 +256,8 @@ namespace local_planner
         angularVel = yy_buf[0];
 
 
-        ROS_INFO_STREAM("Lineer velocity: " << linearVelocity);
-        ROS_INFO_STREAM("Angular velocity: " << angularVel);
+        ROS_WARN_STREAM("Lineer velocity: " << linearVelocity);
+        ROS_WARN_STREAM("Angular velocity: " << angularVel);
 
 
         ROS_INFO_STREAM("dmin: " << dmin_temp);
@@ -316,7 +319,7 @@ namespace local_planner
         else if (dmin < 1.0 && dmin > 0.75)
         {
             ROS_WARN_STREAM("We are in low dmin!");
-            if(dminIdx > 127 && dminIdx <= 172)
+            if(dminIdx > 127 && dminIdx < 172)
             {
                 ROS_ERROR_STREAM("here1!");
                 // Send velocity commands to robot's base
@@ -362,7 +365,7 @@ namespace local_planner
         else if (dmin <= 0.75)
         {
             ROS_WARN_STREAM("We are in lowest dmin!");
-            if(dminIdx <= 172)
+            if(dminIdx < 172)
             {
                 ROS_ERROR_STREAM("here4!");
                 // Send velocity commands to robot's base
@@ -484,7 +487,6 @@ namespace local_planner
         if (goalReached_)
         {
             ROS_INFO("Goal reached!");
-
             if(!executionTimes.empty())
             {
                 for (const auto& time: executionTimes)
@@ -496,7 +498,6 @@ namespace local_planner
             myfile.open("/home/otonom/fgm_ws/src/log/mylogs.txt", ios::out | ios::app);
             myfile << "Goal Reached!  Total distance traveled is: " << dist_travelled << " || " << "Avg execution time per cycle is: " << averageExecTime << "\n";
             myfile.close();
-
 
             return true;
         }
@@ -550,10 +551,6 @@ namespace local_planner
                 myfile.close();
                 collision_counter++;
             }
-
-            
-
-
             
         }
     }
@@ -588,7 +585,7 @@ namespace local_planner
         double odomRY = posePtr_->pose.pose.position.y;
 
         dist_travelled += sqrt((odomRX - prev_odomRX)*(odomRX - prev_odomRX) +(odomRY - prev_odomRY)*(odomRY - prev_odomRY)) ;
-        // ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
+        ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
 
         prev_odomRX = odomRX;
         prev_odomRY = odomRY;
@@ -598,7 +595,7 @@ namespace local_planner
         double robot_pose_theta_real = tf::getYaw(currentPose_.orientation);
         double robot_pose_theta_manipulated;
         robot_pose_theta_real = robot_pose_theta_real * 180 / M_PI;
-        // ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta_real);
+        ROS_INFO("robot_pose_theta real is: %f", robot_pose_theta_real);
 
 
         double goalX = currentGoalPose_.position.x;
@@ -630,17 +627,18 @@ namespace local_planner
         // ters çevrilerek ilk indeksli olan nokta sol 90derecede kalan yer olmaktadır buradan sağa doğru taranmış hale gelir.
 
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
+        // ROS_INFO_STREAM("currange has elements: " << currRange.size());
 
 
         // for (unsigned int i = 0; i < currRange.size() ; i++)
         // {
-        //     currRange[i] -= 0.25;
+        //     ROS_INFO_STREAM("Currrange is: " << currRange[i] << " at "<< i);
         // }
 
         // auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
         auto dminIdxItr = std::min_element(currRange.begin(), currRange.end());
-        // int dminIdx = std::distance(currRange.begin(), dminIdxItr);
-        int dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        // dminIdx = std::distance(currRange.begin(), dminIdxItr);
+        dminIdx = std::distance(currRange.begin(), dminIdxItr);
         ROS_ERROR_STREAM("dminidx is : " << dminIdx);
 
         // dmin = currRange.at(dminIdx);
@@ -709,16 +707,16 @@ namespace local_planner
         {
             phiGoal = phiGoal - 360;
         }
-        vector<vector<double>> gaps_in_memory; //en son halinde gaplerin koordinatlarını tutacak olan vektör
 
+       
+        vector<vector<double>> same_gap_memory; //dış vektör ama sadece indeks olarak tutan
+        vector<double> same_gap_inner;
         double phi_gap = 0.0;
         
         //gap olmadığı durum için phifinal ayarlaması sadece
-    
         if (gap_starting_points.size()== 0 || gap_ending_points.size()==0)
         {
             isGapExist_ = false;
-            return (M_PI_2 - (M_PI*phiGoal)/180);
             // if (phiGoal > 270)
             //     phiFinal = (450 - phiGoal) * (M_PI / 180);
             // else
@@ -729,7 +727,7 @@ namespace local_planner
             //     phiFinal = phiFinal - 2*M_PI;
             // }
             // else if (phiFinal > 2*M_PI)
-            // {ca
+            // {
             //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
             // }
             // // ROS_ERROR("No gap found, FGM failed.");
@@ -1033,14 +1031,14 @@ namespace local_planner
             // ROS_INFO_STREAM("min_size is = " << min_size);
             int counter_array = 0;
 
-            // for (int i = 0; i < min_size; i++)
-            // {
-            //     for (int j = 0; j < 2; j++)
-            //     {
-            //         counter_array++;
-            //         ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
-            //     }
-            // }
+            for (int i = 0; i < min_size; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    counter_array++;
+                    // ROS_INFO_STREAM("Array gap's " << counter_array << " element is = " << array_gap[i][j]);
+                }
+            }
 
             common_angles.erase(common_angles.begin(), common_angles.end());
 
@@ -1083,6 +1081,13 @@ namespace local_planner
             lidar_coord_x = odomRX + 0.322*sin(robot_pose_theta_manipulated*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
             lidar_coord_y = odomRY + 0.322*cos(robot_pose_theta_manipulated*(M_PI/180.0));
 
+            // ROS_INFO_STREAM("lidar coord x is: "<< lidar_coord_x);
+            // ROS_INFO_STREAM("lidar coord y is: "<< lidar_coord_y);
+            // ROS_INFO_STREAM("odomrx is: "<< odomRX);
+            // ROS_INFO_STREAM("odomry is: "<< odomRY);
+
+            // Gap odullendirme baslangici
+
             
             vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
             // vector<double> diff_to_goal; //gap odullendirmede kullanılan ölçüt
@@ -1101,20 +1106,23 @@ namespace local_planner
                 {
                     alpha_temp = beta_temp;
                 }
-
                 if(beta_temp == 163.0)
                 {
                     beta_temp = alpha_temp;
                 }
                 // ROS_INFO_STREAM("d1_temp at: " << alpha_temp*(344.0/163.0));
-                // ROS_INFO_STREAM("alpha_temp at: " << alpha_temp);
+                // ROS_INFO_STREAM("alpha_temp is: " << alpha_temp);
                 d1_temp = currRange.at(round(alpha_temp*(344.0/163.0)));
+                // ROS_INFO_STREAM("d1_temp is: " << d1_temp);
                 // ROS_INFO_STREAM("d2_temp at: " << beta_temp*(344.0/163.0));
-                // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
+                // ROS_INFO_STREAM("beta_temp is: " << beta_temp);
                 // if (beta_temp >= 163.0)
-                //     beta_temp = 162.01;
+                //     beta_temp = 162.91;
                     // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
+                // ROS_INFO_STREAM("currangeat inside is: " << round(beta_temp*(344.0/163.0)));
+                // ROS_INFO_STREAM("d2_temp is: " << d2_temp);
+
 
                 memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
                 memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
@@ -1141,25 +1149,213 @@ namespace local_planner
                 // ROS_INFO_STREAM("d2 temp is : " << d2_temp);
             }
 
+            // ROS_INFO_STREAM("Gap count is: " << gap_midpoints.size());
+
+            // if (gap_midpoints.size() != 0) //sadece midpointlerin hafızasız kısımlarından gelen açı değerlerini yazdırmak için
+            // {
+            //     for (int i = 0; i<gap_midpoints.size();i++)
+            //     {
+            //         ROS_INFO_STREAM("Gap mid point is at angle: " << gap_midpoints[i]);
+            //     }
+            // }
             
             for (int i=0; i<rows ;i++) //bu döngünün içince her gap midpointe ait x ve y koordinatları midpoint vektörüne pushlanır. midpoint vektörü hafıza vektörüne pushlanır. bir cycleda 2 gap görüldüyse yine teker teker pushlanır.
             {
+                // ROS_INFO_STREAM("midpoint x are: " << midpoint_coords[i][0]);
                 if(midpoint_coords[i][2] > 0.65) //genişliği 0.45'ten küçük olan gapler hafızaya atılmaz
                 {
-                    vector<double> currentgaps; //iç vektör, koordinat olarak tutan
+                    vector<double> midpoint_x_y; //iç vektör, koordinat olarak tutan
 
                     // ROS_INFO_STREAM("rows is : " << rows);
 
-                    currentgaps.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
-                    currentgaps.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
-                    currentgaps.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
-                    gaps_in_memory.push_back(currentgaps);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
+                    midpoint_x_y.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
+                    midpoint_x_y.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
+                    midpoint_x_y.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
+                    midpoint_memory.push_back(midpoint_x_y);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
                     // for (int i = 0; i < midpoint_x_y.size();i++)
                     // {
                     //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
                     // }
                 }
+
             }
+
+
+            // for (int i = 0; i < midpoint_x_y.size();i++)
+            // {
+            //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
+            // }
+
+
+        }
+
+        if (midpoint_memory.empty())
+        {
+            ROS_WARN("No gap in memory, heading to phiGoal");
+            return (M_PI_2 - (M_PI*phiGoal)/180);
+        }
+
+
+
+        if (midpoint_memory.size() >= 100) //memorydeki gap sayısını 30'da tutmak için 30'dan fazlalık olan ilk elemanlar silinir.
+        {
+            int elements_to_delete = midpoint_memory.size() - 100;
+            midpoint_memory.erase(midpoint_memory.begin(),midpoint_memory.begin()+elements_to_delete);
+        }
+
+        // ROS_INFO_STREAM("midpoint memory size is: " << midpoint_memory.size());
+        // for (int i = 0; i < midpoint_memory.size();i++)
+        // {
+        //     ROS_INFO_STREAM("midpoint memory has: X| " << midpoint_memory[i][0] << " Y | " << midpoint_memory[i][1] << " width | " << midpoint_memory[i][2]);
+        // }
+
+        for (int i = 0; i < midpoint_memory.size(); i++)
+        {
+            same_gap_inner.push_back(i); //aynı olup olmadığı kıyaslanan iki elemandan ilki iç vektörün başına pushlanır
+            for (int j = 0; j < midpoint_memory.size() ; j++)
+            {
+                if(j <= i)
+                {
+                    continue;
+                }
+                else
+                {
+                    if(sqrt(pow(midpoint_memory[i][0]-midpoint_memory[j][0],2) + pow(midpoint_memory[i][1]-midpoint_memory[j][1],2)) < 0.8)
+                    {
+                        same_gap_inner.push_back(j); //kıyaslanan ikinci eleman ilkiyla aynıysa sırayla bunlar da iç vektöre pushlanır.
+                        //ROS_INFO_STREAM("same gap detected for " << i << " and " << j);
+                    }
+                }
+            }
+            same_gap_memory.push_back(same_gap_inner);
+            same_gap_inner.clear();
+        }
+        // bu for döngüsü her i elemanı ile aynı gapi gösteren j elemanlarını yazdırmak için kullanılır.
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory[i].size(); j++)
+            {
+                // ROS_INFO_STREAM(" " << same_gap_memory[i][j]);
+            }
+            // ROS_INFO_STREAM("----");
+        }
+        //alttaki parça same_gap_memory i sadeleştirmek için yazılmıştır. İcindeki vektörlerde ortak eleman olanları tespit eder.
+        
+        vector<double> merged_vector;
+        vector<double>::iterator it_common, iter_end;
+        int no_of_common_elements = 0;
+
+        //silinecek sadece yazdırma for döngüsü
+        // for (int i = 0; i<same_gap_memory.size(); i++)
+        // {
+        //     ROS_INFO_STREAM("eleman " << i);
+        //     for (int j = 0; j < same_gap_memory[i].size(); j++)
+        //     {
+        //         ROS_INFO_STREAM(" " << same_gap_memory[i][j]);
+        //     }
+        // }
+
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory.size(); j++)
+            {
+                vector<double> common_elements_in_vectors(same_gap_memory[i].size()+same_gap_memory[j].size());
+                if (j <= i)
+                {
+                    continue;
+                }
+                else
+                {
+                    // ROS_INFO_STREAM("saglam2");
+                    // ROS_INFO_STREAM("i is " << i);
+                    // ROS_INFO_STREAM("j is " << j);
+                    iter_end = set_intersection(same_gap_memory[i].begin(), same_gap_memory[i].end(), same_gap_memory[j].begin(), same_gap_memory[j].end(), common_elements_in_vectors.begin());
+                    // ROS_INFO_STREAM("saglam3");
+
+                    for (it_common = common_elements_in_vectors.begin(); it_common != iter_end; it_common++)
+                    {
+                        // ROS_INFO_STREAM("saglam4");
+                        no_of_common_elements++;
+                    }
+                    if (no_of_common_elements > 0)
+                    {
+                        for (int k : same_gap_memory[i])
+                        {
+                            // ROS_INFO_STREAM("saglam4");
+                            if (find(merged_vector.begin(), merged_vector.end(), k) == merged_vector.end())
+                            {
+                                merged_vector.push_back(k);
+                            }
+                        }
+                        for (int l : same_gap_memory[j])
+                        {
+                            if (find(merged_vector.begin(), merged_vector.end(), l) == merged_vector.end())
+                            {
+                                merged_vector.push_back(l);
+                            }
+                        }
+                        same_gap_memory[i] = merged_vector;
+                        same_gap_memory[j] = merged_vector;
+                        merged_vector.clear();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    no_of_common_elements = 0;
+
+                }
+
+            }
+        }
+        // en son ortak elemanlarla merge edilmiş vektörün yazdırıldığı kısım
+        for (int i = 0; i < same_gap_memory.size(); i++)
+        {
+            for (int j = 0; j < same_gap_memory[i].size(); j++)
+            {
+                // ROS_INFO_STREAM(same_gap_memory[i][j] << " ");
+            }
+            // ROS_INFO_STREAM("-----");
+        }
+        // bu kısım ortak elemanları olan merge edilmiş vektörden aynı iç vektörlerin çıkartıldığı sadece gap sayısı kadar iç vektör bırakıldığı kısım
+        std::sort(same_gap_memory.begin(), same_gap_memory.end());
+
+        auto last = std::unique(same_gap_memory.begin(), same_gap_memory.end());
+        same_gap_memory.erase(last, same_gap_memory.end());
+
+        vector<vector<double>> gaps_in_memory; //en son halinde gaplerin koordinatlarını tutacak olan vektör
+        double x_coord = 0.0;
+        double y_coord = 0.0;
+        double final_width = 0.0;
+        double weighted_average_param = 1.0;
+        double weighting_counter = 0.0;
+
+
+        // Aynı gapi işaret eden farklı ölçümlerin aritmetik ortalamaya göre veya ağırlıklı ortalamaya göre birleştirildiği yer
+        for (auto& innerVec : same_gap_memory)
+        {
+            weighted_average_param = 1.0;
+            weighting_counter = 0.0;
+
+            for (auto& element : innerVec)
+            {
+                x_coord = x_coord + midpoint_memory[element][0]*weighted_average_param;
+                y_coord = y_coord + midpoint_memory[element][1]*weighted_average_param;
+                final_width = final_width + midpoint_memory[element][2]*weighted_average_param;
+                weighted_average_param += 0.4;
+                weighting_counter += 1;
+                // ROS_INFO_STREAM(element << " ");
+            }
+            // ROS_INFO_STREAM("--");
+            x_coord = x_coord / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
+            y_coord = y_coord / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
+            final_width = final_width / (innerVec.size()+(weighting_counter-1)*weighting_counter*0.4/2);
+
+            gaps_in_memory.push_back({x_coord, y_coord, final_width});
+
+            x_coord = 0.0;
+            y_coord = 0.0;
+            final_width = 0.0;
         }
 
         visualization_msgs::MarkerArray markers;
@@ -1200,7 +1396,7 @@ namespace local_planner
         visualization_msgs::Marker goal_marker;
         goal_marker.header.frame_id = "map";
         goal_marker.header.stamp = ros::Time::now();
-        goal_marker.id = 50;
+        goal_marker.id = 101;
         goal_marker.type = visualization_msgs::Marker::CUBE;
         goal_marker.action = visualization_msgs::Marker::ADD;
         goal_marker.pose.orientation.w = 1.0;
@@ -1223,16 +1419,11 @@ namespace local_planner
         vector<double> gap_sizes_new;
         double phi_gap_calculator;
 
-        if (gaps_in_memory.size() == 0)
-        {
-            return (M_PI_2 - (M_PI*phiGoal)/180);
-        }
-
         phiGoal += 90; // ödüllendirmede ekseni 90 derece shift etmek için yapıldı.
 
 
         //en son hafızada birleştirilmiş gaplerin x, y koordinatları ve genişliği
-        // ROS_WARN_STREAM("There are total of: " << gaps_in_memory.size() << " current gaps being detected now");
+        ROS_WARN_STREAM("There are total of: " << gaps_in_memory.size() << " gaps in memory");
         for (int i = 0; i < gaps_in_memory.size(); i++)
         {
             xDiff_new.push_back(gaps_in_memory[i][0] - odomRX);
@@ -1322,14 +1513,14 @@ namespace local_planner
         visualization_msgs::Marker selected_gap_marker;
         selected_gap_marker.header.frame_id = "map";
         selected_gap_marker.header.stamp = ros::Time::now();
-        selected_gap_marker.id = 51;
+        selected_gap_marker.id = 102;
         selected_gap_marker.type = visualization_msgs::Marker::CYLINDER;
         selected_gap_marker.action = visualization_msgs::Marker::ADD;
         selected_gap_marker.pose.orientation.w = 1.0;
         selected_gap_marker.scale.z = 0.1;
         selected_gap_marker.pose.position.x = gaps_in_memory[largestWidthIndex][0];
         selected_gap_marker.pose.position.y = gaps_in_memory[largestWidthIndex][1];
-        selected_gap_marker.pose.position.z = 0.1;
+        selected_gap_marker.pose.position.z = 0.3;
         selected_gap_marker.scale.x = 0.4;
         selected_gap_marker.scale.y = 0.4;
         selected_gap_marker.color.a = 1.0;
@@ -1341,58 +1532,108 @@ namespace local_planner
 
 
 
+        same_gap_memory.clear();
         gaps_in_memory.clear();
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 
+        //eski FGM ödüllendirme kısmı
+
+
+        /*
+
+        vector<double> gap_sizes;
+        // double gap_weight = 0.1;
+        double gap_slew_rate = 0.5; //Gap büyütme hızını belirler, bu katsayıyı büyütmek hızı üstel olarak büyütür.
+        double gap_expansion = 0.5; //Gap büyütme oranını belirler, bu katsayıyı büyütmek gap genişleme oranını doğrusal arttırır.
+
+        for (int i = 0; i < rows; i++) //derece cinsinden gap sizelara göre ödüllendirme yapılan kısım, eski klasik FGM için kullanılır. 
+        {
+            gap_sizes.push_back(fabs(array_gap[i][1] - array_gap[i][0])); //açısal anlamda gerçek gap size
+            // ROS_INFO_STREAM("Real gap size is: " << gap_sizes[i]);
+            // gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * sqrt(pow((1 / diff_to_goal[i]),gap_weight));
+            gap_sizes[i] = gap_sizes[i] + gap_sizes[i] * (exp(-gap_slew_rate * (M_PI / 180.0) * diff_to_goal[i]) * gap_expansion); //ödüllendirilmis gap size
+            ROS_INFO_STREAM("Rewarded gap size is: " << gap_sizes[i]);
+        }
+        // gap odullendirme bitisi
+
+
+        int max_gap_idx = max_element(gap_sizes.begin(), gap_sizes.end()) - gap_sizes.begin();
+        ROS_INFO_STREAM("max gap indx is: "<< max_gap_idx);
+
+        int min_gap_idx = min_element(gap_sizes.begin(), gap_sizes.end()) - gap_sizes.begin();
+        // ROS_INFO_STREAM("min gap indx is: "<< min_gap_idx);
+
+        alpha = array_gap[max_gap_idx][0];
+        beta = array_gap[max_gap_idx][1];
+        if (beta >= 163)
+        {
+                beta = 162.01;
+        }
+
+        ROS_INFO_STREAM("alpha is: " << (alpha+8.5));
+        ROS_INFO_STREAM("beta is: " << (beta+8.5));
+
+        if (alpha != 0.0)
+        {
+            d1 = currRange.at(round(alpha*(344.0/163.0)));
+        }
+        ROS_INFO_STREAM("d1 1: " << d1);
+
+        if (beta != 180.0)
+        {   
+            // ROS_INFO_STREAM("d2 11: " << d2);
+            d2 = currRange.at(round(beta*(344.0/163.0)));
+        }
+
+        ROS_INFO_STREAM("d2 1: " << d2);
+
+        if (alpha == 0.0)
+        {
+            d1 = currRange.at(round(beta*(344.0/163.0)));
+        }
+
+        ROS_INFO_STREAM("d1 2: " << d1);
+
+        if (beta == 180.0)
+        {   
+            // ROS_INFO_STREAM("d2 2: " << d2);
+            d2 = currRange.at(round(alpha*(344.0/163.0)));
+        }
+        ROS_INFO_STREAM("d2 2: " << d2);
+
+        if (alpha == 0.0)
+        {
+            d1 = d2;
+        }
+        if (beta == 162.01)
+        {
+            d2 = d1;
+        }
+
+        phi_gap = acos((d1 + d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5))) / sqrt(d1 * d1 + d2 * d2 + 2 * d1 * d2 * cos((M_PI / 180) * (beta + 8.5) - (M_PI / 180) * (alpha + 8.5)))) + (M_PI / 180) * (alpha + 8.5);
+        phi_gap = phi_gap * 180 / M_PI;
+        */
+
+        // phi_gap = ((180.0/M_PI) * acos((d1 + d2 * cos(M_PI/180.0*(beta-alpha))) / sqrt(pow(d1, 2) + pow(d2, 2) + 2*d1*d2*cos(M_PI/180.0*(beta-alpha))))) + alpha;
+
+        // ROS_INFO_STREAM("phi gap is : " << phi_gap);
+        // ROS_INFO_STREAM("d1 is : " << d1);
+        // ROS_INFO_STREAM("d2 is : " << d2);
+
+        // ROS_INFO_STREAM("odomRX is : " << odomRX);
+        // ROS_INFO_STREAM("odomRY is : " << odomRY);
+        // ROS_INFO_STREAM("goalX is : " << goalX);
+        // ROS_INFO_STREAM("goalY is : " << goalY);
+
+        // ROS_INFO_STREAM("Goal angle is: " << phiGoal);
+        // ROS_INFO_STREAM("robot_pose_theta is : " << robot_pose_theta);
+
+        // ROS_WARN_STREAM("Gap existance: " << isGapExist_);
+        // ROS_WARN_STREAM("Phi final: " << phiFinal);
+
         double alpha_weight = 12;
-        // Dmin tutma işi yapıldığında kullanılıyordu    
-        // if(dmin < 2.0)
-        // {
-        //     below_2 = true;
-        //     time_below_2 = ros::Time::now();
-        //     // ROS_WARN_STREAM("true oldu");
-            
-
-        //     if(below_2 && dmin < final_dmin)
-        //     {
-        //         time_below_2 = ros::Time::now();
-        //         // ROS_WARN_STREAM("tazelendi");
-        //     }
-        //     final_dmin = std::min(final_dmin, dmin);
-        //     dmin = final_dmin;
-        // }
-
-        // ros::Duration elapsed_seconds = ros::Time::now() - time_below_2;
-        // double seconds_elapsed = elapsed_seconds.toSec();
-
-        // ROS_WARN_STREAM("geçen zaman: " << seconds_elapsed);
-        // if (below_2 && seconds_elapsed < 5.0)
-        // {
-        //     dmin = final_dmin;
-        // }
-        // else if (below_2 && seconds_elapsed >= 5.0)
-        // {
-        //     // ROS_WARN_STREAM("bu ifteyiz");
-        //     below_2 = false;
-        //     final_dmin = 2.0;
-        // }
-
-        // if(below_2)
-        // {
-        //     final_dmin = std::min(final_dmin, dmin);
-        //     ROS_WARN_STREAM("diğer ifteyiz");
-        //     dmin = final_dmin;
-        // }
-        // else
-        // {
-        //     final_dmin = dmin;
-        //     ROS_WARN_STREAM("elsedeyiz");
-        // }
-
-        // ROS_WARN_STREAM("dmin now is: " << dmin);//double beta_weight = 2.8;
-
-
+        //double beta_weight = 2.8;
         phiFinal = (((alpha_weight / exp(dmin)) * (phi_gap * M_PI/180)) + (phiGoal * M_PI/180)) / (alpha_weight / exp(dmin) + 1);
         // phiFinal = phi_gap;
         // ROS_INFO_STREAM("moving to : "<< phiFinal);
@@ -1417,8 +1658,8 @@ namespace local_planner
         // //     phiFinal = M_PI_2 - (phiFinal - 2*M_PI);
         // // }
         // ROS_INFO_STREAM("alpha_weight/dmin is: " << alpha_weight/dmin);
-        ROS_INFO_STREAM("phi gap is : " << phi_gap);
-        ROS_INFO_STREAM("phi goal is : " << phiGoal);
+        // ROS_INFO_STREAM("phi gap is : " << phi_gap);
+        // ROS_INFO_STREAM("phi goal is : " << phiGoal);
         double moving_to;
         moving_to = 90 - phiFinal*180/M_PI;
         ROS_INFO_STREAM("moving to : " << moving_to);
