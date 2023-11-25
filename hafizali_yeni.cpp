@@ -275,19 +275,7 @@ namespace local_planner
 
             goalReached_ = true;
         }
-        else if (distanceToGlobalGoal() < goalDistTolerance_ + 2)
-        {
-            // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/3;
-            // cmd_vel.linear.x = 0.0;
-            cmd_vel.linear.y = 0.0;
-            cmd_vel.linear.z = 0.0;
 
-            cmd_vel.angular.x = 0.0;
-            cmd_vel.angular.y = 0.0;
-            // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/3;
-        }
         else if (dmin < 1.4 && dminIdx > 137 && dminIdx < 207 && dmin >= 1.0)
         {
             ROS_WARN_STREAM("Hiyaa!");
@@ -319,7 +307,7 @@ namespace local_planner
         else if (dmin < 1.0 && dmin > 0.75)
         {
             ROS_WARN_STREAM("We are in low dmin!");
-            if(dminIdx > 127 && dminIdx < 172)
+            if(dminIdx > 127 && dminIdx <= 172)
             {
                 ROS_ERROR_STREAM("here1!");
                 // Send velocity commands to robot's base
@@ -333,7 +321,7 @@ namespace local_planner
                 // cmd_vel.angular.z = 0.0;
                 cmd_vel.angular.z = 0.7;
             }
-            else if(dminIdx < 172 && dminIdx < 217)
+            else if(dminIdx > 172 && dminIdx < 217)
             {
                 ROS_ERROR_STREAM("here2!");
                 // Send velocity commands to robot's base
@@ -420,6 +408,20 @@ namespace local_planner
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel;
+        }
+
+        if (distanceToGlobalGoal() < goalDistTolerance_ + 2)
+        {
+            // Send velocity commands to robot's base
+            cmd_vel.linear.x = cmd_vel.linear.x/2;
+            // cmd_vel.linear.x = 0.0;
+            cmd_vel.linear.y = 0.0;
+            cmd_vel.linear.z = 0.0;
+
+            cmd_vel.angular.x = 0.0;
+            cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.z = cmd_vel.angular.z/2;
         }
 
         ROS_ERROR_STREAM("cmd vel x is : " << cmd_vel.linear.x);
@@ -627,7 +629,7 @@ namespace local_planner
         // ters çevrilerek ilk indeksli olan nokta sol 90derecede kalan yer olmaktadır buradan sağa doğru taranmış hale gelir.
 
         // her lazer ölçümünden 10cm çıkartıldı (obstacle inflation)
-        // ROS_INFO_STREAM("currange has elements: " << currRange.size());
+        ROS_INFO_STREAM("currange has elements: " << currRange.size());
 
 
         // for (unsigned int i = 0; i < currRange.size() ; i++)

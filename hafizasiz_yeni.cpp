@@ -272,19 +272,7 @@ namespace local_planner
 
             goalReached_ = true;
         }
-        else if (distanceToGlobalGoal() < goalDistTolerance_ + 2)
-        {
-            // Send velocity commands to robot's base
-            cmd_vel.linear.x = linearVelocity/3;
-            // cmd_vel.linear.x = 0.0;
-            cmd_vel.linear.y = 0.0;
-            cmd_vel.linear.z = 0.0;
 
-            cmd_vel.angular.x = 0.0;
-            cmd_vel.angular.y = 0.0;
-            // cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.z = angularVel/3;
-        }
         else if (dmin < 1.4 && dminIdx > 137 && dminIdx < 207 && dmin >= 1.0)
         {
             ROS_WARN_STREAM("Hiyaa!");
@@ -330,7 +318,7 @@ namespace local_planner
                 // cmd_vel.angular.z = 0.0;
                 cmd_vel.angular.z = 0.7;
             }
-            else if(dminIdx < 172 && dminIdx < 217)
+            else if(dminIdx > 172 && dminIdx < 217)
             {
                 ROS_ERROR_STREAM("here2!");
                 // Send velocity commands to robot's base
@@ -417,6 +405,20 @@ namespace local_planner
             cmd_vel.angular.y = 0.0;
             // cmd_vel.angular.z = 0.0;
             cmd_vel.angular.z = angularVel;
+        }
+
+        if (distanceToGlobalGoal() < goalDistTolerance_ + 2)
+        {
+            // Send velocity commands to robot's base
+            cmd_vel.linear.x = cmd_vel.linear.x/3;
+            // cmd_vel.linear.x = 0.0;
+            cmd_vel.linear.y = 0.0;
+            cmd_vel.linear.z = 0.0;
+
+            cmd_vel.angular.x = 0.0;
+            cmd_vel.angular.y = 0.0;
+            // cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.z = cmd_vel.angular.z/3;
         }
 
         ROS_ERROR_STREAM("cmd vel x is : " << cmd_vel.linear.x);
