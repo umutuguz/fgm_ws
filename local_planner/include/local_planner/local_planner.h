@@ -70,6 +70,16 @@ public:
 
     void costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& costmap_msg);
 
+        // Callback functions
+    void poseCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void velocityCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg);
+
+    void poseCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void velocityCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg);
+
+    void poseCallback3(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void velocityCallback3(const geometry_msgs::TwistStamped::ConstPtr& msg);
+
     double distanceToGlobalGoal();
 
     double LLCallback();
@@ -108,12 +118,25 @@ private:
     ros::Subscriber cmdSub_;
     ros::Subscriber collisionSub_;
     ros::Subscriber costmapSub_;
+    // Subscribers for each box's pose and velocity
+    ros::Subscriber pose_sub_1, velocity_sub_1;
+    ros::Subscriber pose_sub_2, velocity_sub_2;
+    ros::Subscriber pose_sub_3, velocity_sub_3;
     boost::shared_ptr<nav_msgs::Odometry const> odomPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanPtr_;
     boost::shared_ptr<sensor_msgs::LaserScan const> scanMultiPtr_;
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> posePtr_;
     boost::shared_ptr<nav_msgs::OccupancyGrid const> costmapPtr_;
     double cmdPtr_;
+    // Data structures to store the received data
+    geometry_msgs::PoseStamped pos_box1;
+    geometry_msgs::TwistStamped vel_box1;
+
+    geometry_msgs::PoseStamped pos_box2;
+    geometry_msgs::TwistStamped vel_box2;
+
+    geometry_msgs::PoseStamped pos_box3;
+    geometry_msgs::TwistStamped vel_box3;
 
     // Publishers
     ros::Publisher globalPlanPub_;
@@ -129,8 +152,13 @@ private:
     int currentGoalPoseIdx_;
     bool isGapExist_;
     double dmin;
+    double posX_box1, posY_box1, velX_box1, velY_box1;
+    double posX_box2, posY_box2, velX_box2, velY_box2;
+    double posX_box3, posY_box3, velX_box3, velY_box3;
 
     double lastCallbackTime_;
+    double lastCallbackTime_end;
+    bool newPoseData;
 
 };
 };

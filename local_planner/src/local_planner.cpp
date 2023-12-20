@@ -61,6 +61,16 @@ namespace local_planner
 
             collisionSub_ = nh_.subscribe("/base_footprint_contact_sensor_state", 100, &LocalPlanner::collisionCallback, this);
 
+            // Initialize subscribers
+            pose_sub_1 = nh_.subscribe("/move_box_plugin/moving_box_1_pose", 10, &LocalPlanner::poseCallback1, this);
+            velocity_sub_1 = nh_.subscribe("/move_box_plugin/moving_box_1_velocity", 10, &LocalPlanner::velocityCallback1, this);
+
+            pose_sub_2 = nh_.subscribe("/move_box_plugin/moving_box_2_pose", 10, &LocalPlanner::poseCallback2, this);
+            velocity_sub_2 = nh_.subscribe("/move_box_plugin/moving_box_2_velocity", 10, &LocalPlanner::velocityCallback2, this);
+
+            pose_sub_3 = nh_.subscribe("/move_box_plugin/moving_box_3_pose", 10, &LocalPlanner::poseCallback3, this);
+            velocity_sub_3 = nh_.subscribe("/move_box_plugin/moving_box_3_velocity", 10, &LocalPlanner::velocityCallback3, this);
+
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
@@ -519,6 +529,8 @@ namespace local_planner
     void LocalPlanner::poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg)
     {
         posePtr_ = msg;
+        newPoseData = true;
+        lastCallbackTime_ = ros::Time::now().toSec();
     } // end function poseCallback
     
     void LocalPlanner::cmdCallback(const std_msgs::Float64::ConstPtr& msg)
@@ -559,6 +571,45 @@ namespace local_planner
             
         }
     }
+    void LocalPlanner::poseCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        posX_box1 = msg->pose.position.x;
+        posY_box1 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    void LocalPlanner::velocityCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    {
+        velX_box1 = msg->twist.linear.x;
+        velY_box1 = msg->twist.linear.y;
+        // Process velocity data
+    }
+    void LocalPlanner::poseCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        posX_box2 = msg->pose.position.x;
+        posY_box2 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    void LocalPlanner::velocityCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    {
+        velX_box2 = msg->twist.linear.x;
+        velY_box2 = msg->twist.linear.y;
+        // Process velocity data
+    }
+    void LocalPlanner::poseCallback3(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        posX_box3 = msg->pose.position.x;
+        posY_box3 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    void LocalPlanner::velocityCallback3(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    {
+        velX_box3 = msg->twist.linear.x;
+        velY_box3 = msg->twist.linear.y;
+        // Process velocity data
+    }
 
     double LocalPlanner::distanceToGlobalGoal()
     {
@@ -577,12 +628,18 @@ namespace local_planner
     vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
     double prev_odomRX = 0.0;
     double prev_odomRY = 0.0;
+    
+
+    double robot_vel_x;
+    double robot_vel_y;
 
     double LocalPlanner::LLCallback()
     {
         ROS_INFO_STREAM("Local Planner started");
-        lastCallbackTime_ = ros::Time::now().toSec();
-
+        
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box1 << " Y:"<< posY_box1 <<" velocity: X: " << velX_box1 << " Y: "<< velY_box1);
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box2 << " Y:"<< posY_box2 <<" velocity: X: " << velX_box2 << " Y: "<< velY_box2);
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box3 << " Y:"<< posY_box3 <<" velocity: X: " << velX_box3 << " Y: "<< velY_box3);
         // Get odometry informations
         // WARNING: These are not odometry information! Variable names remained
         // unchanged since the latest update. These are AMCL positions.
@@ -591,9 +648,25 @@ namespace local_planner
 
         dist_travelled += sqrt((odomRX - prev_odomRX)*(odomRX - prev_odomRX) +(odomRY - prev_odomRY)*(odomRY - prev_odomRY)) ;
         // ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
+        
+        if(newPoseData)
+        {
+            robot_vel_x = (odomRX - prev_odomRX)/(lastCallbackTime_-lastCallbackTime_end);
+            robot_vel_y = (odomRY - prev_odomRY)/(lastCallbackTime_-lastCallbackTime_end);
+            lastCallbackTime_end = ros::Time::now().toSec();
+        }
+        ROS_WARN_STREAM("robot vel X:" << robot_vel_x);
+        ROS_WARN_STREAM("robot vel Y:" << robot_vel_y);
+        ROS_WARN_STREAM("odomRX: " << odomRX);
+        ROS_WARN_STREAM("odomRY: " << odomRY);
+        ROS_WARN_STREAM("prevodomRX: " << prev_odomRX);
+        ROS_WARN_STREAM("prevodomRX: " << prev_odomRX);
+        ROS_WARN_STREAM("time passed: " << lastCallbackTime_ - lastCallbackTime_end);
+        newPoseData = false;
 
         prev_odomRX = odomRX;
         prev_odomRY = odomRY;
+        
 
 
         currentPose_.orientation = posePtr_->pose.pose.orientation;
@@ -604,9 +677,14 @@ namespace local_planner
 
 
         double goalX = currentGoalPose_.position.x;
-        double goalY = currentGoalPose_.position.y;;
+        double goalY = currentGoalPose_.position.y;
 
-
+        double closest_time_t1 = (-2*(posX_box1 - odomRX)*(velX_box1-robot_vel_x)-2*(posY_box1-odomRY)*(velY_box1-robot_vel_y))/(2*pow((velX_box1-robot_vel_x),2)+2*pow((velY_box1-robot_vel_y),2));
+        double closest_time_t2 = (-2*(posX_box2 - odomRX)*(velX_box2-robot_vel_x)-2*(posY_box2-odomRY)*(velY_box2-robot_vel_y))/(2*pow((velX_box2-robot_vel_x),2)+2*pow((velY_box2-robot_vel_y),2));
+        double closest_time_t3 = (-2*(posX_box3 - odomRX)*(velX_box3-robot_vel_x)-2*(posY_box3-odomRY)*(velY_box3-robot_vel_y))/(2*pow((velX_box3-robot_vel_x),2)+2*pow((velY_box3-robot_vel_y),2));
+        ROS_INFO_STREAM("t1 is: " << closest_time_t1);
+        ROS_INFO_STREAM("t2 is: " << closest_time_t2);
+        ROS_INFO_STREAM("t3 is: " << closest_time_t3);
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
@@ -1155,6 +1233,10 @@ namespace local_planner
                     currentgaps.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
+                    currentgaps.push_back(memory_array[i][0]); //d1x
+                    currentgaps.push_back(memory_array[i][1]); //d1y
+                    currentgaps.push_back(memory_array[i][2]); //d2x
+                    currentgaps.push_back(memory_array[i][3]); //d2y
                     gaps_in_memory.push_back(currentgaps);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
                     // for (int i = 0; i < midpoint_x_y.size();i++)
                     // {
