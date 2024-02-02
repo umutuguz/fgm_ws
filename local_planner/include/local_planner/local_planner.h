@@ -155,10 +155,22 @@ private:
     double posX_box1, posY_box1, velX_box1, velY_box1;
     double posX_box2, posY_box2, velX_box2, velY_box2;
     double posX_box3, posY_box3, velX_box3, velY_box3;
-
+    double prevPosX_box1 = 0.0; 
+    double prevPosY_box1 = 0.0;
+    double prevPosX_box2 = 0.0;
+    double prevPosY_box2 = 0.0;
+    double prevPosX_box3 = 0.0;
+    double prevPosY_box3 = 0.0;
     double lastCallbackTime_;
     double lastCallbackTime_end;
     bool newPoseData;
+    double prevPoseTime1_=0.0;
+    double prevPoseTime2_=0.0;
+    double prevPoseTime3_=0.0;
+    double boxPoseTime1_=0.0;
+    double boxPoseTime2_=0.0;
+    double boxPoseTime3_=0.0;
+    double phi_gap;
 
 };
 };

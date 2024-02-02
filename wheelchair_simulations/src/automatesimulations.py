@@ -14,7 +14,7 @@ def get_world_number(launch_file_path):
         launch_content = launch_file.read()
 
     # Use regular expressions to find the world number
-    match = re.search(r"montecarloworld_(\d+)", launch_content)
+    match = re.search(r"montecarloworld_modified_with_moving_boxes_(\d+)", launch_content)
     if match:
         world_number = int(match.group(1))
     else:
@@ -28,7 +28,7 @@ def modify_launch_file(file_path, world_number):
         launch_content = launch_file.read()
 
     # Replace the world file name with the updated version
-    modified_content = re.sub(r"montecarloworld_(\d+).world", "montecarloworld_{}.world".format(world_number+1), launch_content)
+    modified_content = re.sub(r"montecarloworld_modified_with_moving_boxes_(\d+).world", "montecarloworld_modified_with_moving_boxes_{}.world".format(world_number+1), launch_content)
 
     # Write the modified content back to the launch file
     with open(file_path, 'w') as launch_file:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     # Launch the first launch file
     first_launch_file = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch'
     launch_file(first_launch_file)
-    time.sleep(7)
+    time.sleep(6)
 
     # Extract the world number from the first launch file
     world_number = get_world_number(first_launch_file)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     second_launch_file = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_navigation.launch'
     launch_file(second_launch_file)
 
-    time.sleep(5)
+    time.sleep(4)
 
     # Publish the navigation goal with the world number
     publish_goal(world_number)
