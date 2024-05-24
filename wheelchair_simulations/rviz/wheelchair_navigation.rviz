@@ -44,7 +44,7 @@ Visualization Manager:
       Cell Size: 1
       Class: rviz/Grid
       Color: 160; 160; 164
-      Enabled: true
+      Enabled: false
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -57,7 +57,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -388,57 +388,12 @@ Visualization Manager:
       Topic: /move_base_simple/goal
       Unreliable: false
       Value: true
-    - Alpha: 1
-      Class: spencer_tracking_rviz_plugin/TrackedPersons
-      Color: 130; 130; 130
-      Color map offset: 0
-      Color transform: Rainbow
-      Delete after no. cycles: 100
-      Enabled: true
-      Excluded person IDs: ""
-      Font color: 255; 255; 255
-      Font color style: Same color
-      Font scale: 2
-      History as line:
-        Line width: 0.05000000074505806
-        Value: true
-      History size: 100
-      Included person IDs: ""
-      Min. history point distance: 0.4000000059604645
-      Missed alpha: 0.5
-      Name: TrackedPersons
-      Occlusion alpha: 0.30000001192092896
-      Queue Size: 10
-      Render covariances:
-        Line width: 0.10000000149011612
-        Value: true
-      Render detection IDs: true
-      Render history: true
-      Render person visual: true
-      Render track IDs: true
-      Render track state: true
-      Render velocities: true
-      Show DELETED tracks: false
-      Show MATCHED tracks: true
-      Show MISSED tracks: true
-      Show OCCLUDED tracks: true
-      Style:
-        Line width: 0.05000000074505806
-        Scaling factor: 1
-        Value: Cylinders
-      Topic: /spencer/perception/tracked_persons
-      Tracking frame: odom
-      Unreliable: false
-      Value: true
-      Z offset:
-        Use Z position from message: false
-        Value: 0
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /move_base/local_planner/gap_markers
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -492,7 +447,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -3.100797653198242
+      Angle: -4.7157979011535645
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -502,10 +457,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 31.681276321411133
+      Scale: 27.8795223236084
       Target Frame: <Fixed Frame>
-      X: 0.5695199370384216
-      Y: -0.2498687207698822
+      X: 10.639494895935059
+      Y: -0.32777851819992065
     Saved: ~
 Window Geometry:
   Displays:

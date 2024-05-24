@@ -61,6 +61,16 @@ namespace local_planner
 
             collisionSub_ = nh_.subscribe("/base_footprint_contact_sensor_state", 100, &LocalPlanner::collisionCallback, this);
 
+            // Initialize subscribers
+            pose_sub_1 = nh_.subscribe("/move_box_plugin/moving_box_1_pose", 10, &LocalPlanner::poseCallback1, this);
+            // velocity_sub_1 = nh_.subscribe("/move_box_plugin/moving_box_1_velocity", 10, &LocalPlanner::velocityCallback1, this);
+
+            pose_sub_2 = nh_.subscribe("/move_box_plugin/moving_box_2_pose", 10, &LocalPlanner::poseCallback2, this);
+            // velocity_sub_2 = nh_.subscribe("/move_box_plugin/moving_box_2_velocity", 10, &LocalPlanner::velocityCallback2, this);
+
+            pose_sub_3 = nh_.subscribe("/move_box_plugin/moving_box_3_pose", 10, &LocalPlanner::poseCallback3, this);
+            // velocity_sub_3 = nh_.subscribe("/move_box_plugin/moving_box_3_velocity", 10, &LocalPlanner::velocityCallback3, this);
+
             // nh_.getParam("/move_base/local_planner/look_ahead_dist", lookAheadDist_);
 
             // Publishers
@@ -539,6 +549,8 @@ namespace local_planner
     void LocalPlanner::poseCallback(boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> msg)
     {
         posePtr_ = msg;
+        newPoseData = true;
+        lastCallbackTime_ = ros::Time::now().toSec();
     } // end function poseCallback
     
     void LocalPlanner::cmdCallback(const std_msgs::Float64::ConstPtr& msg)
@@ -579,6 +591,78 @@ namespace local_planner
             
         }
     }
+    void LocalPlanner::poseCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        double currentTime1 = ros::Time::now().toSec();
+        double timeDiff1 = currentTime1 - prevPoseTime1_;
+
+        if(timeDiff1 > 0)
+        {
+            velX_box1 = (msg->pose.position.x - prevPosX_box1) / timeDiff1;
+            velY_box1 = (msg->pose.position.y - prevPosY_box1) / timeDiff1;
+        }
+        prevPosX_box1=msg->pose.position.x;
+        prevPosY_box1=msg->pose.position.y;
+        prevPoseTime1_=currentTime1;
+        posX_box1 = msg->pose.position.x;
+        posY_box1 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    // void LocalPlanner::velocityCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    // {
+    //     velX_box1 = msg->twist.linear.x;
+    //     velY_box1 = msg->twist.linear.y;
+    //     // Process velocity data
+    // }
+    void LocalPlanner::poseCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        double currentTime2 = ros::Time::now().toSec();
+        double timeDiff2 = currentTime2 - prevPoseTime2_;
+
+        if(timeDiff2 > 0)
+        {
+            velX_box2 = (msg->pose.position.x - prevPosX_box2) / timeDiff2;
+            velY_box2 = (msg->pose.position.y - prevPosY_box2) / timeDiff2;
+        }
+        prevPosX_box2=msg->pose.position.x;
+        prevPosY_box2=msg->pose.position.y;
+        prevPoseTime2_=currentTime2;
+        posX_box2 = msg->pose.position.x;
+        posY_box2 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    // void LocalPlanner::velocityCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    // {
+    //     velX_box2 = msg->twist.linear.x;
+    //     velY_box2 = msg->twist.linear.y;
+    //     // Process velocity data
+    // }
+    void LocalPlanner::poseCallback3(const geometry_msgs::PoseStamped::ConstPtr& msg)
+    {
+        double currentTime3 = ros::Time::now().toSec();
+        double timeDiff3 = currentTime3 - prevPoseTime3_;
+
+        if(timeDiff3 > 0)
+        {
+            velX_box3 = (msg->pose.position.x - prevPosX_box3) / timeDiff3;
+            velY_box3 = (msg->pose.position.y - prevPosY_box3) / timeDiff3;
+        }
+        prevPosX_box3=msg->pose.position.x;
+        prevPosY_box3=msg->pose.position.y;
+        prevPoseTime3_=currentTime3;
+        posX_box3 = msg->pose.position.x;
+        posY_box3 = msg->pose.position.y;
+        // Process pose data
+    }
+
+    // void LocalPlanner::velocityCallback3(const geometry_msgs::TwistStamped::ConstPtr& msg)
+    // {
+    //     velX_box3 = msg->twist.linear.x;
+    //     velY_box3 = msg->twist.linear.y;
+    //     // Process velocity data
+    // }
 
     double LocalPlanner::distanceToGlobalGoal()
     {
@@ -597,12 +681,18 @@ namespace local_planner
     vector<vector<double>> midpoint_memory; //dış vektör koordinat olarak tutan
     double prev_odomRX = 0.0;
     double prev_odomRY = 0.0;
+    
+
+    double robot_vel_x;
+    double robot_vel_y;
 
     double LocalPlanner::LLCallback()
     {
         ROS_INFO_STREAM("Local Planner started");
-        lastCallbackTime_ = ros::Time::now().toSec();
-
+        
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box1 << " Y:"<< posY_box1 <<" velocity: X: " << velX_box1 << " Y: "<< velY_box1);
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box2 << " Y:"<< posY_box2 <<" velocity: X: " << velX_box2 << " Y: "<< velY_box2);
+        ROS_INFO_STREAM("box1 pose: X: " << posX_box3 << " Y:"<< posY_box3 <<" velocity: X: " << velX_box3 << " Y: "<< velY_box3);
         // Get odometry informations
         // WARNING: These are not odometry information! Variable names remained
         // unchanged since the latest update. These are AMCL positions.
@@ -611,9 +701,25 @@ namespace local_planner
 
         dist_travelled += sqrt((odomRX - prev_odomRX)*(odomRX - prev_odomRX) +(odomRY - prev_odomRY)*(odomRY - prev_odomRY)) ;
         // ROS_INFO_STREAM("total distance traveled is: " << dist_travelled);
+        
+        if(newPoseData)
+        {
+            robot_vel_x = (odomRX - prev_odomRX)/(lastCallbackTime_-lastCallbackTime_end);
+            robot_vel_y = (odomRY - prev_odomRY)/(lastCallbackTime_-lastCallbackTime_end);
+            lastCallbackTime_end = ros::Time::now().toSec();
+        }
+        ROS_WARN_STREAM("robot vel X:" << robot_vel_x);
+        ROS_WARN_STREAM("robot vel Y:" << robot_vel_y);
+        ROS_WARN_STREAM("odomRX: " << odomRX);
+        ROS_WARN_STREAM("odomRY: " << odomRY);
+        ROS_WARN_STREAM("prevodomRX: " << prev_odomRX);
+        ROS_WARN_STREAM("prevodomRX: " << prev_odomRX);
+        ROS_WARN_STREAM("time passed: " << lastCallbackTime_ - lastCallbackTime_end);
+        newPoseData = false;
 
         prev_odomRX = odomRX;
         prev_odomRY = odomRY;
+        
 
 
         currentPose_.orientation = posePtr_->pose.pose.orientation;
@@ -624,9 +730,14 @@ namespace local_planner
 
 
         double goalX = currentGoalPose_.position.x;
-        double goalY = currentGoalPose_.position.y;;
+        double goalY = currentGoalPose_.position.y;
 
-
+        double closest_time_t1 = (-2*(posX_box1 - odomRX)*(velX_box1-robot_vel_x)-2*(posY_box1-odomRY)*(velY_box1-robot_vel_y))/(2*pow((velX_box1-robot_vel_x),2)+2*pow((velY_box1-robot_vel_y),2));
+        double closest_time_t2 = (-2*(posX_box2 - odomRX)*(velX_box2-robot_vel_x)-2*(posY_box2-odomRY)*(velY_box2-robot_vel_y))/(2*pow((velX_box2-robot_vel_x),2)+2*pow((velY_box2-robot_vel_y),2));
+        double closest_time_t3 = (-2*(posX_box3 - odomRX)*(velX_box3-robot_vel_x)-2*(posY_box3-odomRY)*(velY_box3-robot_vel_y))/(2*pow((velX_box3-robot_vel_x),2)+2*pow((velY_box3-robot_vel_y),2));
+        ROS_INFO_STREAM("t1 is: " << closest_time_t1);
+        ROS_INFO_STREAM("t2 is: " << closest_time_t2);
+        ROS_INFO_STREAM("t3 is: " << closest_time_t3);
         // Get laser ranges
         std::vector<double> laserRanges;
         std::vector<double> currRange;
@@ -732,6 +843,7 @@ namespace local_planner
             phiGoal = phiGoal - 360;
         }
         vector<vector<double>> gaps_in_memory; //en son halinde gaplerin koordinatlarını tutacak olan vektör
+        vector<vector<double>> gaps_in_memory_predicted; //predictive FGM için modifiye edilecek olan
 
         double phi_gap = 0.0;
         
@@ -1104,6 +1216,8 @@ namespace local_planner
 
             lidar_coord_x = odomRX + 0.322*sin(robot_pose_theta_manipulated*(M_PI/180.0));  //ön lidarın koordinatının amcl verisi ile hesaplanışı
             lidar_coord_y = odomRY + 0.322*cos(robot_pose_theta_manipulated*(M_PI/180.0));
+            // ROS_INFO_STREAM("odomrx: " << odomRX << " odomry: " << odomRY);
+            // ROS_INFO_STREAM("lidar coord x: " << lidar_coord_x << " lidar coord y: " << lidar_coord_y);
 
             
             vector<double> gap_midpoints;  //gap midpointlerinin açı değerlerini tutan vektör
@@ -1137,6 +1251,9 @@ namespace local_planner
                 //     beta_temp = 162.01;
                     // ROS_INFO_STREAM("beta_temp at: " << beta_temp);
                 d2_temp = currRange.at(round(beta_temp*(344.0/163.0)));
+                // ROS_INFO_STREAM("d1temp: " << d1_temp << " d2temp: " <<d2_temp);
+                // ROS_INFO_STREAM("robot_pose_theta_manipulated: " << robot_pose_theta_manipulated);
+
 
                 memory_array[i][0] = lidar_coord_x - d1_temp*cos(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen X koord
                 memory_array[i][1] = lidar_coord_y + d1_temp*sin(M_PI*(robot_pose_theta_manipulated + (alpha_temp+8.5))/180.0); //d1 den gelen y koord
@@ -1175,7 +1292,12 @@ namespace local_planner
                     currentgaps.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
+                    currentgaps.push_back(memory_array[i][0]); //d1x
+                    currentgaps.push_back(memory_array[i][1]); //d1y
+                    currentgaps.push_back(memory_array[i][2]); //d2x
+                    currentgaps.push_back(memory_array[i][3]); //d2y
                     gaps_in_memory.push_back(currentgaps);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
+                    gaps_in_memory_predicted.push_back(currentgaps);
                     // for (int i = 0; i < midpoint_x_y.size();i++)
                     // {
                     //     ROS_INFO_STREAM("midpoint_x_y has: " << midpoint_x_y[i]);
@@ -1202,19 +1324,29 @@ namespace local_planner
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.id = i;
-            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.type = visualization_msgs::Marker::LINE_STRIP;
             marker.action = visualization_msgs::Marker::ADD;
             marker.pose.orientation.w = 1.0;
-            marker.scale.z = 0.1;
+            marker.scale.x = 0.2;
+            // marker.scale.z = 0.1;
             marker.color.a = 1.0;
             marker.color.r = 1.0;
-            marker.pose.position.x = gaps_in_memory[i][0];
-            marker.pose.position.y = gaps_in_memory[i][1];
-            marker.pose.position.z = 0.05;
-            marker.scale.x = gaps_in_memory[i][2];
-            marker.scale.y = gaps_in_memory[i][2];
+
+            geometry_msgs::Point start_point;
+            start_point.x = gaps_in_memory[i][3]; // x coordinate of the start point
+            start_point.y = gaps_in_memory[i][4]; // y coordinate of the start point
+            start_point.z = 0.05; // z coordinate of the start point
+
+            geometry_msgs::Point end_point;
+            end_point.x = gaps_in_memory[i][5]; // x coordinate of the end point
+            end_point.y = gaps_in_memory[i][6]; // y coordinate of the end point
+            end_point.z = 0.05; // z coordinate of the end point
+
+            marker.points.push_back(start_point);
+            marker.points.push_back(end_point);
 
             markers.markers.push_back(marker);
+            ROS_INFO_STREAM("gaps in memory: " <<gaps_in_memory[i][0] <<"---" << gaps_in_memory[i][1]<<"---" <<gaps_in_memory[i][2]<<"---" <<gaps_in_memory[i][3]<<"---" <<gaps_in_memory[i][4]<<"---" <<gaps_in_memory[i][5]<<"---" <<gaps_in_memory[i][6]);
         }
         // hafızadaki gapleri çizdirme bitişi
 
@@ -1244,6 +1376,13 @@ namespace local_planner
         vector<double> phi_gap_temp;
         vector<double> gap_sizes_new;
         double phi_gap_calculator;
+        double expectedposeX1;
+        double expectedposeY1;
+        double expectedposeX2;
+        double expectedposeY2;
+        double expectedposeX3;
+        double expectedposeY3;
+
 
         if (gaps_in_memory.size() == 0)
         {
@@ -1251,14 +1390,105 @@ namespace local_planner
         }
 
         phiGoal += 90; // ödüllendirmede ekseni 90 derece shift etmek için yapıldı.
+        double gapcornerthreshold = 1.0;
+
+        for(int i = 0; i < gaps_in_memory.size(); i++)
+        {
+            if(fabs(gaps_in_memory[i][3] - posX_box1) < gapcornerthreshold && fabs(gaps_in_memory[i][4] - posY_box1) < gapcornerthreshold) //kutu 1 d1 ile ilişkili mi
+            {
+                ROS_INFO("box1=d1");
+                expectedposeX1 = velX_box1*closest_time_t1+gaps_in_memory[i][3];
+                expectedposeY1 = velY_box1*closest_time_t1+gaps_in_memory[i][4];
+                ROS_INFO_STREAM("expected pose of box 1: " << expectedposeX1 << " and " << expectedposeY1);
+                gaps_in_memory_predicted[i][3] = expectedposeX1;
+                gaps_in_memory_predicted[i][4] = expectedposeY1;
+            }
+            else if(fabs(gaps_in_memory[i][5] - posX_box1) < gapcornerthreshold && fabs(gaps_in_memory[i][6] - posY_box1) < gapcornerthreshold) //kutu 1 d2 ile ilişkili mi
+            {
+                ROS_INFO("box1=d2");
+                expectedposeX1 = velX_box1*closest_time_t1+gaps_in_memory[i][5];
+                expectedposeY1 = velY_box1*closest_time_t1+gaps_in_memory[i][6];
+                ROS_INFO_STREAM("expected pose of box 1: " << expectedposeX1 << " and " << expectedposeY1);
+                gaps_in_memory_predicted[i][5] = expectedposeX1;
+                gaps_in_memory_predicted[i][6] = expectedposeY1;
+            }
+            if(fabs(gaps_in_memory[i][3] - posX_box2) < gapcornerthreshold && fabs(gaps_in_memory[i][4] - posY_box2) < gapcornerthreshold) // kutu 2 d1 ile ilişkili mi
+            {
+                ROS_INFO("box2=d1");
+                expectedposeX2 = velX_box2*closest_time_t2+gaps_in_memory[i][3];
+                expectedposeY2 = velY_box2*closest_time_t2+gaps_in_memory[i][4];
+                ROS_INFO_STREAM("expected pose of box 2: " << expectedposeX2 << " and " << expectedposeY2);
+                gaps_in_memory_predicted[i][3] = expectedposeX2;
+                gaps_in_memory_predicted[i][4] = expectedposeY2;
+            }
+            else if(fabs(gaps_in_memory[i][5] - posX_box2) < gapcornerthreshold && fabs(gaps_in_memory[i][6] - posY_box2) < gapcornerthreshold) // kutu 2 d2 ile ilişkili mi
+            {
+                ROS_INFO("box2=d2");
+                expectedposeX2 = velX_box2*closest_time_t2+gaps_in_memory[i][5];
+                expectedposeY2 = velY_box2*closest_time_t2+gaps_in_memory[i][6];
+                ROS_INFO_STREAM("expected pose of box 2: " << expectedposeX2 << " and " << expectedposeY2);
+                gaps_in_memory_predicted[i][5] = expectedposeX2;
+                gaps_in_memory_predicted[i][6] = expectedposeY2;
+            }
+            if(fabs(gaps_in_memory[i][3] - posX_box3) < gapcornerthreshold && fabs(gaps_in_memory[i][4] - posY_box3) < gapcornerthreshold) // kutu 3 d1 ile ilişkili mi
+            {
+                ROS_INFO("box3=d1");
+                expectedposeX3 = velX_box3*closest_time_t3+gaps_in_memory[i][3];
+                expectedposeY3 = velY_box3*closest_time_t3+gaps_in_memory[i][4];
+                ROS_INFO_STREAM("expected pose of box 3: " << expectedposeX3 << " and " << expectedposeY3);
+                gaps_in_memory_predicted[i][3] = expectedposeX3;
+                gaps_in_memory_predicted[i][4] = expectedposeY3;
+            }
+            else if(fabs(gaps_in_memory[i][5] - posX_box3) < gapcornerthreshold && fabs(gaps_in_memory[i][6] - posY_box3) < gapcornerthreshold) // kutu 3 d2 ile ilişkili mi
+            {
+                ROS_INFO("box3=d2");
+                expectedposeX3 = velX_box3*closest_time_t3+gaps_in_memory[i][5];
+                expectedposeY3 = velY_box3*closest_time_t3+gaps_in_memory[i][6];
+                ROS_INFO_STREAM("expected pose of box 3: " << expectedposeX3 << " and " << expectedposeY3);
+                gaps_in_memory_predicted[i][5] = expectedposeX3;
+                gaps_in_memory_predicted[i][6] = expectedposeY3;
+            }
+        }
 
 
         //en son hafızada birleştirilmiş gaplerin x, y koordinatları ve genişliği
         // ROS_WARN_STREAM("There are total of: " << gaps_in_memory.size() << " current gaps being detected now");
-        for (int i = 0; i < gaps_in_memory.size(); i++)
+        // for (int i = 0; i < gaps_in_memory.size(); i++)
+        // {
+        //     xDiff_new.push_back(gaps_in_memory[i][0] - odomRX);
+        //     yDiff_new.push_back(gaps_in_memory[i][1] - odomRY);
+        //     phi_gap_calculator = atan2(yDiff_new[i], xDiff_new[i])*180/M_PI;
+
+        //     phi_gap_calculator = robot_pose_theta_real - phi_gap_calculator + 90;
+
+        //     if (phi_gap_calculator < -90)
+        //     {
+        //         phi_gap_calculator = phi_gap_calculator + 360;
+        //     }
+        //     else if (phi_gap_calculator > 270)
+        //     {
+        //         phi_gap_calculator = phi_gap_calculator - 360;
+        //     }
+
+        //     phi_gap_temp.push_back(phi_gap_calculator);
+        //     // ROS_INFO_STREAM("phi gap temp is : " << phi_gap_temp[i]);
+
+        //     phi_gap_temp[i] += 90; //gap ödüllendirmede 90 derece shift etmek için yapıldı ekseni. gerçek phigap ile alakası yok.
+        //     diff_to_goal_new.push_back(min(fabs(phi_gap_temp[i] - phiGoal), 360-fabs(phi_gap_temp[i] - phiGoal)));
+        //     // ROS_INFO_STREAM("diff to goal is : " << diff_to_goal_new[i]);
+        //     // ROS_INFO_STREAM("gaps are located at: X| " << gaps_in_memory[i][0] << " Y| " << gaps_in_memory[i][1] << " width| " << gaps_in_memory[i][2]);
+        // }
+
+        for (int i = 0; i < gaps_in_memory_predicted.size(); i++)
         {
-            xDiff_new.push_back(gaps_in_memory[i][0] - odomRX);
-            yDiff_new.push_back(gaps_in_memory[i][1] - odomRY);
+            gaps_in_memory_predicted[i][2] = sqrt(pow((gaps_in_memory_predicted[i][3] - gaps_in_memory_predicted[i][5]),2) + pow((gaps_in_memory_predicted[i][4] - gaps_in_memory_predicted[i][6]),2)) +0.2*(sqrt(pow((gaps_in_memory_predicted[i][3] - gaps_in_memory_predicted[i][5]),2) + pow((gaps_in_memory_predicted[i][4] - gaps_in_memory_predicted[i][6]),2))-gaps_in_memory_predicted[i][2]);
+            ROS_INFO_STREAM("new width of gap " << i  << " : " << gaps_in_memory_predicted[i][2]);
+        }
+
+        for (int i = 0; i < gaps_in_memory_predicted.size(); i++)
+        {
+            xDiff_new.push_back(gaps_in_memory_predicted[i][0] - odomRX);
+            yDiff_new.push_back(gaps_in_memory_predicted[i][1] - odomRY);
             phi_gap_calculator = atan2(yDiff_new[i], xDiff_new[i])*180/M_PI;
 
             phi_gap_calculator = robot_pose_theta_real - phi_gap_calculator + 90;
@@ -1283,37 +1513,41 @@ namespace local_planner
 
         // hafızadaki gapleri ödüllendirme
 
-        for (int i=0; i < gaps_in_memory.size(); i++)
+        for (int i=0; i < gaps_in_memory_predicted.size(); i++)
         {
-            if (gaps_in_memory[i][2] < 0.65) //0,45 ten kucuk olan gapler odullendirilmez.
+            if (gaps_in_memory_predicted[i][2] < 0.65) //0,45 ten kucuk olan gapler odullendirilmez.
             {
-                gaps_in_memory[i][2] = 0.1;
+                gaps_in_memory_predicted[i][2] = 0.1;
             }
             // else if (diff_to_goal_new[i] <= 30)
             // {
-            //     gaps_in_memory[i][2] = gaps_in_memory[i][2] * 2.2;
+            //     gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 2.2;
             //     // gaps_in_memory[i][2] = gaps_in_memory[i][2] + gaps_in_memory[i][2] * (2/(exp(diff_to_goal_new[i]/20))+1); // 0.75'ten buyuk gaplerin hepsi bu ölçüte göre büyütülür.
+            // }
+            // else if (diff_to_goal_new[i] <= 60 && diff_to_goal_new[i] > 30)
+            // {
+            //     gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 1.8;
             // }
             else if (diff_to_goal_new[i] <= 80)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.8;
+                gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2]*1.8;
             }
             else if (diff_to_goal_new[i] <= 90 && diff_to_goal_new[i] > 80)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 1.2;
+                gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 1.2;
             }
 
             else if (diff_to_goal_new[i] <= 120 && diff_to_goal_new[i] > 90)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.9;
+                gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 0.9;
             }
             else if (diff_to_goal_new[i] <= 150 && diff_to_goal_new[i] > 120)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.6;
+                gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 0.6;
             }
             else if (diff_to_goal_new[i] <= 180 && diff_to_goal_new[i] > 150)
             {
-                gaps_in_memory[i][2] = gaps_in_memory[i][2] * 0.3;
+                gaps_in_memory_predicted[i][2] = gaps_in_memory_predicted[i][2] * 0.3;
             }
             else
             {
@@ -1325,20 +1559,25 @@ namespace local_planner
         phiGoal -= 90; // ödüllendirme için eklenmiş olan 90 geri çıkarıldı.
 
         double largestWidthIndex = 0;
-        double largestWidth = gaps_in_memory[0][2];
-        for (int i = 0; i < gaps_in_memory.size(); i++)
+        double largestWidth = gaps_in_memory_predicted[0][2];
+        for (int i = 0; i < gaps_in_memory_predicted.size(); i++)
         {
-            if (gaps_in_memory[i][2] > largestWidth)
+            if (gaps_in_memory_predicted[i][2] > largestWidth)
             {
-                largestWidth = gaps_in_memory[i][2];
+                largestWidth = gaps_in_memory_predicted[i][2];
                 
                 largestWidthIndex = i;
             }
         }
+        for (int i = 0; i < gaps_in_memory_predicted.size(); i++)
+        {
+            ROS_INFO_STREAM("odullendirme sonrasi width of gap " << i  << " : " << gaps_in_memory_predicted[i][2]);
+        }
 
-        // ROS_INFO_STREAM("largestwidth is: " << largestWidth);
-        // ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
+        ROS_INFO_STREAM("largestwidth is: " << largestWidth);
+        ROS_INFO_STREAM("selected gap is at index " << largestWidthIndex);
         phi_gap = phi_gap_temp[largestWidthIndex];
+        
 
         // seçilmiş olan gap in ortasına mavi bir silindir çizmek için.
         visualization_msgs::Marker selected_gap_marker;
@@ -1364,6 +1603,7 @@ namespace local_planner
 
 
         gaps_in_memory.clear();
+        gaps_in_memory_predicted.clear();
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 

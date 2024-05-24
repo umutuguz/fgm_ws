@@ -1324,17 +1324,26 @@ namespace local_planner
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.id = i;
-            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.type = visualization_msgs::Marker::LINE_STRIP;
             marker.action = visualization_msgs::Marker::ADD;
             marker.pose.orientation.w = 1.0;
-            marker.scale.z = 0.1;
+            marker.scale.x = 0.2;
+            // marker.scale.z = 0.1;
             marker.color.a = 1.0;
             marker.color.r = 1.0;
-            marker.pose.position.x = gaps_in_memory[i][0];
-            marker.pose.position.y = gaps_in_memory[i][1];
-            marker.pose.position.z = 0.05;
-            marker.scale.x = gaps_in_memory[i][2];
-            marker.scale.y = gaps_in_memory[i][2];
+
+            geometry_msgs::Point start_point;
+            start_point.x = gaps_in_memory[i][3]; // x coordinate of the start point
+            start_point.y = gaps_in_memory[i][4]; // y coordinate of the start point
+            start_point.z = 0.05; // z coordinate of the start point
+
+            geometry_msgs::Point end_point;
+            end_point.x = gaps_in_memory[i][5]; // x coordinate of the end point
+            end_point.y = gaps_in_memory[i][6]; // y coordinate of the end point
+            end_point.z = 0.05; // z coordinate of the end point
+
+            marker.points.push_back(start_point);
+            marker.points.push_back(end_point);
 
             markers.markers.push_back(marker);
             ROS_INFO_STREAM("gaps in memory: " <<gaps_in_memory[i][0] <<"---" << gaps_in_memory[i][1]<<"---" <<gaps_in_memory[i][2]<<"---" <<gaps_in_memory[i][3]<<"---" <<gaps_in_memory[i][4]<<"---" <<gaps_in_memory[i][5]<<"---" <<gaps_in_memory[i][6]);

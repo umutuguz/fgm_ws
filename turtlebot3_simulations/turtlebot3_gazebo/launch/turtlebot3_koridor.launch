@@ -5,12 +5,12 @@
     <arg name="z_pos" default="0.0"/>
     <arg name="roll" default="0.0"/>
     <arg name="pitch" default="0.0"/>
-    <arg name="yaw" default="-1.57"/>
+    <arg name="yaw" default="0.0"/>
   
   
   
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="world_name" value="$(find wheelchair_simulations)/worlds/koridor_bos_world.world"/>
+      <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/lab_parkur_ozan_hoca.world"/>
       <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
       <arg name="gui" value="true"/>

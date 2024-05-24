@@ -1175,6 +1175,10 @@ namespace local_planner
                     currentgaps.push_back(midpoint_coords[i][0]); //içteki küçük vektöre x koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][1]); //içteki küçük vektöre y koordinatının pushlandığı yer
                     currentgaps.push_back(midpoint_coords[i][2]); //içteki küçük vektöre gap genişliğinin pushlandığı yer
+                    currentgaps.push_back(memory_array[i][0]); //d1x
+                    currentgaps.push_back(memory_array[i][1]); //d1y
+                    currentgaps.push_back(memory_array[i][2]); //d2x
+                    currentgaps.push_back(memory_array[i][3]); //d2y
                     gaps_in_memory.push_back(currentgaps);  //içteki küçük vektörü dıştaki büyük hafıza vektörüne pushlama
                     // for (int i = 0; i < midpoint_x_y.size();i++)
                     // {
@@ -1202,18 +1206,29 @@ namespace local_planner
             marker.header.frame_id = "map";
             marker.header.stamp = ros::Time::now();
             marker.id = i;
-            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.type = visualization_msgs::Marker::LINE_STRIP;
             marker.action = visualization_msgs::Marker::ADD;
             marker.pose.orientation.w = 1.0;
-            marker.scale.z = 0.1;
+            marker.scale.x = 0.2;  // Set a small non-zero value for scale
+            // marker.scale.y = 0.3;  // Set a small non-zero value for scale
+            // marker.scale.z = 0.01;  // Set a small non-zero value for scale
             marker.color.a = 1.0;
             marker.color.r = 1.0;
-            marker.pose.position.x = gaps_in_memory[i][0];
-            marker.pose.position.y = gaps_in_memory[i][1];
-            marker.pose.position.z = 0.05;
-            marker.scale.x = gaps_in_memory[i][2];
-            marker.scale.y = gaps_in_memory[i][2];
 
+            geometry_msgs::Point start_point;
+            start_point.x = gaps_in_memory[i][3]; // x coordinate of the start point
+            start_point.y = gaps_in_memory[i][4]; // y coordinate of the start point
+            start_point.z = 0.05; // z coordinate of the start point
+
+            geometry_msgs::Point end_point;
+            end_point.x = gaps_in_memory[i][5]; // x coordinate of the end point
+            end_point.y = gaps_in_memory[i][6]; // y coordinate of the end point
+            end_point.z = 0.05; // z coordinate of the end point
+
+            // Add start and end points to the marker
+            marker.points.push_back(start_point);
+            marker.points.push_back(end_point);
+           
             markers.markers.push_back(marker);
         }
         // hafızadaki gapleri çizdirme bitişi
