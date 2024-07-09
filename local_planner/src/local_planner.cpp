@@ -55,9 +55,7 @@ namespace local_planner
 
             scanSub_ = nh_.subscribe("/scan", 100, &LocalPlanner::scanCallback, this); //scan move base içinde remap edildi buradaki scan scan_multi_filtered a yönlendiriliyor.
 
-            // poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
-
-            poseSub_ = nh_.subscribe("/MEKF_pose", 100, &LocalPlanner::poseCallback, this);
+            poseSub_ = nh_.subscribe("/amcl_pose", 100, &LocalPlanner::poseCallback, this);
             
             cmdSub_ = nh_.subscribe("/cmd_vel_controller", 100, &LocalPlanner::cmdCallback, this);
 
@@ -138,7 +136,7 @@ namespace local_planner
             currentPose_.position.y = posePtr_->pose.pose.position.y;
             currentPose_.position.z = posePtr_->pose.pose.position.z;
             // ROS_INFO("currentpose_x is: %f", currentPose_.position.x);
-            ROS_INFO("currentpose_y is: %f", currentPose_.position.y);
+            // ROS_INFO("currentpose_y is: %f", currentPose_.position.y);
 
             double waypointX = globalPlan_[i].pose.position.x;
             double waypointY = globalPlan_[i].pose.position.y;
@@ -150,7 +148,7 @@ namespace local_planner
             goalDistTolerance_ = 0.55;
 
             // ROS_INFO("global plan waypoint index: %u", i);
-            ROS_INFO("hypot is: %f", hypot(diffX, diffY));
+            // ROS_INFO("hypot is: %f", hypot(diffX, diffY));
             // ROS_INFO("distance to global goal is: %f", distanceToGlobalGoal());
             // ROS_INFO("goaldisttolerance is: %f", goalDistTolerance_);
             // ROS_INFO("lookaheaddist is: %f", lookAheadDist_);
@@ -223,7 +221,7 @@ namespace local_planner
         // a1 = -2 * cos(omega);
         // a2 = 1 - alpha;
 
-        coefVel = 0.15;
+        coefVel = 0.7;
 
         if (dmin > 8)
             dmin_temp = 8;
@@ -1609,7 +1607,7 @@ namespace local_planner
         phi_gap_temp.clear();
         diff_to_goal_new.clear();
 
-        double alpha_weight = 8;
+        double alpha_weight = 62;
         // Dmin tutma işi yapıldığında kullanılıyordu    
         // if(dmin < 2.0)
         // {
