@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(gazebo REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include
+  #INCLUDE_DIRS include
   LIBRARIES move_box_plugin
   CATKIN_DEPENDS gazebo_ros roscpp
   DEPENDS system_lib

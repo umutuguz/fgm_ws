@@ -8,6 +8,9 @@ import signal
 import subprocess
 from move_base_msgs.msg import MoveBaseActionGoal
 
+home_dir = os.path.expanduser("~")
+fgm_ws_path = os.path.join(home_dir, 'fgm_ws')
+
 def get_world_number(launch_file_path):
     # Extract the world number from the launch file
     with open(launch_file_path, 'r') as launch_file:
@@ -49,7 +52,7 @@ def publish_goal(world_number):
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
     goal_msg.goal.target_pose.pose.orientation.w = 1.0
 
-    rospy.sleep(1)
+    rospy.sleep(10)
 
     # Publish the goal
     goal_pub.publish(goal_msg)
@@ -60,7 +63,7 @@ def publish_goal(world_number):
         goal_msg.goal.target_pose.pose.position.y,
         world_number
     )
-    log_file_path = '/home/otonom/fgm_ws/src/log/mylogs.txt'
+    log_file_path = os.path.join(fgm_ws_path, 'src/log/mylogs.txt')
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_entry + '\n')
 
@@ -85,10 +88,10 @@ def check_log_file(log_file_path, world_number):
             time.sleep(20)  # Wait for 20 seconds
 
             # Modify the world file path in the launch file
-            launch_file_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch'
+            launch_file_path = os.path.join(fgm_ws_path, 'src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch')
             modify_launch_file(launch_file_path, world_number)
 
-            script_path = '/home/otonom/fgm_ws/src/wheelchair_simulations/src/automatesimulations.py'  # Update with the absolute path of your script
+            script_path = os.path.join(fgm_ws_path, 'src/wheelchair_simulations/src/automatesimulations.py')  # Update with the absolute path of your script
             os.system("python3 {}".format(script_path))  # Rerun the script
 
 def launch_file(file_path):
@@ -100,7 +103,7 @@ def launch_file(file_path):
 
 if __name__ == '__main__':
     # Launch the first launch file
-    first_launch_file = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch'
+    first_launch_file = os.path.join(fgm_ws_path, 'src/wheelchair_simulations/launch/wheelchair_monte_carlo.launch')
     launch_file(first_launch_file)
     time.sleep(6)
 
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     world_number = get_world_number(first_launch_file)
 
     # Launch the second launch file in a new gnome-terminal window
-    second_launch_file = '/home/otonom/fgm_ws/src/wheelchair_simulations/launch/wheelchair_navigation.launch'
+    second_launch_file = os.path.join(fgm_ws_path, 'src/wheelchair_simulations/launch/wheelchair_navigation.launch')
     launch_file(second_launch_file)
 
     time.sleep(4)
@@ -117,7 +120,7 @@ if __name__ == '__main__':
     publish_goal(world_number)
 
     # Continuously check the log file for additional content until the simulation ends
-    log_file_path = '/home/otonom/fgm_ws/src/log/mylogs.txt'
+    log_file_path = os.path.join(fgm_ws_path,'src/log/mylogs.txt')
     while not rospy.is_shutdown():
         check_log_file(log_file_path, world_number)
         time.sleep(1)
