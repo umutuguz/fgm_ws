@@ -223,7 +223,7 @@ namespace local_planner
         // a1 = -2 * cos(omega);
         // a2 = 1 - alpha;
 
-        coefVel = 0.15;
+        coefVel = 0.4;
 
         if (dmin > 8)
             dmin_temp = 8;

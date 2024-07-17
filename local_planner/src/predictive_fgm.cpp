@@ -1481,6 +1481,7 @@ namespace local_planner
 
         for (int i = 0; i < gaps_in_memory_predicted.size(); i++)
         {
+            // 0.2'den sonrası küçük olanı seçsin diye yapılmış manipülasyon!!
             gaps_in_memory_predicted[i][2] = sqrt(pow((gaps_in_memory_predicted[i][3] - gaps_in_memory_predicted[i][5]),2) + pow((gaps_in_memory_predicted[i][4] - gaps_in_memory_predicted[i][6]),2)) +0.2*(sqrt(pow((gaps_in_memory_predicted[i][3] - gaps_in_memory_predicted[i][5]),2) + pow((gaps_in_memory_predicted[i][4] - gaps_in_memory_predicted[i][6]),2))-gaps_in_memory_predicted[i][2]);
             ROS_INFO_STREAM("new width of gap " << i  << " : " << gaps_in_memory_predicted[i][2]);
         }
