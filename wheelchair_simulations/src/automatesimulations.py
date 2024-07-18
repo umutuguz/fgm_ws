@@ -52,7 +52,7 @@ def publish_goal(world_number):
     goal_msg.goal.target_pose.pose.orientation.z = 0.0
     goal_msg.goal.target_pose.pose.orientation.w = 1.0
 
-    rospy.sleep(10)
+    rospy.sleep(1)
 
     # Publish the goal
     goal_pub.publish(goal_msg)
