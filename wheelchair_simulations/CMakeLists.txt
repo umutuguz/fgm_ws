@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf2_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -206,3 +207,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+add_executable(mekf_pose_to_tf src/mekf_to_tf_publisher.cpp)
+target_link_libraries(mekf_pose_to_tf ${catkin_LIBRARIES})
+

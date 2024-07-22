@@ -1607,8 +1607,19 @@ namespace local_planner
             marker.pose.orientation.w = 1.0;
             marker.scale.x = 0.2;
             // marker.scale.z = 0.1;
-            marker.color.a = 1.0;
-            marker.color.r = 1.0;
+            if(gaps_in_memory_final[i][7] == 0)
+            {
+                marker.color.a = 1.0;
+                marker.color.r = 0.212;  // Red component
+                marker.color.g = 0.922;  // Green component
+                marker.color.b = 0.922; 
+            }
+            else
+            {
+                marker.color.a = 1.0;
+                marker.color.r = 1.0;
+            }
+
 
             geometry_msgs::Point start_point;
             start_point.x = gaps_in_memory_final[i][3]; // x coordinate of the start point
